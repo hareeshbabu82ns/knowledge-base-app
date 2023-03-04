@@ -2,25 +2,22 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
 import App from './App';
-import {
-  createBrowserRouter,
-  RouterProvider,
-} from "react-router-dom";
-import ErrorPage from './error-page';
+import { configureStore } from '@reduxjs/toolkit'
+import globalReducer from 'state'
+import { Provider as ReduxProvider } from 'react-redux'
 
-
-const router = createBrowserRouter( [
-  {
-    path: "/",
-    element: <App />,
-    errorElement: <ErrorPage />,
-  },
-] );
+const store = configureStore( {
+  reducer: {
+    global: globalReducer,
+  }
+} )
 
 const root = ReactDOM.createRoot( document.getElementById( 'root' ) );
 root.render(
   <React.StrictMode>
-    <RouterProvider router={router} />
+    <ReduxProvider store={store}>
+      <App />
+    </ReduxProvider>
   </React.StrictMode>
 );
 
