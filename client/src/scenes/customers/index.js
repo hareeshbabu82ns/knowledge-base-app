@@ -1,8 +1,7 @@
 import {
-  Box, Button, Card, CardActions, CardContent, Collapse, Rating,
-  Typography, useMediaQuery, useTheme
+  Box, useMediaQuery, useTheme
 } from '@mui/material'
-import React, { useState } from 'react'
+import React from 'react'
 import { DataGrid } from '@mui/x-data-grid'
 
 import { useGetCustomersQuery } from 'state/api'
