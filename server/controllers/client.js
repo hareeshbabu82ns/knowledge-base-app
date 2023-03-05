@@ -1,6 +1,7 @@
 import { ObjectId } from "mongoose";
 import Product from "../models/Product.js";
 import ProductStat from "../models/ProductStat.js";
+import User from "../models/User.js";
 
 export const getProduct = async ( req, res ) => {
   try {
@@ -47,6 +48,26 @@ export const getProductStats = async ( req, res ) => {
     // const { id } = req.params
     const productStats = await ProductStat.find()
     res.status( 200 ).json( productStats )
+  } catch ( err ) {
+    res.status( 404 ).json( { message: err.message } )
+  }
+}
+
+export const getCustomer = async ( req, res ) => {
+  try {
+    const { id } = req.params
+    const user = await User.findById( id )
+    res.status( 200 ).json( user )
+  } catch ( err ) {
+    res.status( 404 ).json( { message: err.message } )
+  }
+}
+
+export const getCustomers = async ( req, res ) => {
+  try {
+    // const { id } = req.params
+    const users = await User.find( { role: 'user' } ).select( '-password' )
+    res.status( 200 ).json( users )
   } catch ( err ) {
     res.status( 404 ).json( { message: err.message } )
   }

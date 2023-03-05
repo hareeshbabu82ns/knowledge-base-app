@@ -14,7 +14,7 @@ function Layout() {
 
   const userId = useSelector( state => state.global.userId )
   const { data } = useGetUserQuery( userId )
-  console.log( "🚀 ~ file: index.js:17 ~ Layout ~ data:", data )
+  // console.log( "🚀 ~ file: index.js:17 ~ Layout ~ data:", data )
 
   return (
     <Box
