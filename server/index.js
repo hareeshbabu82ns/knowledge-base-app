@@ -10,9 +10,11 @@ import clientRoutes from './routes/client.js'
 import generalRoutes from './routes/general.js'
 import managementRoutes from './routes/management.js'
 import salesRoutes from './routes/sales.js'
+import { pushInitUserData } from './data/utils.js'
+
+
 
 /* CONFIGURATION */
-
 dotenv.config()
 const app = express()
 
@@ -26,10 +28,10 @@ app.use( cors() )
 
 /* ROUTES */
 
-app.use( "/client", clientRoutes )
-app.use( "/general", generalRoutes )
-app.use( "/management", managementRoutes )
-app.use( "/sales", salesRoutes )
+app.use( "/api/client", clientRoutes )
+app.use( "/api/general", generalRoutes )
+app.use( "/api/management", managementRoutes )
+app.use( "/api/sales", salesRoutes )
 
 
 /* MONGOOSE SETUP */
@@ -39,5 +41,10 @@ mongoose.connect( process.env.MONGO_URL, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 } ).then( () => {
+
   app.listen( PORT, () => console.log( `Server started at http://localhost/${PORT}` ) )
+
+  /* Sample Data */
+  pushInitUserData()
+
 } ).catch( err => console.log( 'mongodb connection failed...\n', err ) )
