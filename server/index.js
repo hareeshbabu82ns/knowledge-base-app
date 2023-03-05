@@ -10,7 +10,7 @@ import clientRoutes from './routes/client.js'
 import generalRoutes from './routes/general.js'
 import managementRoutes from './routes/management.js'
 import salesRoutes from './routes/sales.js'
-import { pushInitUserData } from './data/utils.js'
+import { pushInitData } from './data/utils.js'
 
 
 
@@ -45,6 +45,6 @@ mongoose.connect( process.env.MONGO_URL, {
   app.listen( PORT, () => console.log( `Server started at http://localhost/${PORT}` ) )
 
   /* Sample Data */
-  pushInitUserData()
+  pushInitData()
 
 } ).catch( err => console.log( 'mongodb connection failed...\n', err ) )
