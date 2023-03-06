@@ -1,5 +1,5 @@
 import {
-  Box, useMediaQuery, useTheme
+  Box, useTheme
 } from '@mui/material'
 import React from 'react'
 import { DataGrid } from '@mui/x-data-grid'
@@ -52,7 +52,6 @@ const columns = [
 function Customers() {
 
   const { data, isLoading } = useGetCustomersQuery()
-  const isNonMobile = useMediaQuery( '(min-width: 1000px)' )
   const theme = useTheme()
 
   return (
@@ -74,7 +73,7 @@ function Customers() {
           "& .MuiDataGrid-virtualScroller": {
             bgcolor: theme.palette.primary.light,
           },
-          "& .MuiDataGrid-fotterContainer": {
+          "& .MuiDataGrid-footerContainer": {
             bgcolor: theme.palette.background.alt,
             color: theme.palette.secondary[ 100 ],
             borderBottom: 'none',
