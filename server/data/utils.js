@@ -2,7 +2,12 @@ import User from '../models/User.js'
 import Product from '../models/Product.js'
 import ProductStat from '../models/ProductStat.js'
 import Transaction from '../models/Transaction.js'
-import { dataUser, dataProduct, dataProductStat, dataTransaction } from "./index.js"
+import OverallStat from '../models/OverallStat.js'
+import {
+  dataUser, dataProduct,
+  dataProductStat, dataTransaction,
+  dataOverallStat,
+} from "./index.js"
 
 export const pushInitUserData = async () => {
   const user = await User.findOne()
@@ -36,10 +41,19 @@ export const pushInitTransactionData = async () => {
     console.log( 'Transaction mockdata uploaded' )
   }
 }
+export const pushInitOverallStatData = async () => {
+  const overallStat = await OverallStat.findOne()
+  // console.log( "🚀 ~ file: utils.js:6 ~ pushInitUserData ~ OverallStat:", overallStat )
+  if ( !overallStat ) {
+    await OverallStat.insertMany( dataOverallStat )
+    console.log( 'OverallStat mockdata uploaded' )
+  }
+}
 
 export const pushInitData = async () => {
   await pushInitUserData()
   await pushInitProductData()
   await pushInitProductStatData()
   await pushInitTransactionData()
+  await pushInitOverallStatData()
 }
