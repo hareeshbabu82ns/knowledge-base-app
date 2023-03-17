@@ -5,11 +5,13 @@ import cors from 'cors'
 import dotenv from 'dotenv'
 import helmet from 'helmet'
 import morgan from 'morgan'
+// const {readdirSync} = require('fs')
 
 import clientRoutes from './routes/client.js'
 import generalRoutes from './routes/general.js'
 import managementRoutes from './routes/management.js'
 import salesRoutes from './routes/sales.js'
+import userRoutes from './routes/user.js'
 import { pushInitData } from './data/utils.js'
 
 
@@ -28,10 +30,13 @@ app.use( cors() )
 
 /* ROUTES */
 
+// readdirSync('./routes').map((route) => app.use('/api/v1', require('./routes/' + route)))
+
 app.use( "/api/client", clientRoutes )
 app.use( "/api/general", generalRoutes )
 app.use( "/api/management", managementRoutes )
 app.use( "/api/sales", salesRoutes )
+app.use( "/api/user", userRoutes )
 
 
 /* MONGOOSE SETUP */
