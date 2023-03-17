@@ -4,7 +4,8 @@ export const api = createApi( {
   baseQuery: fetchBaseQuery( { baseUrl: process.env.REACT_APP_BASE_URL } ),
   reducerPath: 'adminApi',
   tagTypes: [
-    'User', 'Products',
+    'User', 'Signin', 'Signup',
+    'Products',
     'Customers', 'Transactions',
     'Geography', 'Sales',
     'Admins', 'Performance',
@@ -14,6 +15,24 @@ export const api = createApi( {
     getUser: build.query( {
       query: ( id ) => `api/general/user/${id}`,
       providesTags: [ 'User' ],
+    } ),
+    userSignin: build.mutation( {
+      query: ( { email, password } ) => ( {
+        url: `api/user/signin`,
+        method: 'POST',
+        body: { email, password },
+      } ),
+      providesTags: [ 'Signin' ],
+      invalidatesTags: [ 'User' ],
+    } ),
+    userSignup: build.mutation( {
+      query: ( { firstName, lastName, email, password } ) => ( {
+        url: `api/user/signup`,
+        method: 'POST',
+        body: { firstName, lastName, email, password },
+      } ),
+      providesTags: [ 'Signup' ],
+      invalidatesTags: [ 'User' ],
     } ),
     getProducts: build.query( {
       query: () => `api/client/products`,
@@ -56,6 +75,8 @@ export const api = createApi( {
 
 export const {
   useGetUserQuery,
+  useUserSigninMutation,
+  useUserSignupMutation,
   useGetProductsQuery,
   useGetCustomersQuery,
   useGetTransactionsQuery,

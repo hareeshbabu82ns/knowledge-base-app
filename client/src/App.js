@@ -17,6 +17,8 @@ import Monthly from 'scenes/monthly'
 import Breakdown from 'scenes/breakdown'
 import Admin from 'scenes/admin'
 import Performance from 'scenes/performance'
+import Login from "scenes/user/Login"
+import Signup from "scenes/user/Signup"
 
 function App() {
   const mode = useSelector( state => state.global.mode )
@@ -42,6 +44,8 @@ function App() {
               <Route path="/admin" element={<Admin />} />
               <Route path="/performance" element={<Performance />} />
             </Route>
+            <Route path="/signin" element={<Login />} />
+            <Route path="/signup" element={<Signup />} />
           </Routes>
         </ThemeProvider>
       </BrowserRouter>
