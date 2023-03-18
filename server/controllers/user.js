@@ -6,6 +6,27 @@ import User from '../models/User.js'
 const JWT_SECRET = process.env.JWT_SECRET || 'super-secret-for-jwt'
 
 
+export const googleSignin = async ( req, res ) => {
+  const { email, name, profilePic, accessToken } = req.body
+  try {
+    const user = await User.findOne( { email } )
+    if ( user ) {
+      return res.status( 200 ).json( { user, token: accessToken } )
+    } else {
+      const newUser = await User.create( {
+        email,
+        name,
+        profilePic,
+        googleId: email,
+      } )
+      return res.status( 200 ).json( { user: newUser, token: accessToken } )
+    }
+  } catch ( err ) {
+    res.status( 500 ).json( { message: 'Something went wrong!!!' } )
+    console.log( err )
+  }
+}
+
 export const signin = async ( req, res ) => {
   const { email, password } = req.body
   try {

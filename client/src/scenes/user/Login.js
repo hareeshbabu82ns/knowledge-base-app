@@ -1,12 +1,14 @@
-import { Avatar, Box, Button, Card, CardActions, CardContent, Checkbox, Container, FormControlLabel, Grid, TextField, Typography, useTheme } from '@mui/material'
+import { Avatar, Box, Button, Checkbox, Container, FormControlLabel, Grid, TextField, Typography, useTheme } from '@mui/material'
 import React, { useState } from 'react'
 import Link from '@mui/material/Link'
 import { toast } from 'react-toastify'
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined'
 import { useNavigate, useSearchParams } from 'react-router-dom'
-import { useUserSigninMutation } from 'state/api'
+import { useUserSigninMutation, useUserGoogleSigninMutation } from 'state/api'
 import { setUser } from 'state'
+import axios from 'axios'
 import { useDispatch } from 'react-redux'
+import { useGoogleLogin } from '@react-oauth/google'
 import { saveUserLocal } from './utils'
 
 const Login = () => {
@@ -17,9 +19,42 @@ const Login = () => {
   const [ searchParams ] = useSearchParams()
 
   const [ signIn, { isLoading } ] = useUserSigninMutation()
+  const [ googleSignIn ] = useUserGoogleSigninMutation()
 
   const [ email, setEmail ] = useState( '' )
   const [ password, setPassword ] = useState( '' )
+
+  const googleLogin = useGoogleLogin( {
+    onSuccess: async ( tokenResponse ) => {
+      console.log( tokenResponse )
+
+      const userInfo = await axios.get(
+        'https://www.googleapis.com/oauth2/v3/userinfo',
+        {
+          headers: { Authorization: `Bearer ${tokenResponse.access_token}` }
+        }
+      )
+      console.log( userInfo )
+      const { email, name, picture } = userInfo?.data || {}
+
+      const toastId = toast.loading( 'Login...', { toastId: 'google-login-action' } )
+      try {
+        const payload = await googleSignIn( { email, profilePic: picture, name, accessToken: tokenResponse.access_token } ).unwrap();
+        dispatch( setUser( payload ) )
+        saveUserLocal( payload )
+
+        // console.log( 'login successful', payload )
+        toast.update( toastId, { render: 'login successful', type: 'success', isLoading: false, autoClose: true } )
+        navigate( searchParams?.get( 'from' ) || '/dashboard' )
+      } catch ( error ) {
+        // console.error( 'login failed', error );
+        toast.update( toastId, { render: 'login failed', type: 'error', isLoading: false, autoClose: true } )
+        dispatch( setUser( null ) )
+      }
+    },
+    onError: errorResponse => console.log( errorResponse ),
+    // flow: 'auth-code',
+  } )
 
   const toSignup = () => {
     const params = searchParams.toString()
@@ -108,9 +143,18 @@ const Login = () => {
             type="submit"
             fullWidth
             variant="contained"
-            sx={{ mt: 3, mb: 2 }}
+            sx={{ mt: 3 }}
           >
             Sign In
+          </Button>
+          <Button
+            type="button"
+            fullWidth
+            variant="contained"
+            sx={{ mt: 3, mb: 2 }}
+            onClick={googleLogin}
+          >
+            Google Sign In
           </Button>
           <Grid container>
             <Grid item xs>

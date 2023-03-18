@@ -4,7 +4,7 @@ export const api = createApi( {
   baseQuery: fetchBaseQuery( { baseUrl: process.env.REACT_APP_BASE_URL } ),
   reducerPath: 'adminApi',
   tagTypes: [
-    'User', 'Signin', 'Signup',
+    'User', 'Signin', 'Signup', 'GoogleSignin',
     'Products',
     'Customers', 'Transactions',
     'Geography', 'Sales',
@@ -15,6 +15,15 @@ export const api = createApi( {
     getUser: build.query( {
       query: ( id ) => `api/general/user/${id}`,
       providesTags: [ 'User' ],
+    } ),
+    userGoogleSignin: build.mutation( {
+      query: ( { email, name, profilePic, accessToken } ) => ( {
+        url: `api/user/googleSignin`,
+        method: 'POST',
+        body: { email, name, profilePic, accessToken },
+      } ),
+      providesTags: [ 'GoogleSignin' ],
+      invalidatesTags: [ 'User' ],
     } ),
     userSignin: build.mutation( {
       query: ( { email, password } ) => ( {
@@ -77,6 +86,7 @@ export const {
   useGetUserQuery,
   useUserSigninMutation,
   useUserSignupMutation,
+  useUserGoogleSigninMutation,
   useGetProductsQuery,
   useGetCustomersQuery,
   useGetTransactionsQuery,
