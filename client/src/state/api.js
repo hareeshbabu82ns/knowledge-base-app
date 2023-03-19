@@ -1,10 +1,20 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 
 export const api = createApi( {
-  baseQuery: fetchBaseQuery( { baseUrl: process.env.REACT_APP_BASE_URL } ),
+  baseQuery: fetchBaseQuery( {
+    baseUrl: process.env.REACT_APP_BASE_URL,
+    prepareHeaders: ( headers, { getState } ) => {
+      const token = getState().global?.token
+      if ( token ) {
+        headers.set( 'Authorization', `Bearer ${token}` )
+      }
+      return headers
+    }
+  } ),
   reducerPath: 'adminApi',
   tagTypes: [
     'User', 'Signin', 'Signup', 'GoogleSignin',
+    'ExpenseTransactions',
     'Products',
     'Customers', 'Transactions',
     'Geography', 'Sales',
@@ -12,15 +22,31 @@ export const api = createApi( {
     'Dashboard',
   ],
   endpoints: ( build ) => ( {
+    addExpenseTransaction: build.mutation( {
+      query: ( { amount, tags, type, dateUTC } ) => ( {
+        url: `api/expenses/transactions`,
+        method: 'POST',
+        body: { amount, tags, type, dateUTC },
+      } ),
+      invalidatesTags: [ 'ExpenseTransactions' ],
+    } ),
+    getExpenseTransactions: build.query( {
+      query: ( { page, pageSize, sort, search } ) => ( {
+        url: `api/expenses/transactions`,
+        method: 'GET',
+        params: { page, pageSize, sort, search },
+      } ),
+      providesTags: [ 'ExpenseTransactions' ],
+    } ),
     getUser: build.query( {
       query: ( id ) => `api/general/user/${id}`,
       providesTags: [ 'User' ],
     } ),
     userGoogleSignin: build.mutation( {
-      query: ( { email, name, profilePic, accessToken } ) => ( {
+      query: ( { accessToken, expiresIn } ) => ( {
         url: `api/user/googleSignin`,
         method: 'POST',
-        body: { email, name, profilePic, accessToken },
+        body: { accessToken, expiresIn },
       } ),
       providesTags: [ 'GoogleSignin' ],
       invalidatesTags: [ 'User' ],
@@ -87,6 +113,8 @@ export const {
   useUserSigninMutation,
   useUserSignupMutation,
   useUserGoogleSigninMutation,
+  useGetExpenseTransactionsQuery,
+  useAddExpenseTransactionMutation,
   useGetProductsQuery,
   useGetCustomersQuery,
   useGetTransactionsQuery,

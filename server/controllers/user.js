@@ -1,25 +1,49 @@
 import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
 
+import axios from 'axios'
+
 import User from '../models/User.js'
 
 const JWT_SECRET = process.env.JWT_SECRET || 'super-secret-for-jwt'
 
 
 export const googleSignin = async ( req, res ) => {
-  const { email, name, profilePic, accessToken } = req.body
+
+  const { accessToken, expiresIn } = req.body
+
+  // fetch user info from google
+  const userInfo = await axios.get(
+    'https://www.googleapis.com/oauth2/v3/userinfo',
+    {
+      headers: { Authorization: `Bearer ${accessToken}` }
+    }
+  )
+
   try {
+    const { email, name, profilePic } = userInfo?.data
+
+    // find if user already exists in local db
     const user = await User.findOne( { email } )
     if ( user ) {
-      return res.status( 200 ).json( { user, token: accessToken } )
+
+      const token = jwt.sign( { email: user.email, id: user._id, googleId: true, accessToken }, JWT_SECRET,
+        { expiresIn: expiresIn || '1h' } )
+      return res.status( 200 ).json( { user, token } )
+
     } else {
+
+      // create new user in local db
       const newUser = await User.create( {
         email,
         name,
         profilePic,
         googleId: email,
       } )
-      return res.status( 200 ).json( { user: newUser, token: accessToken } )
+
+      const token = jwt.sign( { email: newUser.email, id: newUser._id, googleId: true, accessToken }, JWT_SECRET,
+        { expiresIn: expiresIn || '1h' } )
+      return res.status( 200 ).json( { user: newUser, token } )
     }
   } catch ( err ) {
     res.status( 500 ).json( { message: 'Something went wrong!!!' } )

@@ -12,6 +12,7 @@ import generalRoutes from './routes/general.js'
 import managementRoutes from './routes/management.js'
 import salesRoutes from './routes/sales.js'
 import userRoutes from './routes/user.js'
+import expenseRoutes from './routes/expenses.js'
 import { pushInitData } from './data/utils.js'
 
 
@@ -37,6 +38,7 @@ app.use( "/api/general", generalRoutes )
 app.use( "/api/management", managementRoutes )
 app.use( "/api/sales", salesRoutes )
 app.use( "/api/user", userRoutes )
+app.use( "/api/expenses", expenseRoutes )
 
 
 /* MONGOOSE SETUP */

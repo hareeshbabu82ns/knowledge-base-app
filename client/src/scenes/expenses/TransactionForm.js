@@ -1,0 +1,137 @@
+import { Button, Grid, MenuItem, Select, TextField } from '@mui/material'
+import { Box } from '@mui/system'
+import { EXPENSE_TYPES } from 'constants'
+import React, { forwardRef } from 'react'
+import DatePicker from "react-datepicker"
+import { toast } from 'react-toastify'
+// import "react-datepicker/dist/react-datepicker.css"
+
+import { useAddExpenseTransactionMutation } from 'state/api'
+
+const initFormData = {
+  amount: Math.random() * 134,
+  type: EXPENSE_TYPES[ 0 ],
+  tags: 'ui,test',
+  date: new Date(),
+}
+// const initFormData = {
+//   amount: 0,
+//   type: EXPENSE_TYPES[ 0 ],
+//   tags: '',
+//   date: new Date(),
+// }
+
+const DateButton = forwardRef( ( { value, onClick }, ref ) => (
+  <Button variant='outlined' fullWidth sx={{ py: 1.5 }} color='secondary'
+    onClick={onClick} ref={ref}>
+    {value}
+  </Button>
+) );
+
+
+const TransactionForm = () => {
+
+  const [ formData, setFormData ] = React.useState( initFormData )
+
+  const [ addTransaction, { data, isLoading } ] = useAddExpenseTransactionMutation()
+
+  const onInputChange = ( e ) => setFormData( { ...formData, [ e.target.name ]: e.target.value } )
+
+
+  const handleSubmit = async ( e ) => {
+    e.preventDefault()
+
+    const postData = {
+      amount: formData.amount,
+      type: formData.type,
+      tags: formData.tags.split( ',' ).map( t => t.trim() ),
+      dateUTC: formData.date.toUTCString(),
+    }
+
+    // console.log( 'selected date: ', formData.date )
+    // console.log( 'utc date: ', formData.date.toUTCString() )
+
+
+    const toastId = toast.loading( 'Saving Transaction...', { toastId: 'transaction-add-action' } )
+    try {
+      const payload = await addTransaction( postData ).unwrap();
+      // console.log( 'signup successful', payload )
+      toast.update( toastId, { render: 'Transaction Saved', type: 'success', isLoading: false, autoClose: true } )
+      setFormData( initFormData )
+    } catch ( error ) {
+      // console.error( 'signup failed', error );
+      toast.update( toastId, { render: 'Transaction failed', type: 'error', isLoading: false, autoClose: true } )
+    }
+  }
+
+  return (
+    <Box component='form' onSubmit={handleSubmit} noValidate sx={{ mt: 2, }}>
+
+      <Grid container spacing={2}>
+        <Grid item xs={12} sm={6}>
+          <TextField
+            name="amount"
+            required
+            fullWidth
+            id="amount"
+            label="Amount"
+            autoFocus
+            value={formData.amount}
+            onChange={onInputChange}
+            type='number'
+          />
+        </Grid>
+        <Grid item xs={12} sm={6}>
+          <Select
+            id="type"
+            name="type"
+            label='Type'
+            fullWidth
+            value={formData.type}
+            onChange={onInputChange}
+          >
+            {EXPENSE_TYPES.map( t => ( <MenuItem key={t} value={t}>{t}</MenuItem> ) )}
+          </Select>
+        </Grid>
+        <Grid item xs={12} sm={6}>
+          <TextField
+            name="tags"
+            required
+            fullWidth
+            id="tags"
+            label="Tags (',' delimited)"
+            autoFocus
+            value={formData.tags}
+            onChange={onInputChange}
+          />
+        </Grid>
+        <Grid item xs={12} sm={6}>
+          <DatePicker
+            name="date"
+            id="date"
+            selected={formData.date}
+            showTimeSelect
+            timeIntervals={15}
+            timeFormat='p'
+            dateFormat="Pp"
+            showMonthDropdown
+            showYearDropdown
+            onChange={( date ) => onInputChange( { target: { name: 'date', value: date } } )}
+            customInput={<DateButton />}
+          />
+        </Grid>
+      </Grid>
+      <Button
+        type="submit"
+        fullWidth
+        variant="contained"
+        sx={{ mt: 3, mb: 2 }}
+        onSubmit={handleSubmit}
+      >
+        Add Transaction
+      </Button>
+    </Box>
+  )
+}
+
+export default TransactionForm

@@ -26,20 +26,14 @@ const Login = () => {
 
   const googleLogin = useGoogleLogin( {
     onSuccess: async ( tokenResponse ) => {
-      console.log( tokenResponse )
-
-      const userInfo = await axios.get(
-        'https://www.googleapis.com/oauth2/v3/userinfo',
-        {
-          headers: { Authorization: `Bearer ${tokenResponse.access_token}` }
-        }
-      )
-      console.log( userInfo )
-      const { email, name, picture } = userInfo?.data || {}
+      // console.log( tokenResponse )
 
       const toastId = toast.loading( 'Login...', { toastId: 'google-login-action' } )
       try {
-        const payload = await googleSignIn( { email, profilePic: picture, name, accessToken: tokenResponse.access_token } ).unwrap();
+        const payload = await googleSignIn( {
+          accessToken: tokenResponse.access_token,
+          expiresIn: tokenResponse.expires_in
+        } ).unwrap();
         dispatch( setUser( payload ) )
         saveUserLocal( payload )
 

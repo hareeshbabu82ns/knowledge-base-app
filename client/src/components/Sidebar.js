@@ -14,6 +14,7 @@ import {
   AdminPanelSettingsOutlined,
   TrendingUpOutlined,
   PieChartOutlined,
+  CurrencyRupeeOutlined,
 } from '@mui/icons-material'
 import FlexBetween from 'components/FlexBetween'
 import { useLocation, useNavigate } from 'react-router-dom'
@@ -29,6 +30,10 @@ const navItems = [
   {
     text: "Client Facing",
     icon: null,
+  },
+  {
+    text: "Expenses",
+    icon: <CurrencyRupeeOutlined />,
   },
   {
     text: "Products",

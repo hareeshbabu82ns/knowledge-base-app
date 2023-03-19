@@ -19,6 +19,7 @@ import Admin from 'scenes/admin'
 import Performance from 'scenes/performance'
 import Login from "scenes/user/Login"
 import Signup from "scenes/user/Signup"
+import Expenses from "scenes/expenses"
 
 function App() {
   const mode = useSelector( state => state.global.mode )
@@ -33,6 +34,7 @@ function App() {
             <Route element={<ProtectedLayout />}>
               <Route path="/" element={<Navigate to="/dashboard" replace />} />
               <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/expenses" element={<Expenses />} />
               <Route path="/products" element={<Products />} />
               <Route path="/customers" element={<Customers />} />
               <Route path="/transactions" element={<Transactions />} />
