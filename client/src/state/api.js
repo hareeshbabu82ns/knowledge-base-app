@@ -26,6 +26,13 @@ export const api = createApi( {
     'Dashboard',
   ],
   endpoints: ( build ) => ( {
+    deleteExpenseTransaction: build.mutation( {
+      query: ( id ) => ( {
+        url: `api/expenses/transactions/${id}`,
+        method: 'DELETE',
+      } ),
+      invalidatesTags: [ 'ExpenseTransactions' ],
+    } ),
     updateExpenseTransaction: build.mutation( {
       query: ( { id, amount, tags, type, dateUTC } ) => ( {
         url: `api/expenses/transactions/${id}`,
@@ -128,6 +135,7 @@ export const {
   useGetExpenseTransactionsQuery,
   useAddExpenseTransactionMutation,
   useUpdateExpenseTransactionMutation,
+  useDeleteExpenseTransactionMutation,
   useGetProductsQuery,
   useGetCustomersQuery,
   useGetTransactionsQuery,

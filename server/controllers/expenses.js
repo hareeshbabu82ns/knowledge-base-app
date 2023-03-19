@@ -23,6 +23,37 @@ const validateTransactionData = ( { amount, tags, type } ) => {
 
 }
 
+export const deleteTransaction = async ( req, res ) => {
+  try {
+
+    const { user } = req.auth
+
+    const { id } = req.params
+
+    // fetch existing transaction
+    const oldTransaction = await Transaction.findById( new mongoose.Types.ObjectId( id ) )
+    // console.log( oldTransaction )
+
+    if ( !oldTransaction )
+      throw new Error( `No Transaction found with id ${id}` )
+
+    if ( oldTransaction.userId !== user.id )
+      throw new Error( `Transaction is not from same user` )
+
+    const trans = await oldTransaction.deleteOne()
+
+    // console.log( 'date utc: ', dateUTC )
+    // console.log( 'date db: ', trans.date )
+    // console.log( trans )
+
+    res.status( 200 ).json( { id: oldTransaction._id } )
+
+  } catch ( err ) {
+    console.log( err )
+    res.status( 404 ).json( { message: err.message } )
+  }
+}
+
 export const updateTransaction = async ( req, res ) => {
   try {
 
@@ -52,7 +83,7 @@ export const updateTransaction = async ( req, res ) => {
     // console.log( 'date db: ', trans.date )
     // console.log( trans )
 
-    res.status( 201 ).json( { id: oldTransaction._id } )
+    res.status( 200 ).json( { id: oldTransaction._id } )
 
   } catch ( err ) {
     console.log( err )

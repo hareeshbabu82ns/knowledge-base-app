@@ -4,10 +4,13 @@ import { EXPENSE_TYPES } from 'constants'
 import React, { forwardRef, useEffect } from 'react'
 import DatePicker from "react-datepicker"
 import { toast } from 'react-toastify'
-import { SendOutlined } from '@mui/icons-material'
+import { SendOutlined, DeleteOutlineOutlined } from '@mui/icons-material'
 // import "react-datepicker/dist/react-datepicker.css"
 
-import { useAddExpenseTransactionMutation, useUpdateExpenseTransactionMutation } from 'state/api'
+import {
+  useAddExpenseTransactionMutation, useUpdateExpenseTransactionMutation,
+  useDeleteExpenseTransactionMutation,
+} from 'state/api'
 
 const initFormData = {
   amount: Math.random() * 134,
@@ -36,6 +39,7 @@ const TransactionForm = ( { transactionData } ) => {
 
   const [ addTransaction ] = useAddExpenseTransactionMutation()
   const [ updateTransaction ] = useUpdateExpenseTransactionMutation()
+  const [ deleteTransaction ] = useDeleteExpenseTransactionMutation()
 
   const onInputChange = ( e ) => setFormData( { ...formData, [ e.target.name ]: e.target.value } )
 
@@ -43,6 +47,27 @@ const TransactionForm = ( { transactionData } ) => {
   //   console.log( transactionData )
   // }, [ transactionData ] )
 
+
+
+  const handleDelete = async () => {
+
+    if ( !formData?._id ) {
+      console.log( formData )
+      toast.info( 'Select Transaction to delete first', { autoClose: true } )
+      return
+    }
+
+    const toastId = toast.loading( 'Deleting Transaction...', { toastId: 'transaction-del-action' } )
+    try {
+      const payload = await deleteTransaction( formData?._id ).unwrap()
+      // console.log( 'signup successful', payload )
+      toast.update( toastId, { render: 'Transaction Deleted', type: 'success', isLoading: false, autoClose: true } )
+      setFormData( initFormData )
+    } catch ( error ) {
+      // console.error( 'signup failed', error );
+      toast.update( toastId, { render: 'Transaction failed', type: 'error', isLoading: false, autoClose: true } )
+    }
+  }
 
   const handleSubmit = async ( e ) => {
     e.preventDefault()
@@ -135,8 +160,16 @@ const TransactionForm = ( { transactionData } ) => {
           <IconButton
             type="submit"
             onSubmit={handleSubmit}
+            color='info'
           >
             <SendOutlined />
+          </IconButton>
+          <IconButton
+            type="button"
+            onClick={handleDelete}
+            color='warning'
+          >
+            <DeleteOutlineOutlined />
           </IconButton>
         </Grid>
       </Grid>

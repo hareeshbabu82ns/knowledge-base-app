@@ -1,7 +1,7 @@
 import {
   Box, Chip, Stack, useTheme
 } from '@mui/material'
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import { DataGrid } from '@mui/x-data-grid'
 
 import { useGetExpenseTransactionsQuery } from 'state/api'
