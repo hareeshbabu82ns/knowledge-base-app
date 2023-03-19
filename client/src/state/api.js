@@ -1,16 +1,20 @@
-import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
+import { createApi, fetchBaseQuery, retry } from '@reduxjs/toolkit/query/react'
+
+const baseQuery = fetchBaseQuery( {
+  baseUrl: process.env.REACT_APP_BASE_URL,
+  prepareHeaders: ( headers, { getState } ) => {
+    const token = getState().global?.token
+    if ( token ) {
+      headers.set( 'Authorization', `Bearer ${token}` )
+    }
+    return headers
+  }
+} )
+
+const baseQueryWithRetry = retry( baseQuery, { maxRetries: 2 } )
 
 export const api = createApi( {
-  baseQuery: fetchBaseQuery( {
-    baseUrl: process.env.REACT_APP_BASE_URL,
-    prepareHeaders: ( headers, { getState } ) => {
-      const token = getState().global?.token
-      if ( token ) {
-        headers.set( 'Authorization', `Bearer ${token}` )
-      }
-      return headers
-    }
-  } ),
+  baseQuery: baseQueryWithRetry,
   reducerPath: 'adminApi',
   tagTypes: [
     'User', 'Signin', 'Signup', 'GoogleSignin',
@@ -22,6 +26,14 @@ export const api = createApi( {
     'Dashboard',
   ],
   endpoints: ( build ) => ( {
+    updateExpenseTransaction: build.mutation( {
+      query: ( { id, amount, tags, type, dateUTC } ) => ( {
+        url: `api/expenses/transactions/${id}`,
+        method: 'PATCH',
+        body: { amount, tags, type, dateUTC },
+      } ),
+      invalidatesTags: [ 'ExpenseTransactions' ],
+    } ),
     addExpenseTransaction: build.mutation( {
       query: ( { amount, tags, type, dateUTC } ) => ( {
         url: `api/expenses/transactions`,
@@ -115,6 +127,7 @@ export const {
   useUserGoogleSigninMutation,
   useGetExpenseTransactionsQuery,
   useAddExpenseTransactionMutation,
+  useUpdateExpenseTransactionMutation,
   useGetProductsQuery,
   useGetCustomersQuery,
   useGetTransactionsQuery,

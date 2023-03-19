@@ -1,12 +1,13 @@
-import { Button, Grid, MenuItem, Select, TextField } from '@mui/material'
+import { Button, Grid, IconButton, MenuItem, Select, TextField } from '@mui/material'
 import { Box } from '@mui/system'
 import { EXPENSE_TYPES } from 'constants'
-import React, { forwardRef } from 'react'
+import React, { forwardRef, useEffect } from 'react'
 import DatePicker from "react-datepicker"
 import { toast } from 'react-toastify'
+import { SendOutlined } from '@mui/icons-material'
 // import "react-datepicker/dist/react-datepicker.css"
 
-import { useAddExpenseTransactionMutation } from 'state/api'
+import { useAddExpenseTransactionMutation, useUpdateExpenseTransactionMutation } from 'state/api'
 
 const initFormData = {
   amount: Math.random() * 134,
@@ -22,20 +23,25 @@ const initFormData = {
 // }
 
 const DateButton = forwardRef( ( { value, onClick }, ref ) => (
-  <Button variant='outlined' fullWidth sx={{ py: 1.5 }} color='secondary'
+  <Button variant='outlined' fullWidth sx={{ py: .9 }} color='secondary' size='small'
     onClick={onClick} ref={ref}>
     {value}
   </Button>
 ) );
 
 
-const TransactionForm = () => {
+const TransactionForm = ( { transactionData } ) => {
 
-  const [ formData, setFormData ] = React.useState( initFormData )
+  const [ formData, setFormData ] = React.useState( transactionData )
 
-  const [ addTransaction, { data, isLoading } ] = useAddExpenseTransactionMutation()
+  const [ addTransaction ] = useAddExpenseTransactionMutation()
+  const [ updateTransaction ] = useUpdateExpenseTransactionMutation()
 
   const onInputChange = ( e ) => setFormData( { ...formData, [ e.target.name ]: e.target.value } )
+
+  // useEffect( () => {
+  //   console.log( transactionData )
+  // }, [ transactionData ] )
 
 
   const handleSubmit = async ( e ) => {
@@ -54,7 +60,9 @@ const TransactionForm = () => {
 
     const toastId = toast.loading( 'Saving Transaction...', { toastId: 'transaction-add-action' } )
     try {
-      const payload = await addTransaction( postData ).unwrap();
+      const payload = ( formData?._id ) ?
+        await updateTransaction( { id: formData?._id, ...postData } ).unwrap() :
+        await addTransaction( postData ).unwrap();
       // console.log( 'signup successful', payload )
       toast.update( toastId, { render: 'Transaction Saved', type: 'success', isLoading: false, autoClose: true } )
       setFormData( initFormData )
@@ -79,6 +87,7 @@ const TransactionForm = () => {
             value={formData.amount}
             onChange={onInputChange}
             type='number'
+            size='small'
           />
         </Grid>
         <Grid item xs={12} sm={6}>
@@ -89,6 +98,7 @@ const TransactionForm = () => {
             fullWidth
             value={formData.type}
             onChange={onInputChange}
+            size='small'
           >
             {EXPENSE_TYPES.map( t => ( <MenuItem key={t} value={t}>{t}</MenuItem> ) )}
           </Select>
@@ -103,9 +113,10 @@ const TransactionForm = () => {
             autoFocus
             value={formData.tags}
             onChange={onInputChange}
+            size='small'
           />
         </Grid>
-        <Grid item xs={12} sm={6}>
+        <Grid item xs={9} sm={4}>
           <DatePicker
             name="date"
             id="date"
@@ -120,16 +131,16 @@ const TransactionForm = () => {
             customInput={<DateButton />}
           />
         </Grid>
+        <Grid item xs={3} sm={2}>
+          <IconButton
+            type="submit"
+            onSubmit={handleSubmit}
+          >
+            <SendOutlined />
+          </IconButton>
+        </Grid>
       </Grid>
-      <Button
-        type="submit"
-        fullWidth
-        variant="contained"
-        sx={{ mt: 3, mb: 2 }}
-        onSubmit={handleSubmit}
-      >
-        Add Transaction
-      </Button>
+
     </Box>
   )
 }

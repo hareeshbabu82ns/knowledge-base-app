@@ -1,3 +1,5 @@
+import mongoose from "mongoose";
+
 import { EXPENSE_TYPES } from '../models/Expenses/const.js'
 
 import Transaction from "../models/Expenses/ExpenseTransaction.js";
@@ -6,19 +8,56 @@ import Transaction from "../models/Expenses/ExpenseTransaction.js";
 const validateTransactionData = ( { amount, tags, type } ) => {
 
   if ( amount === 0 ) {
-    throw 'amount can not be empty'
+    throw new Error( 'amount can not be empty' )
   }
 
   if ( tags.length === 0 ) {
-    throw 'tags can not be empty'
+    throw new Error( 'tags can not be empty' )
   }
 
   if ( !EXPENSE_TYPES.includes( type ) ) {
-    throw 'expense type not valid'
+    throw new Error( 'expense type not valid' )
   }
 
   return true
 
+}
+
+export const updateTransaction = async ( req, res ) => {
+  try {
+
+    const { user } = req.auth
+
+    const { amount, tags, type, dateUTC } = req.body
+
+    const { id } = req.params
+
+    // fetch existing transaction
+    const oldTransaction = await Transaction.findById( new mongoose.Types.ObjectId( id ) )
+    // console.log( oldTransaction )
+
+    if ( !oldTransaction )
+      throw new Error( `No Transaction found with id ${id}` )
+
+    if ( oldTransaction.userId !== user.id )
+      throw new Error( `Transaction is not from same user` )
+
+    const isValid = validateTransactionData( { amount, tags, type, date: dateUTC } )
+
+    oldTransaction.set( { userId: user._id, amount, tags, type, date: dateUTC } )
+
+    const trans = await oldTransaction.save()
+
+    // console.log( 'date utc: ', dateUTC )
+    // console.log( 'date db: ', trans.date )
+    // console.log( trans )
+
+    res.status( 201 ).json( { id: oldTransaction._id } )
+
+  } catch ( err ) {
+    console.log( err )
+    res.status( 404 ).json( { message: err.message } )
+  }
 }
 
 export const addTransaction = async ( req, res ) => {
@@ -65,10 +104,13 @@ export const getTransactions = async ( req, res ) => {
 
     const sortFormatted = Boolean( sort ) ? genSort() : {}
 
+    if ( !sortFormatted.date ) sortFormatted.date = -1
+
     const transactions = await Transaction.find( {
+      userId: user._id,
       $or: [
-        // { cost: { $regex: new RegExp( search, 'i' ) } },
-        { userId: user._id },
+        { tags: { $regex: new RegExp( search, 'i' ) } },
+
       ],
     } )
       .sort( sortFormatted )
@@ -76,9 +118,9 @@ export const getTransactions = async ( req, res ) => {
       .limit( pageSize )
 
     const total = await Transaction.countDocuments( {
+      userId: user._id,
       $or: [
-        // { cost: { $regex: new RegExp( search, 'i' ) } },
-        { userId: user._id },
+        { tags: { $regex: new RegExp( search, 'i' ) } },
       ],
     } )
 

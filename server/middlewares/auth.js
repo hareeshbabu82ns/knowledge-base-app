@@ -21,7 +21,7 @@ export default async ( req, res, next ) => {
           headers: { Authorization: `Bearer ${accessToken}` }
         }
       )
-      if ( !userInfoRes ) throw 'Google Login Failed'
+      if ( !userInfoRes ) throw new Error( 'Google Login Failed' )
 
       // read local user from db
       const user = await User.findOne( { email: userInfoRes.data.email } )
@@ -33,7 +33,7 @@ export default async ( req, res, next ) => {
 
       // check local db for user info
       const user = await User.findOne( { email } )
-      if ( !user ) throw 'Login Failed'
+      if ( !user ) throw new Error( 'Login Failed' )
 
       // add user for subsequent execution
       req.auth = { user, accessToken }
