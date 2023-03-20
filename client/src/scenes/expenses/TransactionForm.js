@@ -1,10 +1,10 @@
-import { Button, Grid, IconButton, MenuItem, Select, TextField } from '@mui/material'
+import { Button, Grid, IconButton, InputAdornment, MenuItem, Select, TextField } from '@mui/material'
 import { Box } from '@mui/system'
 import { EXPENSE_TYPES } from 'constants'
-import React, { forwardRef, useEffect } from 'react'
+import React, { forwardRef } from 'react'
 import DatePicker from "react-datepicker"
 import { toast } from 'react-toastify'
-import { SendOutlined, DeleteOutlineOutlined } from '@mui/icons-material'
+import { SendOutlined, DeleteOutlineOutlined, AttachMoneyOutlined, LocalOfferOutlined, CalendarMonthOutlined } from '@mui/icons-material'
 // import "react-datepicker/dist/react-datepicker.css"
 
 import {
@@ -26,7 +26,9 @@ const initFormData = {
 // }
 
 const DateButton = forwardRef( ( { value, onClick }, ref ) => (
-  <Button variant='outlined' fullWidth sx={{ py: .9 }} color='secondary' size='small'
+  <Button variant='outlined'
+    startIcon={<CalendarMonthOutlined />}
+    fullWidth sx={{ py: .9 }} color='secondary' size='small'
     onClick={onClick} ref={ref}>
     {value}
   </Button>
@@ -113,6 +115,9 @@ const TransactionForm = ( { transactionData } ) => {
             onChange={onInputChange}
             type='number'
             size='small'
+            InputProps={{
+              startAdornment: <InputAdornment position="start"><AttachMoneyOutlined /></InputAdornment>
+            }}
           />
         </Grid>
         <Grid item xs={12} sm={6}>
@@ -139,6 +144,9 @@ const TransactionForm = ( { transactionData } ) => {
             value={formData.tags}
             onChange={onInputChange}
             size='small'
+            InputProps={{
+              startAdornment: <InputAdornment position="start"><LocalOfferOutlined /></InputAdornment>
+            }}
           />
         </Grid>
         <Grid item xs={9} sm={4}>
