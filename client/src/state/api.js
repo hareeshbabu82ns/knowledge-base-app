@@ -1,3 +1,5 @@
+import { DateTime } from 'luxon'
+
 import { createApi, fetchBaseQuery, retry } from '@reduxjs/toolkit/query/react'
 
 const baseQuery = fetchBaseQuery( {
@@ -34,19 +36,22 @@ export const api = createApi( {
       invalidatesTags: [ 'ExpenseTransactions' ],
     } ),
     updateExpenseTransaction: build.mutation( {
-      query: ( { id, amount, tags, type, dateUTC } ) => ( {
+      query: ( { id, amount, tags, type, date, timeZone } ) => ( {
         url: `api/expenses/transactions/${id}`,
         method: 'PATCH',
-        body: { amount, tags, type, dateUTC },
+        body: { amount, tags, type, date, timeZone },
       } ),
       invalidatesTags: [ 'ExpenseTransactions' ],
     } ),
     addExpenseTransaction: build.mutation( {
-      query: ( { amount, tags, type, dateUTC } ) => ( {
-        url: `api/expenses/transactions`,
-        method: 'POST',
-        body: { amount, tags, type, dateUTC },
-      } ),
+      query: ( { amount, tags, type, date, timeZone } ) => {
+        const localTimeZone = timeZone || DateTime.now().zoneName
+        return {
+          url: `api/expenses/transactions`,
+          method: 'POST',
+          body: { amount, tags, type, date, timeZone: localTimeZone },
+        }
+      },
       invalidatesTags: [ 'ExpenseTransactions' ],
     } ),
     getExpenseTransactions: build.query( {

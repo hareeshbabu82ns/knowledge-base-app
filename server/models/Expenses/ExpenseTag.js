@@ -1,4 +1,4 @@
-import mongoose from 'mongoose'
+import mongoose from "mongoose";
 
 const ExpenseTagSchema = new mongoose.Schema(
   {
@@ -9,13 +9,14 @@ const ExpenseTagSchema = new mongoose.Schema(
     tag: {
       type: String,
       required: true,
-    }
+    },
   },
   {
-    timestamps: true
+    timestamps: true,
+    collection: "expense_tags",
   }
-)
+);
 
-const ExpenseTag = mongoose.model( 'ExpenseTag', ExpenseTagSchema )
+const ExpenseTag = mongoose.model("ExpenseTag", ExpenseTagSchema);
 
-export default ExpenseTag
+export default ExpenseTag;

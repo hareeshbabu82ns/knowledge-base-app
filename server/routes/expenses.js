@@ -1,13 +1,18 @@
-import express from "express"
+import express from "express";
 
-import auth from '../middlewares/auth.js'
-import { getTransactions, addTransaction, updateTransaction, deleteTransaction } from '../controllers/expenses.js'
+import auth from "../middlewares/auth.js";
+import {
+  getTransactions,
+  addTransaction,
+  updateTransaction,
+  deleteTransaction,
+} from "../controllers/expenses/index.js";
 
-const router = express.Router()
+const router = express.Router();
 
-router.get( '/transactions', auth, getTransactions )
-router.post( '/transactions', auth, addTransaction )
-router.patch( '/transactions/:id', auth, updateTransaction )
-router.delete( '/transactions/:id', auth, deleteTransaction )
+router.get( "/transactions", auth, getTransactions );
+router.post( "/transactions", auth, addTransaction );
+router.patch( "/transactions/:id", auth, updateTransaction );
+router.delete( "/transactions/:id", auth, deleteTransaction );
 
-export default router
+export default router;

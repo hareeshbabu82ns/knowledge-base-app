@@ -1,5 +1,5 @@
-import mongoose from 'mongoose'
-import { EXPENSE_TYPES } from './const.js'
+import mongoose from "mongoose";
+import { EXPENSE_TYPES } from "./const.js";
 
 const ExpenseTypeStatSchema = new mongoose.Schema(
   {
@@ -19,22 +19,26 @@ const ExpenseTypeStatSchema = new mongoose.Schema(
     yearlyTotal: Number,
     monthlyData: [
       {
-        month: String,
+        month: Number,
         total: Number,
-      }
+      },
     ],
     dailyData: [
       {
-        date: String,
+        date: Number,
         total: Number,
-      }
+      },
     ],
   },
   {
-    timestamps: true
+    timestamps: true,
+    collection: "expense_type_stats",
   }
-)
+);
 
-const ExpenseTypeStat = mongoose.model( 'ExpenseTypeStat', ExpenseTypeStatSchema )
+const ExpenseTypeStat = mongoose.model(
+  "ExpenseTypeStat",
+  ExpenseTypeStatSchema
+);
 
-export default ExpenseTypeStat
+export default ExpenseTypeStat;

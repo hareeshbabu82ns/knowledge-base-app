@@ -1,5 +1,5 @@
-import mongoose from 'mongoose'
-import { EXPENSE_TYPES } from './const.js'
+import mongoose from "mongoose";
+import { EXPENSE_TYPES } from "./const.js";
 
 const ExpenseTransactionSchema = new mongoose.Schema(
   {
@@ -12,7 +12,7 @@ const ExpenseTransactionSchema = new mongoose.Schema(
       required: true,
     },
     tags: {
-      type: [ String ],
+      type: [String],
       of: Number,
       required: true,
     },
@@ -22,16 +22,26 @@ const ExpenseTransactionSchema = new mongoose.Schema(
       required: true,
     },
     // ref https://dockyard.com/blog/2020/02/14/you-probably-don-t-need-moment-js-anymore
-    date: { // date in utc
+    date: {
+      // date in utc
       type: Date,
+      required: true,
+    },
+    dateZ: {
+      // date with timezone info (for tracking time in client's timezone)
+      type: String,
       required: true,
     },
   },
   {
-    timestamps: true
+    timestamps: true,
+    collection: "expense_transactions",
   }
-)
+);
 
-const ExpenseTransaction = mongoose.model( 'ExpenseTransaction', ExpenseTransactionSchema )
+const ExpenseTransaction = mongoose.model(
+  "ExpenseTransaction",
+  ExpenseTransactionSchema
+);
 
-export default ExpenseTransaction
+export default ExpenseTransaction;

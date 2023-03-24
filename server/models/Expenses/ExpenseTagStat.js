@@ -1,4 +1,4 @@
-import mongoose from 'mongoose'
+import mongoose from "mongoose";
 
 const ExpenseTagStatSchema = new mongoose.Schema(
   {
@@ -17,22 +17,23 @@ const ExpenseTagStatSchema = new mongoose.Schema(
     yearlyTotal: Number,
     monthlyData: [
       {
-        month: String,
+        month: Number,
         total: Number,
-      }
+      },
     ],
     dailyData: [
       {
-        date: String,
+        date: Number,
         total: Number,
-      }
+      },
     ],
   },
   {
-    timestamps: true
+    timestamps: true,
+    collection: "expense_tag_stats",
   }
-)
+);
 
-const ExpenseTagStat = mongoose.model( 'ExpenseTagStat', ExpenseTagStatSchema )
+const ExpenseTagStat = mongoose.model("ExpenseTagStat", ExpenseTagStatSchema);
 
-export default ExpenseTagStat
+export default ExpenseTagStat;
