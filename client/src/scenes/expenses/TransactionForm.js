@@ -1,5 +1,4 @@
 import {
-  Button,
   Grid,
   IconButton,
   InputAdornment,
@@ -9,24 +8,21 @@ import {
 } from "@mui/material";
 import { Box } from "@mui/system";
 import { EXPENSE_TYPES } from "constants";
-import React, { forwardRef } from "react";
-import DatePicker from "react-datepicker";
+import React from "react";
 import { toast } from "react-toastify";
-import { DateTime } from "luxon";
 import {
   SendOutlined,
   DeleteOutlineOutlined,
   AttachMoneyOutlined,
   LocalOfferOutlined,
-  CalendarMonthOutlined,
 } from "@mui/icons-material";
-// import "react-datepicker/dist/react-datepicker.css"
 
 import {
   useAddExpenseTransactionMutation,
   useUpdateExpenseTransactionMutation,
   useDeleteExpenseTransactionMutation,
 } from "state/api";
+import { DateTimePicker } from "@mui/x-date-pickers";
 
 // const initFormData = {
 //   amount: Math.random() * 134,
@@ -40,21 +36,6 @@ import {
 //   tags: '',
 //   date: DateTime.local(),
 // }
-
-const DateButton = forwardRef(({ value, onClick }, ref) => (
-  <Button
-    variant="outlined"
-    startIcon={<CalendarMonthOutlined />}
-    fullWidth
-    sx={{ py: 0.9 }}
-    color="secondary"
-    size="small"
-    onClick={onClick}
-    ref={ref}
-  >
-    {value}
-  </Button>
-));
 
 const TransactionForm = ({ transactionData }) => {
   const [formData, setFormData] = React.useState(transactionData);
@@ -108,12 +89,12 @@ const TransactionForm = ({ transactionData }) => {
       amount: Number(formData.amount),
       type: formData.type,
       tags: formData.tags.split(",").map((t) => t.trim()),
-      date: DateTime.fromJSDate(formData.date),
+      date: formData.date,
       // dateUTC: formData.date.toUTCString(),
     };
 
     console.log("selected date: ", formData.date);
-    console.log("utc date: ", formData.date.toUTCString());
+    console.log("utc date: ", formData.date.toISO());
     console.log("form local date: ", postData.date);
 
     const toastId = toast.loading("Saving Transaction...", {
@@ -204,20 +185,21 @@ const TransactionForm = ({ transactionData }) => {
           />
         </Grid>
         <Grid item xs={9} sm={4}>
-          <DatePicker
+          <DateTimePicker
             name="date"
             id="date"
-            selected={formData.date}
-            showTimeSelect
-            timeIntervals={15}
-            timeFormat="p"
-            dateFormat="Pp"
-            showMonthDropdown
-            showYearDropdown
+            label="Transaction Date"
+            value={formData.date}
             onChange={(date) =>
               onInputChange({ target: { name: "date", value: date } })
             }
-            customInput={<DateButton />}
+            slotProps={{
+              field: {
+                size: "small",
+                fullWidth: true,
+                required: true,
+              },
+            }}
           />
         </Grid>
         <Grid item xs={3} sm={2}>

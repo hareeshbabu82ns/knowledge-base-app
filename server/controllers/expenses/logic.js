@@ -79,21 +79,6 @@ export const prepareTransaction = ({
       }
     }
   }
-  // else{
-  // // add new tagStats
-  // tagStatsData.push(
-  //   ...tagData.map(({ tag }) => {
-  //     return {
-  //       userId: _id,
-  //       tag: tag,
-  //       year: transactionYear,
-  //       yearlyTotal: amountCalc,
-  //       monthlyData: [{ month: transactionMonth, total: amountCalc }],
-  //       dailyData: [{ date: transactionDay, total: amountCalc }],
-  //     };
-  //   })
-  // );
-  // }
 
   // prepare tagStats for new tags
   const tagStatsNew = tagData.filter(
@@ -170,10 +155,5 @@ export const prepareTransaction = ({
     tagData,
     tagStatsData,
     typeStatsData,
-    clientDate: {
-      day: trClientDate.day,
-      month: trClientDate.month,
-      year: trClientDate.year,
-    },
   };
 };
