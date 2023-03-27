@@ -1,0 +1,81 @@
+@import 'tokens.colors.scss';
+
+// paper & background
+$background: hsl(0, 0%, 100%);
+$paper: hsl(0, 0%, 100%);
+
+// primary
+$primaryLight: hsl(210, 31%, 95%);
+$primaryMain: hsl(207, 90%, 54%);
+$primaryDark: hsl(208, 79%, 51%);
+$primary200: hsl(207, 90%, 77%);
+$primary800: hsl(212, 80%, 42%);
+
+// secondary
+$secondaryLight: hsl(264, 45%, 94%);
+$secondaryMain: hsl(262, 52%, 47%);
+$secondaryDark: hsl(260, 54%, 45%);
+$secondary200: hsl(261, 46%, 74%);
+$secondary800: hsl(255, 61%, 39%);
+
+// success Colors
+$successLight: hsl(137, 77%, 85%);
+$success200: hsl(151, 82%, 68%);
+$successMain: hsl(151, 100%, 45%);
+$successDark: hsl(145, 100%, 39%);
+
+// error
+$errorLight: hsl(0, 73%, 77%);
+$errorMain: hsl(4, 90%, 58%);
+$errorDark: hsl(0, 66%, 47%);
+
+// orange
+$orangeLight: hsl(6, 71%, 95%);
+$orangeMain: hsl(14, 100%, 78%);
+$orangeDark: hsl(14, 82%, 46%);
+
+// warning
+$warningLight: hsl(46, 100%, 94%);
+$warningMain: hsl(48, 100%, 75%);
+$warningDark: hsl(45, 100%, 51%);
+
+// grey
+$grey50: hsl(210, 40%, 98%);
+$grey100: hsl(210, 31%, 95%);
+$grey200: hsl(215, 27%, 91%);
+$grey300: hsl(213, 22%, 84%);
+$grey500: hsl(215, 12%, 47%);
+$grey600: hsl(217, 15%, 35%);
+$grey700: hsl(216, 21%, 27%);
+$grey900: hsl(219, 36%, 11%);
+
+
+// ==============================|| DARK THEME VARIANTS ||============================== //
+
+// paper & background
+$darkBackground: hsl(227, 43%, 17%); // level 3
+$darkPaper: hsl(227, 52%, 14%); // level 4
+
+// dark 800 & 900
+$darkLevel1: hsl(227, 32%, 24%); // level 1
+$darkLevel2: hsl(227, 36%, 20%); // level 2
+
+
+// primary dark
+$darkPrimaryLight: hsl(210, 31%, 95%);
+$darkPrimaryMain: hsl(207, 90%, 54%);
+$darkPrimaryDark: hsl(208, 79%, 51%);
+$darkPrimary200: hsl(207, 90%, 77%);
+$darkPrimary800: hsl(212, 80%, 42%);
+
+// secondary dark
+$darkSecondaryLight: hsl(261, 46%, 84%);
+$darkSecondaryMain: hsl(256, 100%, 65%);
+$darkSecondaryDark: hsl(259, 100%, 56%);
+$darkSecondary200: hsl(261, 46%, 74%);
+$darkSecondary800: hsl(265, 100%, 46%);
+
+// text variants
+$darkTextTitle: hsl(226, 36%, 88%);
+$darkTextPrimary: hsl(227, 63%, 84%);
+$darkTextSecondary: hsl(227, 35%, 64%);

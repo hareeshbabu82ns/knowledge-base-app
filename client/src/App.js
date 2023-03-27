@@ -7,6 +7,7 @@ import { LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterLuxon } from "@mui/x-date-pickers/AdapterLuxon";
 
 import { themeSettings } from "theme";
+// import customTheme from "themes";
 import Dashboard from "scenes/dashboard";
 import ProtectedLayout from "scenes/layout";
 import Products from "scenes/products";
@@ -25,6 +26,7 @@ import Expenses from "scenes/expenses";
 
 function App() {
   const mode = useSelector((state) => state.global.mode);
+  // const theme = useMemo(() => customTheme({ mode }), [mode]);
   const theme = useMemo(() => createTheme(themeSettings(mode)), [mode]);
 
   return (
