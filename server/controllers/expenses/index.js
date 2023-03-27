@@ -7,6 +7,7 @@ import { getClientDateTime, prepareTransaction } from "./logic.js";
 import ExpenseTag from "../../models/Expenses/ExpenseTag.js";
 import ExpenseTagStat from "../../models/Expenses/ExpenseTagStat.js";
 import ExpenseTypeStat from "../../models/Expenses/ExpenseTypeStat.js";
+import { DateTime } from "luxon";
 
 const validateTransactionData = ({ amount, tags, type }) => {
   if (amount === 0) {
@@ -41,13 +42,95 @@ export const deleteTransaction = async (req, res) => {
     if (oldTransaction.userId !== user.id)
       throw new Error(`Transaction is not from same user`);
 
-    const trans = await oldTransaction.deleteOne();
+    const { amount, tags, type, date: jsDate } = oldTransaction.toObject();
 
-    // console.log( 'date utc: ', dateUTC )
-    // console.log( 'date db: ', trans.date )
-    // console.log( trans )
+    const date = jsDate.toISOString();
 
-    res.status(200).json({ id: oldTransaction._id });
+    // console.log(DateTime.fromJSDate(date));
+
+    const clientDate = getClientDateTime({ date });
+    const transactionYear = clientDate.year;
+
+    const tagStats = [];
+    const tagStatsRef = {};
+
+    for (const tag of tags) {
+      const existingTagStats = await ExpenseTagStat.findOne({
+        userId: user._id,
+        tag,
+        year: transactionYear,
+      });
+      if (existingTagStats) {
+        tagStatsRef[existingTagStats._id] = existingTagStats;
+        tagStats.push(existingTagStats.toObject());
+      }
+    }
+
+    const typeStatsRef = await ExpenseTypeStat.findOne({
+      userId: user._id,
+      type,
+      year: transactionYear,
+    });
+
+    const typeStats = typeStatsRef ? typeStatsRef.toObject() : undefined;
+
+    const { tagData, tagStatsData, typeStatsData } = prepareTransaction({
+      transaction: {
+        amount: amount * -1, // do a reverse posting
+        tags,
+        type,
+        date,
+      },
+      user,
+      tagStats,
+      typeStats,
+    });
+
+    const session = await mongoose.startSession();
+
+    try {
+      session.startTransaction();
+      // delete transaction entry
+      const trans = await oldTransaction.deleteOne({ session });
+
+      // save tagStats
+      for (const tagStatsItem of tagStatsData) {
+        if (tagStatsItem._id) {
+          // existing tag stats
+          const exTagStats = tagStatsRef[tagStatsItem._id];
+          exTagStats.set("yearlyTotal", tagStatsItem.yearlyTotal);
+          exTagStats.set("monthlyData", tagStatsItem.monthlyData);
+          exTagStats.set("dailyData", tagStatsItem.dailyData);
+          await exTagStats.save({ session });
+        } else {
+          // new tag stats
+          const exTagStats = new ExpenseTagStat(tagStatsItem, { session });
+          await exTagStats.save({ session });
+        }
+      }
+
+      // save typeStats
+      if (typeStatsData._id) {
+        // existing type stats
+        typeStatsRef.set("yearlyTotal", typeStatsData.yearlyTotal);
+        typeStatsRef.set("monthlyData", typeStatsData.monthlyData);
+        typeStatsRef.set("dailyData", typeStatsData.dailyData);
+        await typeStatsRef.save({ session });
+      } else {
+        // new type stats
+        const typeStatsRef = new ExpenseTypeStat(typeStatsData);
+        await typeStatsRef.save({ session });
+      }
+
+      await session.commitTransaction();
+      session.endSession();
+
+      res.status(200).json({ id: oldTransaction._id });
+    } catch (err) {
+      await session.abortTransaction();
+      session.endSession();
+      res.status(404).json({ message: err.message });
+    }
   } catch (err) {
     console.log(err);
     res.status(404).json({ message: err.message });
@@ -55,6 +138,8 @@ export const deleteTransaction = async (req, res) => {
 };
 
 export const updateTransaction = async (req, res) => {
+  // TODO: still need to add logic to update stats based on new values
+  // for now prefer deleting and adding the entry
   try {
     const { user } = req.auth;
 

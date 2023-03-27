@@ -203,7 +203,12 @@ const TransactionForm = ({ transactionData }) => {
           />
         </Grid>
         <Grid item xs={3} sm={2}>
-          <IconButton type="submit" onSubmit={handleSubmit} color="info">
+          <IconButton
+            type="submit"
+            onSubmit={handleSubmit}
+            color="info"
+            disabled={formData._id} // update is not yet possible, delete and add entry instead
+          >
             <SendOutlined />
           </IconButton>
           <IconButton type="button" onClick={handleDelete} color="warning">

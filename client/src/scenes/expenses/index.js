@@ -179,11 +179,11 @@ const TransactionsGrid = ({ onRowSelected, selectedTransaction }) => {
             const trans = data.transactions.find(
               (v) => v._id === newRowSelectionModel[0]
             );
-            // console.log( trans )
+            // console.log(DateTime.fromISO(trans.date));
             onRowSelected({
               ...trans,
               tags: trans.tags.join(","),
-              date: new Date(trans.date),
+              date: DateTime.fromISO(trans.date),
             });
           } else {
             onRowSelected(null);
