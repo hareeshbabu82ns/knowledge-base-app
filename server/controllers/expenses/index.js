@@ -7,7 +7,7 @@ import { getClientDateTime, prepareTransaction } from "./logic.js";
 import ExpenseTag from "../../models/Expenses/ExpenseTag.js";
 import ExpenseTagStat from "../../models/Expenses/ExpenseTagStat.js";
 import ExpenseTypeStat from "../../models/Expenses/ExpenseTypeStat.js";
-import { DateTime } from "luxon";
+import ExpenseUserStat from "../../models/Expenses/ExpenseUserStat.js";
 
 const validateTransactionData = ({ amount, tags, type }) => {
   if (amount === 0) {
@@ -74,7 +74,14 @@ export const deleteTransaction = async (req, res) => {
 
     const typeStats = typeStatsRef ? typeStatsRef.toObject() : undefined;
 
-    const { tagData, tagStatsData, typeStatsData } = prepareTransaction({
+    const userStatsRef = await ExpenseUserStat.findOne({
+      userId: user._id,
+      year: transactionYear,
+    });
+
+    const userStats = userStatsRef ? userStatsRef.toObject() : undefined;
+
+    const { tagStatsData, typeStatsData, userStatsData } = prepareTransaction({
       transaction: {
         amount: amount * -1, // do a reverse posting
         tags,
@@ -84,6 +91,7 @@ export const deleteTransaction = async (req, res) => {
       user,
       tagStats,
       typeStats,
+      userStats,
     });
 
     const session = await mongoose.startSession();
@@ -120,6 +128,19 @@ export const deleteTransaction = async (req, res) => {
         // new type stats
         const typeStatsRef = new ExpenseTypeStat(typeStatsData);
         await typeStatsRef.save({ session });
+      }
+
+      // save userStats
+      if (userStatsData._id) {
+        // existing user stats
+        userStatsRef.set("yearlyTotal", userStatsData.yearlyTotal);
+        userStatsRef.set("monthlyData", userStatsData.monthlyData);
+        userStatsRef.set("dailyData", userStatsData.dailyData);
+        await userStatsRef.save({ session });
+      } else {
+        // new user stats
+        const userStatsRef = new ExpenseUserStat(userStatsData);
+        await userStatsRef.save({ session });
       }
 
       await session.commitTransaction();
@@ -214,13 +235,26 @@ export const addTransaction = async (req, res) => {
 
     const typeStats = typeStatsRef ? typeStatsRef.toObject() : undefined;
 
-    const { transactionData, tagData, tagStatsData, typeStatsData } =
-      prepareTransaction({
-        transaction: { amount, tags, type, date },
-        user,
-        tagStats,
-        typeStats,
-      });
+    const userStatsRef = await ExpenseUserStat.findOne({
+      userId: user._id,
+      year: transactionYear,
+    });
+
+    const userStats = userStatsRef ? userStatsRef.toObject() : undefined;
+
+    const {
+      transactionData,
+      tagData,
+      tagStatsData,
+      typeStatsData,
+      userStatsData,
+    } = prepareTransaction({
+      transaction: { amount, tags, type, date },
+      user,
+      tagStats,
+      typeStats,
+      userStats,
+    });
 
     const session = await mongoose.startSession();
 
@@ -267,6 +301,19 @@ export const addTransaction = async (req, res) => {
         // new type stats
         const typeStatsRef = new ExpenseTypeStat(typeStatsData);
         await typeStatsRef.save({ session });
+      }
+
+      // save userStats
+      if (userStatsData._id) {
+        // existing user stats
+        userStatsRef.set("yearlyTotal", userStatsData.yearlyTotal);
+        userStatsRef.set("monthlyData", userStatsData.monthlyData);
+        userStatsRef.set("dailyData", userStatsData.dailyData);
+        await userStatsRef.save({ session });
+      } else {
+        // new user stats
+        const userStatsRef = new ExpenseUserStat(userStatsData);
+        await userStatsRef.save({ session });
       }
 
       await session.commitTransaction();

@@ -7,16 +7,24 @@ import {
   tagStatsSimpleIncome,
   tagStatsNewTags,
   tagStatsSimpleExpense,
+  userStatsSimpleIncome,
+  userStatsSimpleExpense,
 } from "./logic.test.data.js";
 
 describe("prepareTransaction - Simple Test - Income", () => {
   test("should return transactionData, tagData, tagStat and typeStats", () => {
-    const { transactionData, tagData, tagStatsData, typeStatsData } =
-      prepareTransaction(simpleTestIncome.transactionDataIn);
+    const {
+      transactionData,
+      tagData,
+      tagStatsData,
+      typeStatsData,
+      userStatsData,
+    } = prepareTransaction(simpleTestIncome.transactionDataIn);
     expect(transactionData).toBeDefined();
     expect(tagData).toBeDefined();
     expect(tagStatsData).toBeDefined();
     expect(typeStatsData).toBeDefined();
+    expect(userStatsData).toBeDefined();
   });
 
   test("should return transactionData", () => {
@@ -44,16 +52,29 @@ describe("prepareTransaction - Simple Test - Income", () => {
     );
     expect(typeStatsData).toStrictEqual(simpleTestIncome.typeStatsDataOut);
   });
+
+  test("should return userStatsData", () => {
+    const { userStatsData } = prepareTransaction(
+      simpleTestIncome.transactionDataIn
+    );
+    expect(userStatsData).toStrictEqual(simpleTestIncome.userStatsDataOut);
+  });
 });
 
 describe("prepareTransaction - Simple Test - Expense", () => {
   test("should return transactionData, tagData, tagStat and typeStats", () => {
-    const { transactionData, tagData, tagStatsData, typeStatsData } =
-      prepareTransaction(simpleTestExpense.transactionDataIn);
+    const {
+      transactionData,
+      tagData,
+      tagStatsData,
+      typeStatsData,
+      userStatsData,
+    } = prepareTransaction(simpleTestExpense.transactionDataIn);
     expect(transactionData).toBeDefined();
     expect(tagData).toBeDefined();
     expect(tagStatsData).toBeDefined();
     expect(typeStatsData).toBeDefined();
+    expect(userStatsData).toBeDefined();
   });
 
   test("should return transactionData", () => {
@@ -80,6 +101,39 @@ describe("prepareTransaction - Simple Test - Expense", () => {
       simpleTestExpense.transactionDataIn
     );
     expect(typeStatsData).toStrictEqual(simpleTestExpense.typeStatsDataOut);
+  });
+
+  test("should return userStatsData", () => {
+    const { userStatsData } = prepareTransaction(
+      simpleTestExpense.transactionDataIn
+    );
+    expect(userStatsData).toStrictEqual(simpleTestExpense.userStatsDataOut);
+  });
+});
+
+describe("prepareTransaction - UserStats Test - Income", () => {
+  test("should return calculated userStats", () => {
+    const { transactionData, userStatsData } = prepareTransaction(
+      userStatsSimpleIncome.transactionDataIn
+    );
+    expect(transactionData).toStrictEqual(
+      userStatsSimpleIncome.transactionDataOut
+    );
+    expect(userStatsData).toStrictEqual(userStatsSimpleIncome.userStatsDataOut);
+  });
+});
+
+describe("prepareTransaction - UserStats Test - Expense", () => {
+  test("should return calculated userStats", () => {
+    const { transactionData, userStatsData } = prepareTransaction(
+      userStatsSimpleExpense.transactionDataIn
+    );
+    expect(transactionData).toStrictEqual(
+      userStatsSimpleExpense.transactionDataOut
+    );
+    expect(userStatsData).toStrictEqual(
+      userStatsSimpleExpense.userStatsDataOut
+    );
   });
 });
 

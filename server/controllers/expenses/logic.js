@@ -10,16 +10,64 @@ export const getClientDateTime = ({ date }) => {
   return trClientDate;
 };
 
+const updateMonthlyData = (monthlyData, { transactionMonth, amountCalc }) => {
+  const currMonthlyDataIndex = monthlyData.findIndex(
+    (d) => d.month === transactionMonth
+  );
+  if (currMonthlyDataIndex >= 0) {
+    const currMonthlyData = monthlyData.at(currMonthlyDataIndex);
+    const data = {
+      ...currMonthlyData,
+      total: currMonthlyData.total + amountCalc,
+    };
+    monthlyData.splice(currMonthlyDataIndex, 1, {
+      ...data,
+    });
+  } else {
+    monthlyData.push({
+      month: transactionMonth,
+      total: amountCalc,
+    });
+  }
+};
+
+const updateDailyData = (
+  dailyData,
+  { transactionMonth, transactionDay, amountCalc }
+) => {
+  const currDailyDataIndex = dailyData.findIndex(
+    (d) => d.month === transactionMonth && d.date === transactionDay
+  );
+  if (currDailyDataIndex >= 0) {
+    const currDailyData = dailyData.at(currDailyDataIndex);
+    const data = {
+      ...currDailyData,
+      total: currDailyData.total + amountCalc,
+    };
+    dailyData.splice(currDailyDataIndex, 1, {
+      ...data,
+    });
+  } else {
+    dailyData.push({
+      month: transactionMonth,
+      date: transactionDay,
+      total: amountCalc,
+    });
+  }
+};
+
 export const prepareTransaction = ({
   transaction: { amount, date, type, tags },
   user: { _id },
   tagStats = [],
   typeStats,
+  userStats,
 }) => {
   const transactionData = { userId: _id, amount, date, type, tags, dateZ: "" };
   const tagData = tags.map((t) => ({ userId: _id, tag: t.trim() }));
   const tagStatsData = [...tagStats];
   const typeStatsData = typeStats ? { ...typeStats } : { userId: _id, type };
+  const userStatsData = userStats ? { ...userStats } : { userId: _id };
 
   const trClientDate = getClientDateTime({ date });
   transactionData.dateZ = trClientDate.toISO();
@@ -39,44 +87,16 @@ export const prepareTransaction = ({
     for (const tagStatsItem of tagStatsData) {
       tagStatsItem.yearlyTotal += amountCalc;
 
-      const currMonthlyDataIndex = tagStatsItem.monthlyData.findIndex(
-        (d) => d.month === transactionMonth
-      );
-      if (currMonthlyDataIndex >= 0) {
-        const currMonthlyData =
-          tagStatsItem.monthlyData.at(currMonthlyDataIndex);
-        const data = {
-          ...currMonthlyData,
-          total: currMonthlyData.total + amountCalc,
-        };
-        tagStatsItem.monthlyData.splice(currMonthlyDataIndex, 1, {
-          ...data,
-        });
-      } else {
-        tagStatsItem.monthlyData.push({
-          month: transactionMonth,
-          total: amountCalc,
-        });
-      }
+      updateMonthlyData(tagStatsItem.monthlyData, {
+        transactionMonth,
+        amountCalc,
+      });
 
-      const currDailyDataIndex = tagStatsItem.dailyData.findIndex(
-        (d) => d.date === transactionDay
-      );
-      if (currDailyDataIndex >= 0) {
-        const currDailyData = tagStatsItem.dailyData.at(currDailyDataIndex);
-        const data = {
-          ...currDailyData,
-          total: currDailyData.total + amountCalc,
-        };
-        tagStatsItem.dailyData.splice(currDailyDataIndex, 1, {
-          ...data,
-        });
-      } else {
-        tagStatsItem.dailyData.push({
-          date: transactionDay,
-          total: amountCalc,
-        });
-      }
+      updateDailyData(tagStatsItem.dailyData, {
+        transactionMonth,
+        transactionDay,
+        amountCalc,
+      });
     }
   }
 
@@ -96,7 +116,9 @@ export const prepareTransaction = ({
         year: transactionYear,
         yearlyTotal: amountCalc,
         monthlyData: [{ month: transactionMonth, total: amountCalc }],
-        dailyData: [{ date: transactionDay, total: amountCalc }],
+        dailyData: [
+          { month: transactionMonth, date: transactionDay, total: amountCalc },
+        ],
       };
     })
   );
@@ -107,47 +129,52 @@ export const prepareTransaction = ({
 
     typeStatsData.yearlyTotal += amount;
 
-    const currMonthlyDataIndex = typeStatsData.monthlyData.findIndex(
-      (d) => d.month === transactionMonth
-    );
-    if (currMonthlyDataIndex >= 0) {
-      const currMonthlyData =
-        typeStatsData.monthlyData.at(currMonthlyDataIndex);
-      const data = {
-        ...currMonthlyData,
-        total: currMonthlyData.total + amount,
-      };
-      typeStatsData.monthlyData.splice(currMonthlyDataIndex, 1, {
-        ...data,
-      });
-    } else {
-      typeStatsData.monthlyData.push({
-        month: transactionMonth,
-        total: amount,
-      });
-    }
+    updateMonthlyData(typeStatsData.monthlyData, {
+      transactionMonth,
+      amountCalc: amount,
+    });
 
-    const currDailyDataIndex = typeStatsData.dailyData.findIndex(
-      (d) => d.date === transactionDay
-    );
-    if (currDailyDataIndex >= 0) {
-      const currDailyData = typeStatsData.dailyData.at(currDailyDataIndex);
-      const data = {
-        ...currDailyData,
-        total: currDailyData.total + amount,
-      };
-      typeStatsData.dailyData.splice(currDailyDataIndex, 1, {
-        ...data,
-      });
-    } else {
-      typeStatsData.dailyData.push({ date: transactionDay, total: amount });
-    }
+    updateDailyData(typeStatsData.dailyData, {
+      transactionMonth,
+      transactionDay,
+      amountCalc: amount,
+    });
   } else {
     // new typeStats
     typeStatsData.year = transactionYear;
     typeStatsData.yearlyTotal = amount;
     typeStatsData.monthlyData = [{ month: transactionMonth, total: amount }];
-    typeStatsData.dailyData = [{ date: transactionDay, total: amount }];
+    typeStatsData.dailyData = [
+      { month: transactionMonth, date: transactionDay, total: amount },
+    ];
+  }
+
+  // User Stats Logic
+  if (userStatsData._id) {
+    // updating existing userStats
+
+    userStatsData.yearlyTotal += amountCalc;
+
+    updateMonthlyData(userStatsData.monthlyData, {
+      transactionMonth,
+      amountCalc,
+    });
+
+    updateDailyData(userStatsData.dailyData, {
+      transactionMonth,
+      transactionDay,
+      amountCalc,
+    });
+  } else {
+    // new userStats
+    userStatsData.year = transactionYear;
+    userStatsData.yearlyTotal = amountCalc;
+    userStatsData.monthlyData = [
+      { month: transactionMonth, total: amountCalc },
+    ];
+    userStatsData.dailyData = [
+      { month: transactionMonth, date: transactionDay, total: amountCalc },
+    ];
   }
 
   return {
@@ -155,5 +182,6 @@ export const prepareTransaction = ({
     tagData,
     tagStatsData,
     typeStatsData,
+    userStatsData,
   };
 };

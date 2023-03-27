@@ -1,12 +1,9 @@
 import mongoose from "mongoose";
+import { EXPENSE_TYPES } from "./const.js";
 
-const ExpenseTagStatSchema = new mongoose.Schema(
+const ExpenseUserStatSchema = new mongoose.Schema(
   {
     userId: {
-      type: String,
-      required: true,
-    },
-    tag: {
       type: String,
       required: true,
     },
@@ -31,10 +28,13 @@ const ExpenseTagStatSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-    collection: "expense_tag_stats",
+    collection: "expense_user_stats",
   }
 );
 
-const ExpenseTagStat = mongoose.model("ExpenseTagStat", ExpenseTagStatSchema);
+const ExpenseUserStat = mongoose.model(
+  "ExpenseUserStat",
+  ExpenseUserStatSchema
+);
 
-export default ExpenseTagStat;
+export default ExpenseUserStat;

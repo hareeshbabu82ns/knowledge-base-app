@@ -25,6 +25,7 @@ const ExpenseTypeStatSchema = new mongoose.Schema(
     ],
     dailyData: [
       {
+        month: Number,
         date: Number,
         total: Number,
       },

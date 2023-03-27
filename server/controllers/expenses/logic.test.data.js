@@ -1,3 +1,179 @@
+export const userStatsSimpleExpense = {
+  transactionDataIn: {
+    transaction: {
+      amount: 100,
+      date: "2023-03-21T23:30:00.938-06:00", // UTC date saves will go to 2023-03-22T05
+      type: "Expense",
+      tags: ["test", "sample"],
+    },
+    user: {
+      _id: "userId",
+    },
+    userStats: {
+      _id: "userStats",
+      userId: "userId",
+      year: 2023,
+      yearlyTotal: 300,
+      monthlyData: [
+        {
+          month: 1,
+          total: 150,
+        },
+        {
+          month: 3,
+          total: 150,
+        },
+      ],
+      dailyData: [
+        {
+          month: 1,
+          date: 5,
+          total: 30,
+        },
+        {
+          month: 3,
+          date: 21,
+          total: 150,
+        },
+        {
+          month: 1,
+          date: 28,
+          total: 120,
+        },
+      ],
+    },
+  },
+  transactionDataOut: {
+    userId: "userId",
+    amount: 100,
+    date: "2023-03-21T23:30:00.938-06:00",
+    dateZ: "2023-03-21T23:30:00.938-06:00",
+    type: "Expense",
+    tags: ["test", "sample"],
+  },
+  userStatsDataOut: {
+    _id: "userStats",
+    userId: "userId",
+    year: 2023,
+    yearlyTotal: 200,
+    monthlyData: [
+      {
+        month: 1,
+        total: 150,
+      },
+      {
+        month: 3,
+        total: 50,
+      },
+    ],
+    dailyData: [
+      {
+        month: 1,
+        date: 5,
+        total: 30,
+      },
+      {
+        month: 3,
+        date: 21,
+        total: 50,
+      },
+      {
+        month: 1,
+        date: 28,
+        total: 120,
+      },
+    ],
+  },
+};
+
+export const userStatsSimpleIncome = {
+  transactionDataIn: {
+    transaction: {
+      amount: 100,
+      date: "2023-03-21T23:30:00.938-06:00", // UTC date saves will go to 2023-03-22T05
+      type: "Income",
+      tags: ["test", "sample"],
+    },
+    user: {
+      _id: "userId",
+    },
+    userStats: {
+      _id: "userStats",
+      userId: "userId",
+      year: 2023,
+      yearlyTotal: 200,
+      monthlyData: [
+        {
+          month: 1,
+          total: 150,
+        },
+        {
+          month: 3,
+          total: 50,
+        },
+      ],
+      dailyData: [
+        {
+          month: 1,
+          date: 5,
+          total: 30,
+        },
+        {
+          month: 3,
+          date: 21,
+          total: 50,
+        },
+        {
+          month: 1,
+          date: 28,
+          total: 120,
+        },
+      ],
+    },
+  },
+  transactionDataOut: {
+    userId: "userId",
+    amount: 100,
+    date: "2023-03-21T23:30:00.938-06:00",
+    dateZ: "2023-03-21T23:30:00.938-06:00",
+    type: "Income",
+    tags: ["test", "sample"],
+  },
+  userStatsDataOut: {
+    _id: "userStats",
+    userId: "userId",
+    year: 2023,
+    yearlyTotal: 300,
+    monthlyData: [
+      {
+        month: 1,
+        total: 150,
+      },
+      {
+        month: 3,
+        total: 150,
+      },
+    ],
+    dailyData: [
+      {
+        month: 1,
+        date: 5,
+        total: 30,
+      },
+      {
+        month: 3,
+        date: 21,
+        total: 150,
+      },
+      {
+        month: 1,
+        date: 28,
+        total: 120,
+      },
+    ],
+  },
+};
+
 export const tagStatsSimpleExpense = {
   transactionDataIn: {
     transaction: {
@@ -32,16 +208,19 @@ export const tagStatsSimpleExpense = {
         ],
         dailyData: [
           {
+            month: 8,
             date: 3,
             total: 500,
           },
           {
+            month: 4,
             date: 21,
-            total: 50,
+            total: 80,
           },
           {
-            date: 28,
-            total: 80,
+            month: 3,
+            date: 21,
+            total: 50,
           },
         ],
       },
@@ -59,10 +238,12 @@ export const tagStatsSimpleExpense = {
         ],
         dailyData: [
           {
+            month: 1,
             date: 5,
             total: 50,
           },
           {
+            month: 3,
             date: 21,
             total: 50,
           },
@@ -101,16 +282,19 @@ export const tagStatsSimpleExpense = {
       ],
       dailyData: [
         {
+          month: 8,
           date: 3,
           total: 500,
         },
         {
+          month: 4,
           date: 21,
-          total: -50,
+          total: 80,
         },
         {
-          date: 28,
-          total: 80,
+          month: 3,
+          date: 21,
+          total: -50,
         },
       ],
     },
@@ -128,10 +312,12 @@ export const tagStatsSimpleExpense = {
       ],
       dailyData: [
         {
+          month: 1,
           date: 5,
           total: 50,
         },
         {
+          month: 3,
           date: 21,
           total: -50,
         },
@@ -174,14 +360,17 @@ export const tagStatsSimpleIncome = {
         ],
         dailyData: [
           {
+            month: 8,
             date: 3,
             total: 500,
           },
           {
+            month: 3,
             date: 21,
             total: 50,
           },
           {
+            month: 1,
             date: 28,
             total: 80,
           },
@@ -201,10 +390,12 @@ export const tagStatsSimpleIncome = {
         ],
         dailyData: [
           {
+            month: 3,
             date: 5,
             total: 50,
           },
           {
+            month: 3,
             date: 21,
             total: 50,
           },
@@ -243,14 +434,17 @@ export const tagStatsSimpleIncome = {
       ],
       dailyData: [
         {
+          month: 8,
           date: 3,
           total: 500,
         },
         {
+          month: 3,
           date: 21,
           total: 150,
         },
         {
+          month: 1,
           date: 28,
           total: 80,
         },
@@ -270,10 +464,12 @@ export const tagStatsSimpleIncome = {
       ],
       dailyData: [
         {
+          month: 3,
           date: 5,
           total: 50,
         },
         {
+          month: 3,
           date: 21,
           total: 150,
         },
@@ -308,10 +504,12 @@ export const tagStatsNewTags = {
         ],
         dailyData: [
           {
+            month: 3,
             date: 5,
             total: 50,
           },
           {
+            month: 3,
             date: 21,
             total: 50,
           },
@@ -342,10 +540,12 @@ export const tagStatsNewTags = {
       ],
       dailyData: [
         {
+          month: 3,
           date: 5,
           total: 50,
         },
         {
+          month: 3,
           date: 21,
           total: 150,
         },
@@ -364,6 +564,7 @@ export const tagStatsNewTags = {
       ],
       dailyData: [
         {
+          month: 3,
           date: 21,
           total: 100,
         },
@@ -401,14 +602,17 @@ export const typeStatsSimpleExpense = {
       ],
       dailyData: [
         {
+          month: 1,
           date: 5,
           total: 30,
         },
         {
+          month: 3,
           date: 21,
           total: 150,
         },
         {
+          month: 1,
           date: 28,
           total: 120,
         },
@@ -441,14 +645,17 @@ export const typeStatsSimpleExpense = {
     ],
     dailyData: [
       {
+        month: 1,
         date: 5,
         total: 30,
       },
       {
+        month: 3,
         date: 21,
         total: 250,
       },
       {
+        month: 1,
         date: 28,
         total: 120,
       },
@@ -485,14 +692,17 @@ export const typeStatsSimpleIncome = {
       ],
       dailyData: [
         {
+          month: 1,
           date: 5,
           total: 30,
         },
         {
+          month: 3,
           date: 21,
           total: 50,
         },
         {
+          month: 1,
           date: 28,
           total: 120,
         },
@@ -525,14 +735,17 @@ export const typeStatsSimpleIncome = {
     ],
     dailyData: [
       {
+        month: 1,
         date: 5,
         total: 30,
       },
       {
+        month: 3,
         date: 21,
         total: 150,
       },
       {
+        month: 1,
         date: 28,
         total: 120,
       },
@@ -584,6 +797,7 @@ export const simpleTestExpense = {
       ],
       dailyData: [
         {
+          month: 3,
           date: 21,
           total: -100,
         },
@@ -602,6 +816,7 @@ export const simpleTestExpense = {
       ],
       dailyData: [
         {
+          month: 3,
           date: 21,
           total: -100,
         },
@@ -621,8 +836,27 @@ export const simpleTestExpense = {
     ],
     dailyData: [
       {
+        month: 3,
         date: 21,
         total: 100,
+      },
+    ],
+  },
+  userStatsDataOut: {
+    userId: "userId",
+    year: 2023,
+    yearlyTotal: -100,
+    monthlyData: [
+      {
+        month: 3,
+        total: -100,
+      },
+    ],
+    dailyData: [
+      {
+        month: 3,
+        date: 21,
+        total: -100,
       },
     ],
   },
@@ -672,6 +906,7 @@ export const simpleTestIncome = {
       ],
       dailyData: [
         {
+          month: 3,
           date: 21,
           total: 100,
         },
@@ -690,6 +925,7 @@ export const simpleTestIncome = {
       ],
       dailyData: [
         {
+          month: 3,
           date: 21,
           total: 100,
         },
@@ -709,6 +945,25 @@ export const simpleTestIncome = {
     ],
     dailyData: [
       {
+        month: 3,
+        date: 21,
+        total: 100,
+      },
+    ],
+  },
+  userStatsDataOut: {
+    userId: "userId",
+    year: 2023,
+    yearlyTotal: 100,
+    monthlyData: [
+      {
+        month: 3,
+        total: 100,
+      },
+    ],
+    dailyData: [
+      {
+        month: 3,
         date: 21,
         total: 100,
       },
