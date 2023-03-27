@@ -16,14 +16,16 @@ import {
   useMediaQuery,
 } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
-import BreakdownChart from "components/BreakdownChart";
+// import BreakdownChart from "components/BreakdownChart";
 import OverviewChart from "components/OverviewChart";
 import { useGetDashboardQuery } from "state/api";
 import StatBox from "components/StatBox";
+// import UserTypeStatsChart from "components/UserTypeStatsChart";
+import TagStatsChart from "components/TagStatsChart";
 
 const Dashboard = () => {
   const theme = useTheme();
-  const isNonMediumScreens = useMediaQuery( "(min-width: 1200px)" );
+  const isNonMediumScreens = useMediaQuery("(min-width: 1200px)");
   const { data, isLoading } = useGetDashboardQuery();
 
   const columns = [
@@ -47,13 +49,13 @@ const Dashboard = () => {
       headerName: "# of Products",
       flex: 0.5,
       sortable: false,
-      renderCell: ( params ) => params.value.length,
+      renderCell: (params) => params.value.length,
     },
     {
       field: "cost",
       headerName: "Cost",
       flex: 1,
-      renderCell: ( params ) => `$${Number( params.value ).toFixed( 2 )}`,
+      renderCell: (params) => `$${Number(params.value).toFixed(2)}`,
     },
   ];
 
@@ -96,7 +98,7 @@ const Dashboard = () => {
           description="Since last month"
           icon={
             <Email
-              sx={{ color: theme.palette.secondary[ 300 ], fontSize: "26px" }}
+              sx={{ color: theme.palette.secondary[300], fontSize: "26px" }}
             />
           }
         />
@@ -107,7 +109,7 @@ const Dashboard = () => {
           description="Since last month"
           icon={
             <PointOfSale
-              sx={{ color: theme.palette.secondary[ 300 ], fontSize: "26px" }}
+              sx={{ color: theme.palette.secondary[300], fontSize: "26px" }}
             />
           }
         />
@@ -127,7 +129,7 @@ const Dashboard = () => {
           description="Since last month"
           icon={
             <PersonAdd
-              sx={{ color: theme.palette.secondary[ 300 ], fontSize: "26px" }}
+              sx={{ color: theme.palette.secondary[300], fontSize: "26px" }}
             />
           }
         />
@@ -138,7 +140,7 @@ const Dashboard = () => {
           description="Since last month"
           icon={
             <Traffic
-              sx={{ color: theme.palette.secondary[ 300 ], fontSize: "26px" }}
+              sx={{ color: theme.palette.secondary[300], fontSize: "26px" }}
             />
           }
         />
@@ -157,7 +159,7 @@ const Dashboard = () => {
             },
             "& .MuiDataGrid-columnHeaders": {
               backgroundColor: theme.palette.background.alt,
-              color: theme.palette.secondary[ 100 ],
+              color: theme.palette.secondary[100],
               borderBottom: "none",
             },
             "& .MuiDataGrid-virtualScroller": {
@@ -165,18 +167,18 @@ const Dashboard = () => {
             },
             "& .MuiDataGrid-footerContainer": {
               backgroundColor: theme.palette.background.alt,
-              color: theme.palette.secondary[ 100 ],
+              color: theme.palette.secondary[100],
               borderTop: "none",
             },
             "& .MuiDataGrid-toolbarContainer .MuiButton-text": {
-              color: `${theme.palette.secondary[ 200 ]} !important`,
+              color: `${theme.palette.secondary[200]} !important`,
             },
           }}
         >
           <DataGrid
             loading={isLoading || !data}
-            getRowId={( row ) => row._id}
-            rows={( data && data.transactions ) || []}
+            getRowId={(row) => row._id}
+            rows={(data && data.transactions) || []}
             columns={columns}
           />
         </Box>
@@ -187,17 +189,17 @@ const Dashboard = () => {
           p="1.5rem"
           borderRadius="0.55rem"
         >
-          <Typography variant="h6" sx={{ color: theme.palette.secondary[ 100 ] }}>
-            Sales By Category
+          <Typography variant="h6" sx={{ color: theme.palette.secondary[100] }}>
+            Expenses by Type
           </Typography>
-          <BreakdownChart isDashboard={true} />
+          <TagStatsChart isDashboard={true} />
+          {/* <UserTypeStatsChart isDashboard={true} /> */}
           <Typography
             p="0 0.6rem"
             fontSize="0.8rem"
-            sx={{ color: theme.palette.secondary[ 200 ] }}
+            sx={{ color: theme.palette.secondary[200] }}
           >
-            Breakdown of real states and information via category for revenue
-            made for this year and total sales.
+            Breakdown of expenses by Expense Types.
           </Typography>
         </Box>
       </Box>

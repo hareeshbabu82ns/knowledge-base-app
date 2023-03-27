@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { DateTime } from "luxon";
 
 import { EXPENSE_TYPES } from "../../models/Expenses/const.js";
 
@@ -368,6 +369,150 @@ export const getTransactions = async (req, res) => {
     });
 
     res.status(200).json({ transactions, total });
+  } catch (err) {
+    res.status(404).json({ message: err.message });
+  }
+};
+
+export const getUserStats = async (req, res) => {
+  try {
+    const { user } = req.auth;
+
+    // dates in ISO format
+    // depth in yearly monthly daily
+    const { dateFrom, dateTo, depth = "yearly" } = req.query;
+
+    const clientDateFrom = dateFrom
+      ? getClientDateTime({ date: dateFrom })
+      : DateTime.now();
+    const transactionYearFrom = clientDateFrom.year;
+    const transactionMonthFrom = clientDateFrom.month;
+    const transactionDayFrom = clientDateFrom.day;
+
+    const clientDateTo = dateTo
+      ? getClientDateTime({ date: dateTo })
+      : DateTime.now();
+    const transactionYearTo = clientDateTo.year;
+    const transactionMonthTo = clientDateTo.month;
+    const transactionDayTo = clientDateTo.day;
+
+    const query = {
+      userId: user._id,
+      year: { $gte: transactionYearFrom, $lte: transactionYearTo },
+    };
+
+    const projection = {};
+    if (depth === "yearly") {
+      projection["monthlyData"] = 0;
+      projection["dailyData"] = 0;
+    }
+    if (depth === "monthly") {
+      projection["dailyData"] = 0;
+    }
+
+    const sort = { year: 1 };
+
+    const stats = await ExpenseUserStat.find(query, projection).sort(sort);
+
+    res.status(200).json({ stats });
+  } catch (err) {
+    res.status(404).json({ message: err.message });
+  }
+};
+
+export const getTypeStats = async (req, res) => {
+  try {
+    const { user } = req.auth;
+
+    // dates in ISO format
+    const { type, dateFrom, dateTo, depth = "yearly" } = req.query;
+
+    const clientDateFrom = dateFrom
+      ? getClientDateTime({ date: dateFrom })
+      : DateTime.now();
+    const transactionYearFrom = clientDateFrom.year;
+    const transactionMonthFrom = clientDateFrom.month;
+    const transactionDayFrom = clientDateFrom.day;
+
+    const clientDateTo = dateTo
+      ? getClientDateTime({ date: dateTo })
+      : DateTime.now();
+    const transactionYearTo = clientDateTo.year;
+    const transactionMonthTo = clientDateTo.month;
+    const transactionDayTo = clientDateTo.day;
+
+    const query = {
+      userId: user._id,
+      year: { $gte: transactionYearFrom, $lte: transactionYearTo },
+    };
+    if (type) query["type"] = type;
+
+    const projection = {};
+    if (depth === "yearly") {
+      projection["monthlyData"] = 0;
+      projection["dailyData"] = 0;
+    }
+    if (depth === "monthly") {
+      projection["dailyData"] = 0;
+    }
+
+    const sort = {
+      year: 1,
+    };
+
+    const stats = await ExpenseTypeStat.find(query, projection).sort(sort);
+
+    res.status(200).json({ stats });
+  } catch (err) {
+    res.status(404).json({ message: err.message });
+  }
+};
+
+export const getTagStats = async (req, res) => {
+  try {
+    const { user } = req.auth;
+
+    // dates in ISO format
+    const { tag, dateFrom, dateTo, depth = "yearly" } = req.query;
+
+    const clientDateFrom = dateFrom
+      ? getClientDateTime({ date: dateFrom })
+      : DateTime.now();
+    const transactionYearFrom = clientDateFrom.year;
+    const transactionMonthFrom = clientDateFrom.month;
+    const transactionDayFrom = clientDateFrom.day;
+
+    const clientDateTo = dateTo
+      ? getClientDateTime({ date: dateTo })
+      : DateTime.now();
+    const transactionYearTo = clientDateTo.year;
+    const transactionMonthTo = clientDateTo.month;
+    const transactionDayTo = clientDateTo.day;
+
+    const query = {
+      userId: user._id,
+      year: { $gte: transactionYearFrom, $lte: transactionYearTo },
+    };
+    if (tag) {
+      query["tag"] = tag;
+    }
+
+    const projection = {};
+    if (depth === "yearly") {
+      projection["monthlyData"] = 0;
+      projection["dailyData"] = 0;
+    }
+    if (depth === "monthly") {
+      projection["dailyData"] = 0;
+    }
+
+    const sort = {
+      year: 1,
+    };
+
+    const stats = await ExpenseTagStat.find(query, projection).sort(sort);
+
+    res.status(200).json({ stats });
   } catch (err) {
     res.status(404).json({ message: err.message });
   }
