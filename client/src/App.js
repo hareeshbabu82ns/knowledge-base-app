@@ -27,7 +27,11 @@ import Expenses from "scenes/expenses";
 
 function App() {
   const mode = useSelector((state) => state.global.mode);
-  const theme = useMemo(() => customTheme({ mode }), [mode]);
+  const baseColor = useSelector((state) => state.global.baseColor);
+  const theme = useMemo(
+    () => customTheme({ mode, baseColor }),
+    [mode, baseColor]
+  );
   // const theme = useMemo(() => createTheme(themeSettings(mode)), [mode]);
 
   return (
