@@ -15,6 +15,7 @@ function ExpensesOverviewChart({
   endDate,
 }) {
   const theme = useTheme();
+  const isDark = theme.palette.mode === "dark";
   const { data, isLoading } = useGetExpenseTagStatsQuery({
     depth: "monthly",
     dateFrom: startDate.toISO(),
@@ -96,32 +97,32 @@ function ExpensesOverviewChart({
         axis: {
           domain: {
             line: {
-              stroke: theme.palette.secondary[200],
+              stroke: theme.palette.tertiary[700],
             },
           },
           legend: {
             text: {
-              fill: theme.palette.secondary[200],
+              fill: theme.palette.tertiary[200],
             },
           },
           ticks: {
             line: {
-              stroke: theme.palette.secondary[200],
+              stroke: theme.palette.tertiary[200],
               strokeWidth: 1,
             },
             text: {
-              fill: theme.palette.secondary[200],
+              fill: theme.palette.text.primary,
             },
           },
         },
         legends: {
           text: {
-            fill: theme.palette.secondary[200],
+            fill: theme.palette.text.primary,
           },
         },
         tooltip: {
           container: {
-            color: theme.palette.primary.main,
+            color: theme.palette.grey[isDark ? 200 : 900],
           },
         },
       }}
@@ -148,7 +149,7 @@ function ExpensesOverviewChart({
         tickSize: 5,
         tickPadding: 5,
         tickRotation: 0,
-        legend: isDashboard ? "" : "Month",
+        legend: isDashboard ? "" : "Monthly Total",
         legendOffset: 36,
         legendPosition: "middle",
       }}

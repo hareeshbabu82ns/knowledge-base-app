@@ -1,16 +1,12 @@
 import { createTheme } from "@mui/material/styles";
-// import { red } from "@mui/material/colors";
 
 // assets
 // import cssCustomColors from "assets/scss/_themes-vars.module.scss";
-import cssPaletteColors from "assets/scss/_tokens.module.scss";
-import cssTokenPaletteColors from "assets/scss/_tokens.colors.scss";
-import cssColorsLight from "assets/scss/theme.dark.scss";
-import cssColorsDark from "assets/scss/theme.dark.scss";
 
 // project imports
 import componentStyleOverrides from "./compStyleOverride";
-import themePalette from "./palette";
+import themePalette from "./dynamic-palette";
+import materialDynamicColors from "./material-dynamic-colors";
 import themeTypography from "./typography";
 
 // function that reverses the color palette
@@ -29,79 +25,49 @@ function reverseTokens(tokensDark) {
   return reversedTokens;
 }
 
-const parsePalette = ({ paletteTokens, prefix, separator = "-" }) => {
-  const palette = Object.keys(paletteTokens)
-    .filter((k) => k.startsWith(prefix))
-    .reduce((p, k) => {
-      return {
-        ...p,
-        [k.split(separator)[1]]: paletteTokens[k],
-      };
-    }, {});
-  return palette;
-};
-
 /**
  * Represent theme style and structure as per Material-UI
  * @param {JsonObject} customization customization parameter object
  */
 
-export const theme = (customization) => {
-  // const customColors = cssCustomColors;
-  const tokenPaletteColors = cssTokenPaletteColors;
-  const cssColors = cssPaletteColors;
-  const colorsLight = cssColorsLight;
-  const colorsDark = cssColorsDark;
+// const baseColor = "#130019";
 
+export const theme = (customization) => {
   const isDark = customization?.mode === "dark";
 
-  // prepare color arrays
-  // console.log(tokenPaletteColors);
-  const tokenPaletteColorsDark = {
-    primary: parsePalette({
-      paletteTokens: tokenPaletteColors,
-      prefix: "primary",
-    }),
-    secondary: parsePalette({
-      paletteTokens: tokenPaletteColors,
-      prefix: "secondary",
-    }),
-    grey: parsePalette({
-      paletteTokens: tokenPaletteColors,
-      prefix: "grey",
-    }),
-  };
-  // prepare light colors
-  // const tokenPaletteColorsLight = reverseTokens(tokenPaletteColorsDark);
+  const baseColor = customization?.baseColor || "#130019";
+
+  const dynColors = materialDynamicColors(baseColor);
 
   const colors = {
-    ...(isDark ? colorsDark : colorsLight),
-    ...cssColors,
-    // ...(isDark ? tokenPaletteColorsDark : tokenPaletteColorsLight),
-    ...tokenPaletteColorsDark, // do not switch
-    // ...customColors,
+    // ...(isDark ? colorsDark : colorsLight),
+    ...dynColors[customization?.mode],
   };
 
   const themeOption = {
     colors,
-    heading: colors.grey[isDark ? 900 : 100],
-    paper: colors.paper,
-    backgroundDefault: colors.background,
-    background: colors.primaryLight,
-    darkTextPrimary: colors.textPrimary,
-    darkTextSecondary: colors.textSecondary,
-    textDark: colors.grey[isDark ? 50 : 900],
-    menuSelected: colors.secondaryDark,
-    menuSelectedBack: colors.secondaryLight,
-    divider: colors.grey[isDark ? 50 : 800],
+    // heading: colors.grey[isDark ? 900 : 100],
+    // paper: colors.paper,
+    // backgroundDefault: colors.background,
+    // background: colors.primaryLight,
+    // darkTextPrimary: colors.textPrimary,
+    // darkTextSecondary: colors.textSecondary,
+    // textDark: colors.grey[isDark ? 50 : 900],
+    // menuSelected: colors.secondaryDark,
+    // menuSelectedBack: colors.secondaryLight,
+    // divider: colors.grey[isDark ? 50 : 800],
     customization,
   };
 
   // console.log(themeOption);
 
+  const palette = themePalette(themeOption);
+
+  // console.log(palette);
+
   const themeOptions = {
     direction: "ltr",
-    palette: themePalette(themeOption),
+    palette,
     mixins: {
       toolbar: {
         minHeight: "48px",
@@ -111,12 +77,12 @@ export const theme = (customization) => {
         },
       },
     },
-    typography: themeTypography(themeOption),
+    typography: themeTypography(themeOption, palette),
   };
 
   const themes = createTheme(themeOptions);
 
-  themes.components = componentStyleOverrides(themeOption);
+  themes.components = componentStyleOverrides(themeOption, palette);
 
   return themes;
 };

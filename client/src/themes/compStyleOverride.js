@@ -1,7 +1,13 @@
-export default function componentStyleOverrides(theme) {
+import { toneByMode } from "./utils";
+
+export default function componentStyleOverrides(theme, palette) {
   const isDark = theme?.customization?.mode === "dark";
-  const bgColor = theme.colors?.primary[isDark ? 900 : 800];
-  // const bgColor = isDark ? theme.colors?.grey[100] : theme.colors?.grey[600];
+
+  const bgColor = toneByMode(palette?.primary[500], isDark, {
+    darkBy: 0.8,
+    lightBy: 0.9,
+  });
+  // const bgColor = isDark ? palette??.grey[100] : palette??.grey[600];
 
   return {
     MuiButton: {
@@ -28,7 +34,7 @@ export default function componentStyleOverrides(theme) {
     MuiCardHeader: {
       styleOverrides: {
         root: {
-          color: theme?.textDark,
+          color: palette?.text.primary,
           padding: "24px",
         },
         title: {
@@ -53,25 +59,29 @@ export default function componentStyleOverrides(theme) {
     MuiListItemButton: {
       styleOverrides: {
         root: {
-          color: theme.textPrimary,
+          color: palette?.text.primary,
           paddingTop: "10px",
           paddingBottom: "10px",
           "&.Mui-selected": {
-            color: theme.menuSelected,
-            backgroundColor: theme.menuSelectedBack,
+            color: palette?.warning[isDark ? 200 : 900],
+            backgroundColor: palette?.secondary[isDark ? 700 : 400],
             "&:hover": {
-              backgroundColor: theme.menuSelectedBack,
+              color: palette?.secondary[100],
+              backgroundColor: palette?.secondary[200],
             },
             "& .MuiListItemIcon-root": {
-              color: theme.menuSelected,
+              color: palette?.warning[isDark ? 200 : 900],
             },
           },
           "&:hover": {
-            backgroundColor: theme.menuSelectedBack,
-            color: theme.menuSelected,
+            backgroundColor: palette?.secondary[100],
+            color: palette?.secondary[100],
             "& .MuiListItemIcon-root": {
-              color: theme.menuSelected,
+              color: palette?.warning[isDark ? 200 : 900],
             },
+          },
+          "& .MuiListItemIcon-root": {
+            color: palette?.secondary[900],
           },
         },
       },
@@ -79,7 +89,7 @@ export default function componentStyleOverrides(theme) {
     MuiListItemIcon: {
       styleOverrides: {
         root: {
-          color: theme.textPrimary,
+          color: palette?.text.primary,
           minWidth: "36px",
         },
       },
@@ -87,16 +97,16 @@ export default function componentStyleOverrides(theme) {
     MuiListItemText: {
       styleOverrides: {
         primary: {
-          color: theme.textDark,
+          color: palette?.grey[900],
         },
       },
     },
     MuiInputBase: {
       styleOverrides: {
         input: {
-          color: theme.textDark,
+          color: palette?.grey[900],
           "&::placeholder": {
-            color: theme.textSecondary,
+            color: palette?.grey[900],
             fontSize: "0.875rem",
           },
         },
@@ -108,10 +118,10 @@ export default function componentStyleOverrides(theme) {
           background: bgColor,
           borderRadius: `${theme?.customization?.borderRadius}px`,
           "& .MuiOutlinedInput-notchedOutline": {
-            borderColor: theme.colors?.grey400,
+            borderColor: palette?.grey[400],
           },
           "&:hover $notchedOutline": {
-            borderColor: theme.colors?.primaryLight,
+            borderColor: palette?.primary[700],
           },
           "&.MuiInputBase-multiline": {
             padding: 1,
@@ -141,22 +151,22 @@ export default function componentStyleOverrides(theme) {
       styleOverrides: {
         root: {
           "&.Mui-disabled": {
-            color: theme.colors?.grey300,
+            color: palette?.grey[300],
           },
         },
         mark: {
-          backgroundColor: theme.paper,
+          backgroundColor: palette?.background.paper,
           width: "4px",
         },
         valueLabel: {
-          color: theme?.colors?.primaryLight,
+          color: theme?.colors?.primary[800],
         },
       },
     },
     MuiDivider: {
       styleOverrides: {
         root: {
-          borderColor: theme.divider,
+          borderColor: palette?.grey[300],
           opacity: 1,
         },
       },
@@ -164,8 +174,8 @@ export default function componentStyleOverrides(theme) {
     MuiAvatar: {
       styleOverrides: {
         root: {
-          color: theme.colors?.primaryDark,
-          background: theme.colors?.primary200,
+          color: palette?.primary[200],
+          background: palette?.primary[500],
         },
       },
     },
@@ -181,29 +191,32 @@ export default function componentStyleOverrides(theme) {
     MuiTooltip: {
       styleOverrides: {
         tooltip: {
-          color: theme.paper,
-          background: theme.colors?.grey700,
+          color: palette?.background.paper,
+          background: palette?.grey[700],
         },
       },
     },
     MuiDataGrid: {
       styleOverrides: {
+        root: {
+          "& .MuiToolbar-root > *": {
+            color: palette?.secondary[800],
+          },
+        },
         virtualScroller: {
-          background: isDark
-            ? theme.colors?.darkLevel2
-            : theme?.colors?.primaryLight,
+          background: palette.primary[300],
         },
         footerContainer: {
-          color: theme.colors.secondary100,
-          background: isDark
-            ? theme.colors?.darkLevel1
-            : theme?.colors?.primaryDark,
+          color: palette?.secondary[800],
+          // background: isDark
+          //   ? palette?.primary[300]
+          //   : theme?.colors?.primary[800],
         },
         columnHeaders: {
-          color: theme.colors.secondary100,
+          color: palette?.secondary[900],
           background: isDark
-            ? theme.colors?.darkLevel1
-            : theme?.colors?.primaryDark,
+            ? palette?.colors.background
+            : palette.primary[200],
         },
       },
     },

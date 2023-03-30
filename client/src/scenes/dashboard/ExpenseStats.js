@@ -14,7 +14,7 @@ import ExpensesOverviewChart from "components/ExpensesOverviewChart";
 import { Stack } from "@mui/system";
 import { DateTime } from "luxon";
 
-function ExpenseStatsChart() {
+function ExpenseStatsChart({ hideHeading = false }) {
   const [view, setView] = useState("tags");
   const [startDate, setStartDate] = useState(DateTime.now().startOf("month"));
   const [endDate, setEndDate] = useState(DateTime.now().endOf("month"));
@@ -70,7 +70,6 @@ function ExpenseStatsChart() {
           startDate={startDate}
           endDate={endDate}
         />
-        {/* <OverviewChart view={view} /> */}
       </Box>
     </Box>
   );

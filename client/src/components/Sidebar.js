@@ -121,9 +121,13 @@ function Sidebar({
     <Fragment>
       <Box width="100%" overflow="auto" marginBottom="5rem">
         <Box m="1.5rem 2rem 2rem 3rem">
-          <FlexBetween color={theme.palette.secondary.main}>
+          <FlexBetween>
             <Box display="flex" alignItems="center" gap="0.5rem">
-              <Typography variant="h4" fontWeight="bold">
+              <Typography
+                variant="h4"
+                fontWeight="bold"
+                color={theme.palette.warning["A700"]}
+              >
                 HKBase
               </Typography>
             </Box>
@@ -151,24 +155,15 @@ function Sidebar({
                     navigate(`/${lcText}`);
                     setActive(lcText);
                   }}
-                  sx={{
-                    bgcolor:
-                      active === lcText
-                        ? theme.palette.secondary[300]
-                        : "transparent",
-                    color:
-                      active === lcText
-                        ? theme.palette.primary[600]
-                        : theme.palette.secondary[100],
-                  }}
+                  selected={active === lcText}
                 >
                   <ListItemIcon
                     sx={{
                       ml: "2rem",
-                      color:
-                        active === lcText
-                          ? theme.palette.primary[600]
-                          : theme.palette.secondary[200],
+                      // color:
+                      //   active === lcText
+                      //     ? theme.palette.primary[400]
+                      //     : theme.palette.grey[800],
                     }}
                   >
                     {icon}

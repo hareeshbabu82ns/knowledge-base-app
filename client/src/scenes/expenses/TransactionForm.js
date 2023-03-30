@@ -4,6 +4,7 @@ import {
   InputAdornment,
   MenuItem,
   Select,
+  Switch,
   TextField,
 } from "@mui/material";
 import { Box } from "@mui/system";
@@ -126,7 +127,7 @@ const TransactionForm = ({ transactionData }) => {
   return (
     <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 2 }}>
       <Grid container spacing={2}>
-        <Grid item xs={12} sm={6}>
+        <Grid item xs={12} sm={6} lg={3}>
           <TextField
             name="amount"
             required
@@ -147,8 +148,23 @@ const TransactionForm = ({ transactionData }) => {
             }}
           />
         </Grid>
-        <Grid item xs={12} sm={6}>
-          <Select
+        <Grid item xs={12} sm={6} lg={1}>
+          <Switch
+            id="type"
+            name="type"
+            label="Type"
+            checked={formData.type === EXPENSE_TYPES[0]}
+            onChange={(e) =>
+              onInputChange({
+                target: {
+                  name: "type",
+                  value: e.target.checked ? EXPENSE_TYPES[0] : EXPENSE_TYPES[1],
+                },
+              })
+            }
+            size="small"
+          />
+          {/* <Select
             id="type"
             name="type"
             label="Type"
@@ -162,9 +178,9 @@ const TransactionForm = ({ transactionData }) => {
                 {t}
               </MenuItem>
             ))}
-          </Select>
+          </Select> */}
         </Grid>
-        <Grid item xs={12} sm={6}>
+        <Grid item xs={12} sm={6} lg={3}>
           <TextField
             name="tags"
             required
@@ -184,10 +200,11 @@ const TransactionForm = ({ transactionData }) => {
             }}
           />
         </Grid>
-        <Grid item xs={9} sm={4}>
+        <Grid item xs={9} sm={4} lg={3}>
           <DateTimePicker
             name="date"
             id="date"
+            format="LLL dd yyyy hh:mm a"
             label="Transaction Date"
             value={formData.date}
             onChange={(date) =>
@@ -211,7 +228,12 @@ const TransactionForm = ({ transactionData }) => {
           >
             <SendOutlined />
           </IconButton>
-          <IconButton type="button" onClick={handleDelete} color="warning">
+          <IconButton
+            type="button"
+            onClick={handleDelete}
+            color="warning"
+            disabled={!formData._id}
+          >
             <DeleteOutlineOutlined />
           </IconButton>
         </Grid>

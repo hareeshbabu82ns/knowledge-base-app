@@ -50,11 +50,12 @@ const StyledMenu = styled((props) => (
     borderRadius: 0,
     marginTop: theme.spacing(1),
     minWidth: 180,
-    color:
-      theme.palette.mode === "light"
-        ? theme.palette.grey[700]
-        : theme.palette.grey[300],
-    backgroundColor: theme.palette.background.alt,
+    color: theme.palette.grey[700],
+    // theme.palette.mode === "light"
+    //   ? theme.palette.grey[700]
+    //   : theme.palette.grey[300],
+    backgroundColor: "red",
+    // backgroundColor: theme.palette.background.alt,
     boxShadow:
       "rgb(255, 255, 255) 0px 0px 0px 0px, rgba(0, 0, 0, 0.05) 0px 0px 0px 1px, rgba(0, 0, 0, 0.1) 0px 10px 15px -3px, rgba(0, 0, 0, 0.05) 0px 4px 6px -2px",
     "& .MuiMenu-list": {
@@ -67,10 +68,11 @@ const StyledMenu = styled((props) => (
         marginRight: theme.spacing(1.5),
       },
       "&:active": {
-        backgroundColor: alpha(
-          theme.palette.primary.main,
-          theme.palette.action.selectedOpacity
-        ),
+        backgroundColor: "red",
+        // backgroundColor: alpha(
+        //   theme.palette.primary.main,
+        //   theme.palette.action.selectedOpacity
+        // ),
       },
     },
   },
@@ -154,22 +156,13 @@ function Navbar({ user, isSidebarOpen, setIsSidebarOpen }) {
                 sx={{ objectFit: "cover" }}
               />
               <Box textAlign="left">
-                <Typography
-                  fontWeight="bold"
-                  fontSize="0.8rem"
-                  sx={{ color: theme.palette.secondary[100] }}
-                >
+                <Typography fontWeight="bold" fontSize="0.8rem">
                   {user.name}
                 </Typography>
-                <Typography
-                  fontSize="0.7rem"
-                  sx={{ color: theme.palette.secondary[200] }}
-                >
-                  {user.occupation}
-                </Typography>
+                <Typography fontSize="0.7rem">{user.occupation}</Typography>
               </Box>
               <ArrowDropDownOutlined
-                sx={{ color: theme.palette.secondary[300], fontSize: "25px" }}
+                sx={{ color: theme.palette.secondary[900], fontSize: "25px" }}
               />
             </Button>
             <StyledMenu
