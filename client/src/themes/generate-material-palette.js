@@ -1,6 +1,7 @@
-import { generateMaterialUIPalette } from "coloring-palette";
+import coloringPalette, { generateMaterialUIPalette } from "coloring-palette";
+import tinycolor from "tinycolor2";
 
-import { hexToHSL, hslToHex } from "./utils";
+import { hexToHSL, hexToHsv, hslToHex } from "./utils";
 
 /**
  * Minimize the maximum possible loss
@@ -87,18 +88,73 @@ export const generatorBasic = ({ hex, onlyHex = true }) => {
   }, {});
 };
 
-const generator = ({ hex, onlyHex = true, isDark }) => {
-  const { h, s, l } = hexToHSL(hex);
+const generator = ({ hex, onlyHex = true, isDark, paletteOnHues = true }) => {
+  const { h, s: sp, v: vp } = tinycolor(hex).toHsv();
+  const s = sp * 100;
+  const v = vp * 100;
+  // const { h, s, v } = hexToHsv(hex);
 
-  const res = generateMaterialUIPalette({
-    hueStart: h + 5,
-    satStart: isDark ? 30 : 60,
-    valStart: isDark ? 95 : 70,
-    hueEnd: h - 5,
-    satEnd: isDark ? 90 : 100,
-    valEnd: isDark ? 65 : 42,
-    format: "hex",
-  });
+  const hueStartNum = Math.abs(h - 5) % 360;
+  const hueEndNum = Math.min(360, Math.abs(hueStartNum + 10));
+
+  const satStartNum = Math.min(s, Math.abs(Math.round(s - s / 2)) % 100);
+  const satEndNum = Math.max(s, Math.abs(Math.round(s + s / 2)) % 100);
+
+  const valStartNum = Math.min(v, Math.abs(Math.round(v - v / 2)) % 100);
+  const valEndNum = Math.max(v, Math.abs(Math.round(v + v / 2)) % 100);
+
+  const hueStart = isDark
+    ? Math.min(hueStartNum, hueEndNum)
+    : Math.max(hueStartNum, hueEndNum);
+  const hueEnd = isDark
+    ? Math.max(hueStartNum, hueEndNum)
+    : Math.min(hueStartNum, hueEndNum);
+
+  const satStart = isDark ? satEndNum : satStartNum;
+  const satEnd = isDark ? satStartNum : satEndNum;
+
+  const valStart = isDark ? valStartNum : valEndNum;
+  const valEnd = isDark ? valEndNum : valStartNum;
+
+  // const satStart = Math.max(isDark ? 30 : 60, satStartNum);
+  // const satEnd = Math.min(isDark ? 90 : 100, satEndNum);
+
+  // const valStart = Math.max(isDark ? 95 : 70, Math.min(valStartNum, valEndNum));
+  // const valEnd = Math.min(isDark ? 65 : 42, Math.max(valStartNum, valEndNum));
+
+  // const satStart = isDark ? 30 : 60;
+  // const satEnd = isDark ? 90 : 100;
+
+  // const valStart = isDark ? 95 : 70;
+  // const valEnd = isDark ? 65 : 42;
+
+  const format = "hex";
+
+  // console.log(
+  //   `${hex},
+  //   h: (${h},${hueStart},${hueEnd}),
+  //   s: (${s},${satStart},${satEnd}),
+  //   v: (${v},${valStart},${valEnd})`
+  // );
+
+  // const hueStart = h
+  // const satStart = round(s * 10)
+  // const valStart = generateValStart(v * 100)
+  // const hueEnd = (h + 354) % 360
+  // const satEnd = round(atMost100(s * 108))
+  // const valEnd = round(v * 66)
+
+  const res = paletteOnHues
+    ? generateMaterialUIPalette({
+        hueStart,
+        satStart,
+        valStart,
+        hueEnd,
+        satEnd,
+        valEnd,
+        format,
+      })
+    : coloringPalette(hex);
 
   return Object.keys(res).reduce((acc, k) => {
     const v = res[k];

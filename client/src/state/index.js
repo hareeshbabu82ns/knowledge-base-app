@@ -1,11 +1,16 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { loadUserLocal } from "scenes/user/utils";
+import {
+  loadThemeLocal,
+  loadUserLocal,
+  saveThemeLocal,
+} from "scenes/user/utils";
 
 const { user, token } = loadUserLocal();
+const { mode, baseColor } = loadThemeLocal();
 
 const initialState = {
-  mode: "dark",
-  baseColor: "#09D7F9",
+  mode,
+  baseColor,
   // userId: '63701cc1f03239b7f700000e',
   userId: user?._id,
   user,
@@ -18,9 +23,11 @@ export const globalSlice = createSlice({
   reducers: {
     setBaseColor: (state, { payload }) => {
       state.baseColor = payload.baseColor;
+      saveThemeLocal({ mode: state.mode, baseColor: state.baseColor });
     },
     setMode: (state) => {
       state.mode = state.mode === "light" ? "dark" : "light";
+      saveThemeLocal({ mode: state.mode, baseColor: state.baseColor });
     },
     setUser: (state, { payload }) => {
       state.user = payload?.user;

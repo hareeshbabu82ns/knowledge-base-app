@@ -1,10 +1,32 @@
-import { Box } from "@mui/material";
-import React, { useState } from "react";
+import { Box, Stack, Typography } from "@mui/material";
+import React, { useEffect, useState } from "react";
 import { SketchPicker } from "react-color";
+import tinycolor from "tinycolor2";
+import { useDebounce } from "./debounceHook";
+
+const sxSwatch = {
+  padding: "5px",
+  background: "#fff",
+  borderRadius: "1px",
+  boxShadow: "0 0 0 1px rgba(0,0,0,.1)",
+  display: "inline-block",
+  cursor: "pointer",
+  minWidth: "200px",
+};
 
 function SketchColorPicker({ color: baseColor, onChange }) {
   const [displayColorPicker, showColorPicker] = useState(false);
   const [color, setColor] = useState(baseColor);
+
+  const lazyColor = useDebounce(color, 500);
+
+  useEffect(() => {
+    if (onChange) onChange(lazyColor);
+  }, [lazyColor]);
+
+  const tinyColor = tinycolor(baseColor);
+  const hsvStr = tinyColor.toHsvString();
+  const textColor = tinyColor.getLuminance() > 0.5 ? "black" : "white";
 
   const handleClick = () => {
     showColorPicker(!displayColorPicker);
@@ -16,23 +38,17 @@ function SketchColorPicker({ color: baseColor, onChange }) {
 
   const handleChange = (color) => {
     setColor(color.hex);
-    if (onChange) onChange(color.hex);
-  };
-
-  const sxSwatch = {
-    padding: "5px",
-    background: "#fff",
-    borderRadius: "1px",
-    boxShadow: "0 0 0 1px rgba(0,0,0,.1)",
-    display: "inline-block",
-    cursor: "pointer",
+    // if (onChange) onChange(color.hex);
   };
 
   const sxColor = {
-    width: "36px",
-    height: "14px",
+    width: "100%",
+    height: 50,
     borderRadius: "2px",
     background: color,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
   };
 
   const sxPopover = {
@@ -50,12 +66,22 @@ function SketchColorPicker({ color: baseColor, onChange }) {
   return (
     <div>
       <Box sx={sxSwatch} onClick={handleClick}>
-        <Box sx={sxColor} />
+        <Box sx={sxColor}>
+          <Stack justifyContent="center" alignItems="center">
+            <Typography variant="h4" sx={{ color: textColor }}>
+              {color}
+            </Typography>
+            <Typography variant="body1" sx={{ color: textColor }}>
+              {hsvStr}
+              {/* {`H: ${h}, S: ${s}, V: ${v}`} */}
+            </Typography>
+          </Stack>
+        </Box>
       </Box>
       {displayColorPicker ? (
         <Box sx={sxPopover}>
           <Box sx={sxCover} onClick={handleClose} />
-          <SketchPicker color={color} onChange={handleChange} />
+          <SketchPicker color={color} onChange={handleChange} disableAlpha />
         </Box>
       ) : null}
     </div>

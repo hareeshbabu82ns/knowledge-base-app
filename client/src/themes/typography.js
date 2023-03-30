@@ -4,69 +4,69 @@
  */
 
 export default function themeTypography(theme, palette) {
-  const isDark = theme?.customization?.mode === "dark";
+  const isDark = theme.customization.mode === "dark";
   return {
-    fontFamily: theme?.customization?.fontFamily,
+    fontFamily: theme.customization.fontFamily,
     h6: {
       fontWeight: 500,
-      color: palette?.text.heading,
+      color: palette.text.heading,
       fontSize: "0.75rem",
     },
     h5: {
       fontSize: "0.875rem",
-      color: palette?.text.heading,
+      color: palette.text.heading,
       fontWeight: 500,
     },
     h4: {
       fontSize: "1rem",
-      color: palette?.text.heading,
+      color: palette.text.heading,
       fontWeight: 600,
     },
     h3: {
       fontSize: "1.25rem",
-      color: palette?.text.heading,
+      color: palette.text.heading,
       fontWeight: 600,
     },
     h2: {
       fontSize: "1.5rem",
-      color: palette?.text.heading,
+      color: palette.text.heading,
       fontWeight: 700,
     },
     h1: {
       fontSize: "2.125rem",
-      color: palette?.text.heading,
+      color: palette.text.heading,
       fontWeight: 700,
     },
     subtitle1: {
       fontSize: "0.875rem",
       fontWeight: 500,
-      color: palette?.text.primary,
+      color: palette.text.primary,
     },
     subtitle2: {
       fontSize: "0.75rem",
       fontWeight: 400,
-      color: palette?.text.secondary,
+      color: palette.text.secondary,
     },
     caption: {
       fontSize: "0.75rem",
-      color: palette?.text.secondary,
+      color: palette.text.secondary,
       fontWeight: 400,
     },
     body1: {
       fontSize: "0.875rem",
       fontWeight: 400,
       lineHeight: "1.334em",
-      color: palette?.text.primary,
+      color: palette.text.primary,
     },
     body2: {
       letterSpacing: "0em",
       fontWeight: 400,
       lineHeight: "1.5em",
-      color: palette?.text.secondary,
+      color: palette.text.secondary,
     },
     button: {
       textTransform: "capitalize",
-      color: palette?.text.primary,
+      color: palette.text.primary,
     },
     customInput: {
       marginTop: 1,
@@ -74,7 +74,7 @@ export default function themeTypography(theme, palette) {
       "& > label": {
         top: 23,
         left: 0,
-        color: palette?.grey[500],
+        color: palette.grey[500],
         '&[data-shrink="false"]': {
           top: 5,
         },
@@ -90,19 +90,19 @@ export default function themeTypography(theme, palette) {
       },
     },
     mainContent: {
-      backgroundColor: palette?.background.default,
+      backgroundColor: palette.background.default,
       width: "100%",
       minHeight: "calc(100vh - 88px)",
       flexGrow: 1,
       padding: "20px",
       marginTop: "88px",
       marginRight: "20px",
-      borderRadius: `${theme?.customization?.borderRadius}px`,
+      borderRadius: `${theme.customization.borderRadius}px`,
     },
     menuCaption: {
       fontSize: "0.875rem",
       fontWeight: 500,
-      color: palette?.text.heading,
+      color: palette.text.heading,
       padding: "6px",
       textTransform: "capitalize",
       marginTop: "10px",
@@ -110,7 +110,7 @@ export default function themeTypography(theme, palette) {
     subMenuCaption: {
       fontSize: "0.6875rem",
       fontWeight: 500,
-      color: palette?.text.secondary,
+      color: palette.text.secondary,
       textTransform: "capitalize",
     },
     commonAvatar: {

@@ -23,19 +23,12 @@ import { useGetDashboardQuery } from "state/api";
 import StatBox from "components/StatBox";
 // import UserTypeStatsChart from "components/UserTypeStatsChart";
 import TagStatsChart from "components/TagStatsChart";
-import { useDispatch, useSelector } from "react-redux";
-import SketchColorPicker from "components/SketchColorPicker";
-import { setBaseColor } from "state";
 
 const Dashboard = () => {
   const theme = useTheme();
-  const dispatch = useDispatch();
-  const baseColor = useSelector((state) => state.global.baseColor);
 
   const isNonMediumScreens = useMediaQuery("(min-width: 1200px)");
   const { data, isLoading } = useGetDashboardQuery();
-
-  const handleColorChange = (c) => dispatch(setBaseColor({ baseColor: c }));
 
   const columns = [
     {
@@ -74,7 +67,6 @@ const Dashboard = () => {
         <Header title="DASHBOARD" subtitle="Welcome to your dashboard" />
 
         <Stack direction="row" columnGap={2} alignItems="center">
-          <SketchColorPicker color={baseColor} onChange={handleColorChange} />
           <Button
             sx={{
               fontSize: "14px",

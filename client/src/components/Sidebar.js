@@ -15,6 +15,7 @@ import {
   TrendingUpOutlined,
   PieChartOutlined,
   CurrencyRupeeOutlined,
+  ColorLensOutlined as ThemeSettingsOutlinedIcon,
 } from "@mui/icons-material";
 import FlexBetween from "components/FlexBetween";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -93,6 +94,11 @@ const navItems = [
     icon: <AdminPanelSettingsOutlined />,
   },
   {
+    text: "Theme Settings",
+    icon: <ThemeSettingsOutlinedIcon />,
+    to: "/theme",
+  },
+  {
     text: "Performance",
     icon: <TrendingUpOutlined />,
   },
@@ -124,9 +130,9 @@ function Sidebar({
           <FlexBetween>
             <Box display="flex" alignItems="center" gap="0.5rem">
               <Typography
-                variant="h4"
+                variant="h3"
                 fontWeight="bold"
-                color={theme.palette.warning["A700"]}
+                color={theme.palette.text.primary}
               >
                 HKBase
               </Typography>
@@ -139,39 +145,33 @@ function Sidebar({
           </FlexBetween>
         </Box>
         <List>
-          {navItems.map(({ text, icon }) => {
+          {navItems.map(({ text, icon, to }) => {
             if (!icon) {
               return (
-                <Typography key={text} sx={{ m: "2.25rem 0 1rem 3rem" }}>
+                <Typography
+                  key={text}
+                  fontWeight="bold"
+                  sx={{ m: "2.25rem 0 1rem 3rem" }}
+                >
                   {text}
                 </Typography>
               );
             }
             const lcText = text.toLowerCase();
+            const lcTo = to || lcText;
+            const isActive = active === lcTo?.substring(1) || active === lcText;
             return (
               <ListItem key={text} disablePadding>
                 <ListItemButton
                   onClick={() => {
-                    navigate(`/${lcText}`);
+                    navigate(`${lcTo}`);
                     setActive(lcText);
                   }}
-                  selected={active === lcText}
+                  selected={isActive}
                 >
-                  <ListItemIcon
-                    sx={{
-                      ml: "2rem",
-                      // color:
-                      //   active === lcText
-                      //     ? theme.palette.primary[400]
-                      //     : theme.palette.grey[800],
-                    }}
-                  >
-                    {icon}
-                  </ListItemIcon>
+                  <ListItemIcon sx={{ ml: "2rem" }}>{icon}</ListItemIcon>
                   <ListItemText primary={text} />
-                  {active === lcText && (
-                    <ChevronRightOutlined sx={{ ml: "auto" }} />
-                  )}
+                  {isActive && <ChevronRightOutlined sx={{ ml: "auto" }} />}
                 </ListItemButton>
               </ListItem>
             );
@@ -197,20 +197,20 @@ function Sidebar({
             <Typography
               fontWeight="bold"
               fontSize="0.9rem"
-              sx={{ color: theme.palette.secondary[100] }}
+              sx={{ color: theme.palette.text.primary }}
             >
               {user.name}
             </Typography>
             <Typography
               fontSize="0.8rem"
-              sx={{ color: theme.palette.secondary[200] }}
+              sx={{ color: theme.palette.text.secondary }}
             >
               {user.occupation}
             </Typography>
           </Box>
 
           <SettingsOutlined
-            sx={{ color: theme.palette.secondary[300], fontSize: "25px" }}
+            sx={{ color: theme.palette.text.secondary, fontSize: "25px" }}
           />
         </FlexBetween>
       </Box>
@@ -237,7 +237,7 @@ function Sidebar({
             "& .MuiDrawer-paper": {
               boxSizing: "border-box",
               width: drawerWidth,
-              color: theme.palette.secondary[200],
+              color: theme.palette.text.secondary,
               bgcolor: theme.palette.background.alt,
               borderWidth: isNonMobile ? 0 : "2px",
             },
@@ -257,7 +257,7 @@ function Sidebar({
             "& .MuiDrawer-paper": {
               width: drawerWidth,
               boxSizing: "border-box",
-              color: theme.palette.secondary[200],
+              color: theme.palette.text.secondary,
               bgcolor: theme.palette.background.alt,
               borderWidth: isNonMobile ? 0 : "2px",
             },
