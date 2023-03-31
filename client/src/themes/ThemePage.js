@@ -6,15 +6,16 @@ import PrintPaletteColors from "components/PrintPaletteColors";
 import FlexBetween from "components/FlexBetween";
 import SketchColorPicker from "components/SketchColorPicker";
 import { useDispatch, useSelector } from "react-redux";
-import { setBaseColor } from "state";
+import { setThemeColors } from "state/themeSlice";
 import { ColorizeOutlined as BaseColorIcon } from "@mui/icons-material";
 
 const BaseColors = () => {
   const theme = useTheme();
 
   const dispatch = useDispatch();
-  const baseColor = useSelector((state) => state.global.baseColor);
+  const themeColors = useSelector((state) => state.theme);
 
+  const [primaryColor, setPrimaryColor] = useState(theme.palette.primary.main);
   const [secondaryColor, setScondaryColor] = useState(
     theme.palette.secondary.main
   );
@@ -23,18 +24,39 @@ const BaseColors = () => {
   );
 
   useEffect(() => {
+    setPrimaryColor(theme.palette.primary.main);
     setScondaryColor(theme.palette.secondary.main);
     setTertiaryColor(theme.palette.tertiary[500]);
   }, [theme]);
 
-  const handleColorChange = (c) => dispatch(setBaseColor({ baseColor: c }));
+  const handleColorChange = (colorKey, color) =>
+    dispatch(
+      setThemeColors({
+        ...themeColors,
+        [colorKey]: color,
+      })
+    );
+
+  const genBaseColor = (c) =>
+    dispatch(
+      setThemeColors({
+        baseColor: tinycolor.random().toHexString(),
+      })
+    );
 
   const genTertiaryColors = () => {
-    const colors = tinycolor(baseColor)
+    const colors = tinycolor
+      .random()
       .triad()
       .map((c) => c.toHexString());
-    setScondaryColor(colors[1]);
-    setTertiaryColor(colors[2]);
+
+    dispatch(
+      setThemeColors({
+        baseColor: colors[0],
+        secondaryColor: colors[1],
+        tertiaryColor: colors[3],
+      })
+    );
   };
 
   return (
@@ -46,11 +68,7 @@ const BaseColors = () => {
     >
       <Stack direction="column" gap={4}>
         <Stack direction="row" gap={2}>
-          <Button
-            color="primary"
-            variant="contained"
-            onClick={() => handleColorChange(tinycolor.random().toHexString())}
-          >
+          <Button color="primary" variant="contained" onClick={genBaseColor}>
             <BaseColorIcon sx={{ mr: "10px" }} />
             Generate Base Color
           </Button>
@@ -66,20 +84,23 @@ const BaseColors = () => {
         <Stack direction="row" gap={2}>
           <Stack rowGap={1}>
             <Typography variant="h4">Base Color</Typography>
-            <SketchColorPicker color={baseColor} onChange={handleColorChange} />
+            <SketchColorPicker
+              color={primaryColor}
+              onChange={(c) => handleColorChange("baseColor", c)}
+            />
           </Stack>
           <Stack rowGap={1}>
             <Typography variant="h4">Secondary Color</Typography>
             <SketchColorPicker
               color={secondaryColor}
-              // onChange={handleColorChange}
+              onChange={(c) => handleColorChange("secondaryColor", c)}
             />
           </Stack>
           <Stack rowGap={1}>
             <Typography variant="h4">Tertiary Color</Typography>
             <SketchColorPicker
               color={tertiaryColor}
-              // onChange={handleColorChange}
+              onChange={(c) => handleColorChange("tertiaryColor", c)}
             />
           </Stack>
         </Stack>

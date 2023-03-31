@@ -2613,7 +2613,7 @@ class Flags {
 
 const flags = new Flags();
 
-const fromColor = function (value) {
+const fromColor = function (value, overrides) {
   var is3p = flags.is3p;
   console.debug("theme adapter from color");
   const keyTones = new CorePalette(intFromHex(value));
@@ -2621,7 +2621,7 @@ const fromColor = function (value) {
     tones: keyTones,
     seed: value,
     is3p,
-    overrides: {},
+    overrides: overrides || {},
     blend: !1,
     isBaseline: !1,
   });
@@ -2646,12 +2646,27 @@ const hexFromInt = (argb) => {
   return "#" + outParts.join("");
 };
 
-const materialDynamicColors = function (from) {
-  if (/#[a-fA-F0-9]{6}/.test(from)) {
-    let theme = fromColor(from);
+const materialDynamicColors = function ({ seed, overrides, isDark }) {
+  if (/#[a-fA-F0-9]{6}/.test(seed)) {
+    let theme = fromColor(seed, overrides);
+
+    const tonalGroups = Object.keys(theme.tonalGroups).reduce((acc, key) => {
+      const tone = theme.tonalGroups[key];
+      return {
+        ...acc,
+        [`${key}Tones`]: Object.keys(tone).reduce(
+          (acc, tkey) => ({
+            ...acc,
+            [tkey.replace("luminance", "")]: tone[tkey],
+          }),
+          {}
+        ),
+      };
+    }, {});
+
     return {
-      light: theme.light,
-      dark: theme.dark,
+      ...(isDark ? theme.dark : theme.light),
+      ...tonalGroups,
     };
   } else {
     return null;

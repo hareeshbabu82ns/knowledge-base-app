@@ -26,11 +26,16 @@ import Expenses from "scenes/expenses";
 import ThemePage from "themes/ThemePage";
 
 function App() {
-  const mode = useSelector((state) => state.global.mode);
-  const baseColor = useSelector((state) => state.global.baseColor);
+  const themeState = useSelector((state) => state.theme);
   const theme = useMemo(
-    () => customTheme({ mode, baseColor }),
-    [mode, baseColor]
+    () =>
+      customTheme({
+        mode: themeState.mode,
+        baseColor: themeState.baseColor,
+        secondaryColor: themeState.secondaryColor,
+        tertiaryColor: themeState.tertiaryColor,
+      }),
+    [themeState]
   );
   // const theme = useMemo(() => createTheme(themeSettings(mode)), [mode]);
 

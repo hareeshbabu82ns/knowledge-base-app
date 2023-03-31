@@ -34,45 +34,31 @@ function reverseTokens(tokensDark) {
 // const baseColor = "#130019";
 
 export const theme = (customization) => {
-  const isDark = customization?.mode === "dark";
+  const isDark = customization.mode === "dark";
 
-  const baseColor = customization?.baseColor || "#130019";
+  const baseColor = customization.baseColor || "#130019";
 
-  const dynColors = materialDynamicColors(baseColor);
-
-  const colors = {
-    // ...(isDark ? colorsDark : colorsLight),
-    ...dynColors[customization?.mode],
-  };
-
-  const tetradColors = tinycolor(baseColor).tetrad();
-  colors.primary = tetradColors[0].toString();
-  colors.secondary = tetradColors[1].toString();
-  colors.tertiary = tetradColors[2].toString();
-
-  // colors.primary = tinycolor.random().toString();
-  // colors.secondary = tinycolor.random().toString();
-  // colors.tertiary = tinycolor.random().toString();
-
-  // const {h,s,v} = tinycolor(baseColor).toHsv()
-  console.log("baseColor: ", tinycolor(baseColor).toHsvString());
-  console.log("primary: ", tinycolor(colors.primary).toHsvString());
-  console.log("secondary: ", tinycolor(colors.secondary).toHsvString());
-  console.log("tertiary: ", tinycolor(colors.tertiary).toHsvString());
-  console.log("error: ", tinycolor(colors.error).toHsvString());
-
+  const colors = materialDynamicColors({
+    seed: baseColor,
+    isDark,
+    overrides: {
+      light: {
+        primary: customization.baseColor,
+        secondary: customization.secondaryColor,
+        tertiary: customization.tertiaryColor,
+      },
+      dark: {
+        primary: customization.baseColor,
+        secondary: customization.secondaryColor,
+        tertiary: customization.tertiaryColor,
+      },
+    },
+  });
+  // console.log(colors.primary);
+  // console.log(colors.secondary);
+  // console.log(colors.tertiary);
   const themeOption = {
     colors,
-    // heading: colors.grey[isDark ? 900 : 100],
-    // paper: colors.paper,
-    // backgroundDefault: colors.background,
-    // background: colors.primaryLight,
-    // darkTextPrimary: colors.textPrimary,
-    // darkTextSecondary: colors.textSecondary,
-    // textDark: colors.grey[isDark ? 50 : 900],
-    // menuSelected: colors.secondaryDark,
-    // menuSelectedBack: colors.secondaryLight,
-    // divider: colors.grey[isDark ? 50 : 800],
     customization,
   };
 

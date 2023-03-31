@@ -11,13 +11,33 @@ const PrintPaletteColors = () => {
   return (
     <Stack direction="row" columnGap={2} flexWrap>
       <PrintColorList palette={theme.palette.primary} title="Primary" />
+      {/* <PrintColorList
+        palette={theme.palette.colors.primaryTones}
+        title="Primary Tones"
+      /> */}
       <PrintColorList palette={theme.palette.secondary} title="Secondary" />
+      {/* <PrintColorList
+        palette={theme.palette.colors.secondaryTones}
+        title="Secondary Tones"
+      /> */}
       <PrintColorList palette={theme.palette.tertiary} title="Tertiary" />
+      {/* <PrintColorList
+        palette={theme.palette.colors.tertiaryTones}
+        title="Tertiary Tones"
+      /> */}
       <PrintColorList palette={theme.palette.success} title="Success" />
       <PrintColorList palette={theme.palette.info} title="Info" />
       <PrintColorList palette={theme.palette.warning} title="Warning" />
       <PrintColorList palette={theme.palette.error} title="Error" />
+      {/* <PrintColorList
+        palette={theme.palette.colors.errorTones}
+        title="Error Tones"
+      /> */}
       <PrintColorList palette={theme.palette.grey} title="Grey" />
+      <PrintColorList
+        palette={theme.palette.colors.neutralTones}
+        title="Neutral"
+      />
       <PrintColorList palette={theme.palette.background} title="Background" />
       <PrintColorList palette={theme.palette.text} title="Text" />
     </Stack>

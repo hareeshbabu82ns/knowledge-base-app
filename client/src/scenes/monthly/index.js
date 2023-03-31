@@ -8,8 +8,8 @@ const Monthly = () => {
   const { data } = useGetSalesQuery();
   const theme = useTheme();
 
-  const [ formattedData ] = useMemo( () => {
-    if ( !data ) return [];
+  const [formattedData] = useMemo(() => {
+    if (!data) return [];
 
     const { monthlyData } = data;
     const totalSalesLine = {
@@ -19,11 +19,11 @@ const Monthly = () => {
     };
     const totalUnitsLine = {
       id: "totalUnits",
-      color: theme.palette.secondary[ 600 ],
+      color: theme.palette.secondary[600],
       data: [],
     };
 
-    Object.values( monthlyData ).forEach( ( { month, totalSales, totalUnits } ) => {
+    Object.values(monthlyData).forEach(({ month, totalSales, totalUnits }) => {
       totalSalesLine.data = [
         ...totalSalesLine.data,
         { x: month, y: totalSales },
@@ -32,11 +32,11 @@ const Monthly = () => {
         ...totalUnitsLine.data,
         { x: month, y: totalUnits },
       ];
-    } );
+    });
 
-    const formattedData = [ totalSalesLine, totalUnitsLine ];
-    return [ formattedData ];
-  }, [ data ] ); // eslint-disable-line react-hooks/exhaustive-deps
+    const formattedData = [totalSalesLine, totalUnitsLine];
+    return [formattedData];
+  }, [data]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <Box m="1.5rem 2.5rem">
@@ -49,27 +49,27 @@ const Monthly = () => {
               axis: {
                 domain: {
                   line: {
-                    stroke: theme.palette.secondary[ 200 ],
+                    stroke: theme.palette.secondary[700],
                   },
                 },
                 legend: {
                   text: {
-                    fill: theme.palette.secondary[ 200 ],
+                    fill: theme.palette.secondary[700],
                   },
                 },
                 ticks: {
                   line: {
-                    stroke: theme.palette.secondary[ 200 ],
+                    stroke: theme.palette.secondary[700],
                     strokeWidth: 1,
                   },
                   text: {
-                    fill: theme.palette.secondary[ 200 ],
+                    fill: theme.palette.secondary[700],
                   },
                 },
               },
               legends: {
                 text: {
-                  fill: theme.palette.secondary[ 200 ],
+                  fill: theme.palette.secondary[700],
                 },
               },
               tooltip: {

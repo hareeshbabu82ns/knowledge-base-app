@@ -18,11 +18,11 @@ function SketchColorPicker({ color: baseColor, onChange }) {
   const [displayColorPicker, showColorPicker] = useState(false);
   const [color, setColor] = useState(baseColor);
 
-  const lazyColor = useDebounce(color, 500);
+  // const lazyColor = useDebounce(color, 500);
 
-  useEffect(() => {
-    if (onChange) onChange(lazyColor);
-  }, [lazyColor]);
+  // useEffect(() => {
+  //   if (onChange) onChange(lazyColor);
+  // }, [lazyColor]);
 
   useEffect(() => {
     setColor(baseColor);
@@ -42,7 +42,7 @@ function SketchColorPicker({ color: baseColor, onChange }) {
 
   const handleChange = (color) => {
     setColor(color.hex);
-    // if (onChange) onChange(color.hex);
+    if (onChange) onChange(color.hex);
   };
 
   const sxColor = {

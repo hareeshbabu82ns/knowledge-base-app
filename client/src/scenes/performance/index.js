@@ -8,8 +8,8 @@ import CustomColumnMenu from "components/DataGridCustomColumnMenu";
 
 const Performance = () => {
   const theme = useTheme();
-  const userId = useSelector( ( state ) => state.global.userId );
-  const { data, isLoading } = useGetUserPerformanceQuery( userId );
+  const userId = useSelector((state) => state.global.userId);
+  const { data, isLoading } = useGetUserPerformanceQuery(userId);
 
   const columns = [
     {
@@ -32,13 +32,13 @@ const Performance = () => {
       headerName: "# of Products",
       flex: 0.5,
       sortable: false,
-      renderCell: ( params ) => params.value.length,
+      renderCell: (params) => params.value.length,
     },
     {
       field: "cost",
       headerName: "Cost",
       flex: 1,
-      renderCell: ( params ) => `$${Number( params.value ).toFixed( 2 )}`,
+      renderCell: (params) => `$${Number(params.value).toFixed(2)}`,
     },
   ];
 
@@ -60,7 +60,7 @@ const Performance = () => {
           },
           "& .MuiDataGrid-columnHeaders": {
             backgroundColor: theme.palette.background.alt,
-            color: theme.palette.secondary[ 100 ],
+            color: theme.palette.secondary[700],
             borderBottom: "none",
           },
           "& .MuiDataGrid-virtualScroller": {
@@ -68,18 +68,18 @@ const Performance = () => {
           },
           "& .MuiDataGrid-footerContainer": {
             backgroundColor: theme.palette.background.alt,
-            color: theme.palette.secondary[ 100 ],
+            color: theme.palette.secondary[700],
             borderTop: "none",
           },
           "& .MuiDataGrid-toolbarContainer .MuiButton-text": {
-            color: `${theme.palette.secondary[ 200 ]} !important`,
+            color: `${theme.palette.secondary[800]} !important`,
           },
         }}
       >
         <DataGrid
           loading={isLoading || !data}
-          getRowId={( row ) => row._id}
-          rows={( data && data.sales ) || []}
+          getRowId={(row) => row._id}
+          rows={(data && data.sales) || []}
           columns={columns}
           components={{
             ColumnMenu: CustomColumnMenu,

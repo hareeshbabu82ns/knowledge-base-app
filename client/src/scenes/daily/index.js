@@ -7,13 +7,13 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 
 const Daily = () => {
-  const [ startDate, setStartDate ] = useState( new Date( "2021-02-01" ) );
-  const [ endDate, setEndDate ] = useState( new Date( "2021-03-01" ) );
+  const [startDate, setStartDate] = useState(new Date("2021-02-01"));
+  const [endDate, setEndDate] = useState(new Date("2021-03-01"));
   const { data } = useGetSalesQuery();
   const theme = useTheme();
 
-  const [ formattedData ] = useMemo( () => {
-    if ( !data ) return [];
+  const [formattedData] = useMemo(() => {
+    if (!data) return [];
 
     const { dailyData } = data;
     const totalSalesLine = {
@@ -23,14 +23,14 @@ const Daily = () => {
     };
     const totalUnitsLine = {
       id: "totalUnits",
-      color: theme.palette.secondary[ 600 ],
+      color: theme.palette.secondary[600],
       data: [],
     };
 
-    Object.values( dailyData ).forEach( ( { date, totalSales, totalUnits } ) => {
-      const dateFormatted = new Date( date );
-      if ( dateFormatted >= startDate && dateFormatted <= endDate ) {
-        const splitDate = date.substring( date.indexOf( "-" ) + 1 );
+    Object.values(dailyData).forEach(({ date, totalSales, totalUnits }) => {
+      const dateFormatted = new Date(date);
+      if (dateFormatted >= startDate && dateFormatted <= endDate) {
+        const splitDate = date.substring(date.indexOf("-") + 1);
 
         totalSalesLine.data = [
           ...totalSalesLine.data,
@@ -41,11 +41,11 @@ const Daily = () => {
           { x: splitDate, y: totalUnits },
         ];
       }
-    } );
+    });
 
-    const formattedData = [ totalSalesLine, totalUnitsLine ];
-    return [ formattedData ];
-  }, [ data, startDate, endDate ] ); // eslint-disable-line react-hooks/exhaustive-deps
+    const formattedData = [totalSalesLine, totalUnitsLine];
+    return [formattedData];
+  }, [data, startDate, endDate]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <Box m="1.5rem 2.5rem">
@@ -55,7 +55,7 @@ const Daily = () => {
           <Box>
             <DatePicker
               selected={startDate}
-              onChange={( date ) => setStartDate( date )}
+              onChange={(date) => setStartDate(date)}
               selectsStart
               startDate={startDate}
               endDate={endDate}
@@ -64,7 +64,7 @@ const Daily = () => {
           <Box>
             <DatePicker
               selected={endDate}
-              onChange={( date ) => setEndDate( date )}
+              onChange={(date) => setEndDate(date)}
               selectsEnd
               startDate={startDate}
               endDate={endDate}
@@ -80,27 +80,27 @@ const Daily = () => {
               axis: {
                 domain: {
                   line: {
-                    stroke: theme.palette.secondary[ 200 ],
+                    stroke: theme.palette.secondary[700],
                   },
                 },
                 legend: {
                   text: {
-                    fill: theme.palette.secondary[ 200 ],
+                    fill: theme.palette.secondary[700],
                   },
                 },
                 ticks: {
                   line: {
-                    stroke: theme.palette.secondary[ 200 ],
+                    stroke: theme.palette.secondary[700],
                     strokeWidth: 1,
                   },
                   text: {
-                    fill: theme.palette.secondary[ 200 ],
+                    fill: theme.palette.secondary[700],
                   },
                 },
               },
               legends: {
                 text: {
-                  fill: theme.palette.secondary[ 200 ],
+                  fill: theme.palette.secondary[700],
                 },
               },
               tooltip: {

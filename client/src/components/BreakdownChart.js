@@ -3,25 +3,25 @@ import { ResponsivePie } from "@nivo/pie";
 import { Box, Typography, useTheme } from "@mui/material";
 import { useGetSalesQuery } from "state/api";
 
-const BreakdownChart = ( { isDashboard = false } ) => {
+const BreakdownChart = ({ isDashboard = false }) => {
   const { data, isLoading } = useGetSalesQuery();
   const theme = useTheme();
 
-  if ( !data || isLoading ) return "Loading...";
+  if (!data || isLoading) return "Loading...";
 
   const colors = [
-    theme.palette.secondary[ 500 ],
-    theme.palette.secondary[ 300 ],
-    theme.palette.secondary[ 300 ],
-    theme.palette.secondary[ 500 ],
+    theme.palette.secondary[500],
+    theme.palette.secondary[300],
+    theme.palette.secondary[300],
+    theme.palette.secondary[500],
   ];
-  const formattedData = Object.entries( data.salesByCategory ).map(
-    ( [ category, sales ], i ) => ( {
+  const formattedData = Object.entries(data.salesByCategory).map(
+    ([category, sales], i) => ({
       id: category,
       label: category,
       value: sales,
-      color: colors[ i ],
-    } )
+      color: colors[i],
+    })
   );
 
   return (
@@ -38,27 +38,27 @@ const BreakdownChart = ( { isDashboard = false } ) => {
           axis: {
             domain: {
               line: {
-                stroke: theme.palette.secondary[ 200 ],
+                stroke: theme.palette.secondary[800],
               },
             },
             legend: {
               text: {
-                fill: theme.palette.secondary[ 200 ],
+                fill: theme.palette.secondary[800],
               },
             },
             ticks: {
               line: {
-                stroke: theme.palette.secondary[ 200 ],
+                stroke: theme.palette.secondary[800],
                 strokeWidth: 1,
               },
               text: {
-                fill: theme.palette.secondary[ 200 ],
+                fill: theme.palette.secondary[800],
               },
             },
           },
           legends: {
             text: {
-              fill: theme.palette.secondary[ 200 ],
+              fill: theme.palette.secondary[800],
             },
           },
           tooltip: {
@@ -79,16 +79,16 @@ const BreakdownChart = ( { isDashboard = false } ) => {
         borderWidth={1}
         borderColor={{
           from: "color",
-          modifiers: [ [ "darker", 0.2 ] ],
+          modifiers: [["darker", 0.2]],
         }}
         enableArcLinkLabels={!isDashboard}
-        arcLinkLabelsTextColor={theme.palette.secondary[ 200 ]}
+        arcLinkLabelsTextColor={theme.palette.secondary[800]}
         arcLinkLabelsThickness={2}
         arcLinkLabelsColor={{ from: "color" }}
         arcLabelsSkipAngle={10}
         arcLabelsTextColor={{
           from: "color",
-          modifiers: [ [ "darker", 2 ] ],
+          modifiers: [["darker", 2]],
         }}
         legends={[
           {
@@ -109,7 +109,7 @@ const BreakdownChart = ( { isDashboard = false } ) => {
               {
                 on: "hover",
                 style: {
-                  itemTextColor: theme.palette.primary[ 500 ],
+                  itemTextColor: theme.palette.text.primary,
                 },
               },
             ],
@@ -120,7 +120,7 @@ const BreakdownChart = ( { isDashboard = false } ) => {
         position="absolute"
         top="50%"
         left="50%"
-        color={theme.palette.secondary[ 400 ]}
+        color={theme.palette.secondary[700]}
         textAlign="center"
         pointerEvents="none"
         sx={{

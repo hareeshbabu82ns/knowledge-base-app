@@ -29,8 +29,8 @@ const Admin = () => {
       field: "phoneNumber",
       headerName: "Phone Number",
       flex: 0.5,
-      renderCell: ( params ) => {
-        return params.value.replace( /^(\d{3})(\d{3})(\d{4})/, "($1)$2-$3" );
+      renderCell: (params) => {
+        return params.value?.replace(/^(\d{3})(\d{3})(\d{4})/, "($1)$2-$3");
       },
     },
     {
@@ -65,7 +65,7 @@ const Admin = () => {
           },
           "& .MuiDataGrid-columnHeaders": {
             backgroundColor: theme.palette.background.alt,
-            color: theme.palette.secondary[ 100 ],
+            color: theme.palette.secondary[700],
             borderBottom: "none",
           },
           "& .MuiDataGrid-virtualScroller": {
@@ -73,17 +73,17 @@ const Admin = () => {
           },
           "& .MuiDataGrid-footerContainer": {
             backgroundColor: theme.palette.background.alt,
-            color: theme.palette.secondary[ 100 ],
+            color: theme.palette.secondary[600],
             borderTop: "none",
           },
           "& .MuiDataGrid-toolbarContainer .MuiButton-text": {
-            color: `${theme.palette.secondary[ 200 ]} !important`,
+            color: `${theme.palette.secondary[800]} !important`,
           },
         }}
       >
         <DataGrid
           loading={isLoading || !data}
-          getRowId={( row ) => row._id}
+          getRowId={(row) => row._id}
           rows={data || []}
           columns={columns}
           slots={{

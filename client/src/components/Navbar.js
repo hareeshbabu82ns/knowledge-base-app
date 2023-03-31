@@ -11,7 +11,7 @@ import {
 import FlexBetween from "components/FlexBetween";
 
 import { useDispatch } from "react-redux";
-import { setMode } from "state";
+import { setMode } from "state/themeSlice";
 import {
   alpha,
   AppBar,
@@ -51,11 +51,7 @@ const StyledMenu = styled((props) => (
     marginTop: theme.spacing(1),
     minWidth: 180,
     color: theme.palette.grey[700],
-    // theme.palette.mode === "light"
-    //   ? theme.palette.grey[700]
-    //   : theme.palette.grey[300],
-    backgroundColor: "red",
-    // backgroundColor: theme.palette.background.alt,
+    backgroundColor: theme.palette.background.alt,
     boxShadow:
       "rgb(255, 255, 255) 0px 0px 0px 0px, rgba(0, 0, 0, 0.05) 0px 0px 0px 1px, rgba(0, 0, 0, 0.1) 0px 10px 15px -3px, rgba(0, 0, 0, 0.05) 0px 4px 6px -2px",
     "& .MuiMenu-list": {
@@ -68,11 +64,10 @@ const StyledMenu = styled((props) => (
         marginRight: theme.spacing(1.5),
       },
       "&:active": {
-        backgroundColor: "red",
-        // backgroundColor: alpha(
-        //   theme.palette.primary.main,
-        //   theme.palette.action.selectedOpacity
-        // ),
+        backgroundColor: alpha(
+          theme.palette.background.default,
+          theme.palette.action.selectedOpacity
+        ),
       },
     },
   },
