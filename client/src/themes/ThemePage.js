@@ -86,6 +86,7 @@ const BaseColors = () => {
             <Typography variant="h4">Base Color</Typography>
             <SketchColorPicker
               color={primaryColor}
+              useSlider
               onChange={(c) => handleColorChange("baseColor", c)}
             />
           </Stack>
@@ -93,6 +94,7 @@ const BaseColors = () => {
             <Typography variant="h4">Secondary Color</Typography>
             <SketchColorPicker
               color={secondaryColor}
+              useSlider
               onChange={(c) => handleColorChange("secondaryColor", c)}
             />
           </Stack>
@@ -100,6 +102,7 @@ const BaseColors = () => {
             <Typography variant="h4">Tertiary Color</Typography>
             <SketchColorPicker
               color={tertiaryColor}
+              useSlider
               onChange={(c) => handleColorChange("tertiaryColor", c)}
             />
           </Stack>

@@ -1,8 +1,8 @@
 import { Box, Stack, Typography } from "@mui/material";
 import React, { useEffect, useState } from "react";
-import { SketchPicker } from "react-color";
+import { SketchPicker, SliderPicker } from "react-color";
 import tinycolor from "tinycolor2";
-import { useDebounce } from "./debounceHook";
+// import { useDebounce } from "./debounceHook";
 
 const sxSwatch = {
   padding: "5px",
@@ -14,7 +14,12 @@ const sxSwatch = {
   minWidth: "200px",
 };
 
-function SketchColorPicker({ color: baseColor, onChange }) {
+function SketchColorPicker({
+  color: baseColor,
+  onChange,
+  useSlider,
+  disabled,
+}) {
   const [displayColorPicker, showColorPicker] = useState(false);
   const [color, setColor] = useState(baseColor);
 
@@ -68,23 +73,38 @@ function SketchColorPicker({ color: baseColor, onChange }) {
 
   return (
     <div>
-      <Box sx={sxSwatch} onClick={handleClick}>
-        <Box sx={{ ...sxColor, backgroundColor: color }}>
-          <Stack justifyContent="center" alignItems="center">
-            <Typography variant="h4" sx={{ color: textColor }}>
-              {color}
-            </Typography>
-            <Typography variant="body1" sx={{ color: textColor }}>
-              {hsvStr}
-              {/* {`H: ${h}, S: ${s}, V: ${v}`} */}
-            </Typography>
-          </Stack>
-        </Box>
+      <Box
+        sx={{
+          ...sxSwatch,
+          cursor: disabled || useSlider ? "inherited" : "pointer",
+        }}
+        onClick={handleClick}
+      >
+        <Stack gap={2} mb={!disabled && useSlider ? 1 : 0}>
+          <Box sx={{ ...sxColor, backgroundColor: color }}>
+            <Stack justifyContent="center" alignItems="center">
+              <Typography variant="h4" sx={{ color: textColor }}>
+                {color}
+              </Typography>
+              <Typography variant="body1" sx={{ color: textColor }}>
+                {hsvStr}
+                {/* {`H: ${h}, S: ${s}, V: ${v}`} */}
+              </Typography>
+            </Stack>
+          </Box>
+          {!disabled && useSlider && (
+            <SliderPicker color={color} onChangeComplete={handleChange} />
+          )}
+        </Stack>
       </Box>
-      {displayColorPicker ? (
+      {!disabled && !useSlider && displayColorPicker ? (
         <Box sx={sxPopover}>
           <Box sx={sxCover} onClick={handleClose} />
-          <SketchPicker color={color} onChange={handleChange} disableAlpha />
+          <SketchPicker
+            color={color}
+            onChangeComplete={handleChange}
+            disableAlpha
+          />
         </Box>
       ) : null}
     </div>
