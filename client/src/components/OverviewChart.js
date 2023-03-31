@@ -1,50 +1,49 @@
-import React, { useMemo } from 'react'
-import { ResponsiveLine } from '@nivo/line'
-import { useTheme } from '@mui/material'
+import React, { useMemo } from "react";
+import { ResponsiveLine } from "@nivo/line";
+import { useTheme } from "@mui/material";
 
-import { useGetSalesQuery } from 'state/api'
+import { useGetSalesQuery } from "state/api";
 
-function OverviewChart( { isDashboard = false, view } ) {
+function OverviewChart({ isDashboard = false, view }) {
+  const theme = useTheme();
+  const { data, isLoading } = useGetSalesQuery();
 
-  const theme = useTheme()
-  const { data, isLoading } = useGetSalesQuery()
-
-  const [ totalSalesLine, totalUnitsLine ] = useMemo( () => {
-    if ( !data ) return []
-    const { monthlyData } = data
+  const [totalSalesLine, totalUnitsLine] = useMemo(() => {
+    if (!data) return [];
+    const { monthlyData } = data;
 
     const totalSalesLine = {
-      id: 'totalSales',
+      id: "totalSales",
       color: theme.palette.secondary.main,
       data: [],
-    }
+    };
     const totalUnitsLine = {
-      id: 'totalUnits',
-      color: theme.palette.secondary[ 600 ],
+      id: "totalUnits",
+      color: theme.palette.secondary[600],
       data: [],
-    }
+    };
 
     monthlyData.reduce(
-      ( acc, { month, totalSales, totalUnits } ) => {
-        const curSales = acc.sales + totalSales
-        const curUnits = acc.units + totalUnits
+      (acc, { month, totalSales, totalUnits }) => {
+        const curSales = acc.sales + totalSales;
+        const curUnits = acc.units + totalUnits;
 
         totalSalesLine.data = [
           ...totalSalesLine.data,
           { x: month, y: curSales },
-        ]
+        ];
         totalUnitsLine.data = [
           ...totalUnitsLine.data,
           { x: month, y: curUnits },
-        ]
-        return { sales: curSales, units: curUnits }
+        ];
+        return { sales: curSales, units: curUnits };
       },
       { sales: 0, units: 0 }
-    )
-    return [ [ totalSalesLine ], [ totalUnitsLine ] ]
-  }, [ data, theme ] )
+    );
+    return [[totalSalesLine], [totalUnitsLine]];
+  }, [data, theme]);
 
-  if ( !data || isLoading ) return <>Loading...</>
+  if (!data || isLoading) return <>Loading...</>;
 
   return (
     <ResponsiveLine
@@ -53,27 +52,27 @@ function OverviewChart( { isDashboard = false, view } ) {
         axis: {
           domain: {
             line: {
-              stroke: theme.palette.secondary[ 200 ],
+              stroke: theme.palette.text.onTileSecondary,
             },
           },
           legend: {
             text: {
-              fill: theme.palette.secondary[ 200 ],
+              fill: theme.palette.text.onTileSecondary,
             },
           },
           ticks: {
             line: {
-              stroke: theme.palette.secondary[ 200 ],
+              stroke: theme.palette.text.onTileSecondary,
               strokeWidth: 1,
             },
             text: {
-              fill: theme.palette.secondary[ 200 ],
+              fill: theme.palette.text.onTileSecondary,
             },
           },
         },
         legends: {
           text: {
-            fill: theme.palette.secondary[ 200 ],
+            fill: theme.palette.text.onTileSecondary,
           },
         },
         tooltip: {
@@ -97,8 +96,8 @@ function OverviewChart( { isDashboard = false, view } ) {
       axisTop={null}
       axisRight={null}
       axisBottom={{
-        format: ( v ) => {
-          if ( isDashboard ) return v.slice( 0, 3 );
+        format: (v) => {
+          if (isDashboard) return v.slice(0, 3);
           return v;
         },
         orient: "bottom",
@@ -132,35 +131,35 @@ function OverviewChart( { isDashboard = false, view } ) {
       legends={
         !isDashboard
           ? [
-            {
-              anchor: "bottom-right",
-              direction: "column",
-              justify: false,
-              translateX: 30,
-              translateY: -40,
-              itemsSpacing: 0,
-              itemDirection: "left-to-right",
-              itemWidth: 80,
-              itemHeight: 20,
-              itemOpacity: 0.75,
-              symbolSize: 12,
-              symbolShape: "circle",
-              symbolBorderColor: "rgba(0, 0, 0, .5)",
-              effects: [
-                {
-                  on: "hover",
-                  style: {
-                    itemBackground: "rgba(0, 0, 0, .03)",
-                    itemOpacity: 1,
+              {
+                anchor: "bottom-right",
+                direction: "column",
+                justify: false,
+                translateX: 30,
+                translateY: -40,
+                itemsSpacing: 0,
+                itemDirection: "left-to-right",
+                itemWidth: 80,
+                itemHeight: 20,
+                itemOpacity: 0.75,
+                symbolSize: 12,
+                symbolShape: "circle",
+                symbolBorderColor: "rgba(0, 0, 0, .5)",
+                effects: [
+                  {
+                    on: "hover",
+                    style: {
+                      itemBackground: "rgba(0, 0, 0, .03)",
+                      itemOpacity: 1,
+                    },
                   },
-                },
-              ],
-            },
-          ]
+                ],
+              },
+            ]
           : undefined
       }
     />
-  )
+  );
 }
 
-export default OverviewChart
+export default OverviewChart;

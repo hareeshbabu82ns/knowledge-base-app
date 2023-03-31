@@ -1,4 +1,5 @@
 import { darken, lighten } from "@mui/material";
+import tinycolor from "tinycolor2";
 import {
   lightBlue as primary,
   teal as secondary,
@@ -9,7 +10,6 @@ import {
   amber as warning,
   red as error,
 } from "@mui/material/colors";
-import tinycolor from "tinycolor2";
 
 import paletteGen from "./generate-material-palette";
 import { reverseColorPalette, toneByMode } from "./utils";
@@ -34,6 +34,28 @@ const WARNING_DARK = reverseColorPalette({
   mode: "dark",
   by: 0.1,
 });
+const ERROR_DARK = reverseColorPalette({
+  colorPalette: error,
+  mode: "dark",
+  by: 0.1,
+});
+
+const prepareOnBackgroundColors = (palette) => {
+  ["primary", "secondary", "tertiary"].forEach((paletteKey) => {
+    const paletteColors = Object.values(palette[paletteKey]);
+    // loop over each background color to find optimal readable text color
+    Object.keys(palette.background).forEach((bgKey) => {
+      const textKey = `on${bgKey.charAt(0).toUpperCase() + bgKey.substring(1)}${
+        paletteKey.charAt(0).toUpperCase() + paletteKey.substring(1)
+      }`;
+      palette.text[textKey] = tinycolor
+        .mostReadable(palette.background[bgKey], paletteColors, {
+          includeFallbackColors: true,
+        })
+        .toHexString();
+    });
+  });
+};
 
 const preparePalette = (isDark, colors) => {
   // const primaryPalette = primary;
@@ -43,7 +65,7 @@ const preparePalette = (isDark, colors) => {
   const secondaryPalette = paletteGen({ hex: colors.secondary, isDark });
   const tertiaryPalette = paletteGen({ hex: colors.tertiary, isDark });
 
-  return {
+  const res = {
     colors,
     primary: primaryPalette,
     secondary: secondaryPalette,
@@ -51,43 +73,36 @@ const preparePalette = (isDark, colors) => {
     success: isDark ? SUCCESS_DARK : success,
     info: isDark ? INFO_DARK : info,
     warning: isDark ? WARNING_DARK : warning,
-    error: paletteGen({ hex: colors.error, isDark }),
+    error: isDark ? ERROR_DARK : error,
+    // error: paletteGen({ hex: colors.error, isDark }),
     grey: isDark ? GREY_DARK : grey,
     background: {
       default: isDark
-        ? darken(colors.secondary, 0.75)
-        : lighten(colors.secondary, 0.9),
+        ? darken(colors.primary, 0.75)
+        : lighten(colors.primary, 0.9),
       paper: isDark
-        ? darken(colors.secondary, 0.75)
-        : lighten(colors.secondary, 0.9),
-      alt: isDark
-        ? darken(colors.secondary, 0.6)
-        : lighten(colors.secondary, 0.7),
+        ? darken(colors.primary, 0.75)
+        : lighten(colors.primary, 0.9),
+      alt: isDark ? darken(colors.primary, 0.6) : lighten(colors.primary, 0.7),
       tile: isDark
-        ? darken(colors.secondary, 0.65)
-        : lighten(colors.secondary, 0.75),
+        ? darken(colors.primary, 0.65)
+        : lighten(colors.primary, 0.75),
       // default: colors.background,
       // paper: colors.surface,
       // alt: colors.surfaceVariant,
     },
     divider: isDark ? GREY_DARK[200] : grey[200],
     text: {
-      primary: primaryPalette["A700"],
-      // primary: toneByMode(colors.primary, !isDark, {
-      //   darkBy: 0.4,
-      //   lightBy: 0.4,
-      // }),
-      secondary: secondaryPalette["A700"],
-      // secondary: toneByMode(colors.secondary, !isDark, {
-      //   darkBy: 0.4,
-      //   lightBy: 0.4,
-      // }),
-      heading: tertiaryPalette["A700"],
-      // heading: isDark
-      //   ? lighten(colors.tertiary, 0.8)
-      //   : darken(colors.tertiary, 0.6),
+      primary: isDark ? "#fff" : "#000",
+      secondary: isDark ? "#fff" : "#000",
+      heading: isDark ? "#fff" : "#000",
+      // primary: primaryPalette["A700"],
+      // secondary: secondaryPalette["A700"],
+      // heading: tertiaryPalette["A700"],
     },
   };
+  prepareOnBackgroundColors(res);
+  return res;
 };
 
 export default function themePalette(theme) {
@@ -95,6 +110,7 @@ export default function themePalette(theme) {
 
   return {
     mode: theme?.customization?.mode,
+    isDark,
     ...preparePalette(isDark, theme.colors),
   };
 }

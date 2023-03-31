@@ -1,16 +1,16 @@
 import { darken, lighten } from "@mui/material";
 
-export const getBackgroundColor = (color, mode) =>
-  mode === "dark" ? darken(color, 0.7) : lighten(color, 0.7);
+export const getBackgroundColor = (color, isDark) =>
+  isDark ? darken(color, 0.7) : lighten(color, 0.7);
 
-export const getHoverBackgroundColor = (color, mode) =>
-  mode === "dark" ? darken(color, 0.6) : lighten(color, 0.6);
+export const getHoverBackgroundColor = (color, isDark) =>
+  isDark ? darken(color, 0.6) : lighten(color, 0.6);
 
-export const getSelectedBackgroundColor = (color, mode) =>
-  mode === "dark" ? darken(color, 0.5) : lighten(color, 0.5);
+export const getSelectedBackgroundColor = (color, isDark) =>
+  isDark ? darken(color, 0.5) : lighten(color, 0.5);
 
-export const getSelectedHoverBackgroundColor = (color, mode) =>
-  mode === "dark" ? darken(color, 0.4) : lighten(color, 0.4);
+export const getSelectedHoverBackgroundColor = (color, isDark) =>
+  isDark ? darken(color, 0.4) : lighten(color, 0.4);
 
 export const toneByMode = (color, toDark, { darkBy, lightBy }) => {
   const funcMode = toDark ? darken : lighten;
@@ -19,10 +19,10 @@ export const toneByMode = (color, toDark, { darkBy, lightBy }) => {
 
 export const reverseColorPalette = ({
   colorPalette,
-  mode = "light",
+  isDark = false,
   by = 0,
 }) => {
-  const funcMode = mode === "light" ? lighten : darken;
+  const funcMode = isDark ? darken : lighten;
 
   const res = {
     ...colorPalette,

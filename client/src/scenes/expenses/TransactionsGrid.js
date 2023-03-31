@@ -23,7 +23,7 @@ const StyledDataGrid = styled(DataGrid)(({ theme }) => ({
   "& .MuiDataGrid-columnHeaders": {
     backgroundColor: getHoverBackgroundColor(
       theme.palette.primary[800],
-      theme.palette.mode
+      theme.palette.isDark
     ),
     color: theme.palette.secondary[500],
     borderBottom: "none",
@@ -32,7 +32,7 @@ const StyledDataGrid = styled(DataGrid)(({ theme }) => ({
   "& .MuiDataGrid-footerContainer": {
     backgroundColor: getBackgroundColor(
       theme.palette.info.main,
-      theme.palette.mode
+      theme.palette.isDark
     ),
     borderBottom: "none",
     "& .MuiTablePagination-root": {
@@ -42,7 +42,7 @@ const StyledDataGrid = styled(DataGrid)(({ theme }) => ({
   "& .MuiDataGrid-toolbarContainer ": {
     backgroundColor: getBackgroundColor(
       theme.palette.info.main,
-      theme.palette.mode
+      theme.palette.isDark
     ),
     "& .MuiButton-text": {
       color: `${theme.palette.secondary[800]} !important`,
@@ -51,29 +51,29 @@ const StyledDataGrid = styled(DataGrid)(({ theme }) => ({
   "& .MuiDataGrid-virtualScroller": {
     backgroundColor: getBackgroundColor(
       theme.palette.primary.light,
-      theme.palette.mode
+      theme.palette.isDark
     ),
   },
   "& .status-theme--Income": {
     backgroundColor: getBackgroundColor(
       theme.palette.success.main,
-      theme.palette.mode
+      theme.palette.isDark
     ),
     "&:hover": {
       backgroundColor: getHoverBackgroundColor(
         theme.palette.success.main,
-        theme.palette.mode
+        theme.palette.isDark
       ),
     },
     "&.Mui-selected": {
       backgroundColor: getSelectedBackgroundColor(
         theme.palette.success.main,
-        theme.palette.mode
+        theme.palette.isDark
       ),
       "&:hover": {
         backgroundColor: getSelectedHoverBackgroundColor(
           theme.palette.success.main,
-          theme.palette.mode
+          theme.palette.isDark
         ),
       },
     },
@@ -81,23 +81,23 @@ const StyledDataGrid = styled(DataGrid)(({ theme }) => ({
   "& .status-theme--Expense": {
     backgroundColor: getBackgroundColor(
       theme.palette.error.main,
-      theme.palette.mode
+      theme.palette.isDark
     ),
     "&:hover": {
       backgroundColor: getHoverBackgroundColor(
         theme.palette.error.main,
-        theme.palette.mode
+        theme.palette.isDark
       ),
     },
     "&.Mui-selected": {
       backgroundColor: getSelectedBackgroundColor(
         theme.palette.error.main,
-        theme.palette.mode
+        theme.palette.isDark
       ),
       "&:hover": {
         backgroundColor: getSelectedHoverBackgroundColor(
           theme.palette.error.main,
-          theme.palette.mode
+          theme.palette.isDark
         ),
       },
     },

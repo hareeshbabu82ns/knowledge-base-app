@@ -89,25 +89,25 @@ const paletteLight = {
 
 const GREY_DARK = reverseColorPalette({
   colorPalette: GREY,
-  mode: "dark",
+  isDark: true,
   by: 0.1,
 });
 
 const paletteDark = {
   primary: {
-    ...reverseColorPalette({ colorPalette: PRIMARY, mode: "dark", by: 0.4 }),
+    ...reverseColorPalette({ colorPalette: PRIMARY, isDark: true, by: 0.4 }),
   },
   secondary: {
-    ...reverseColorPalette({ colorPalette: SECONDARY, mode: "dark", by: 0.3 }),
+    ...reverseColorPalette({ colorPalette: SECONDARY, isDark: true, by: 0.3 }),
   },
   success: {
-    ...reverseColorPalette({ colorPalette: SUCCESS, mode: "dark", by: 0.2 }),
+    ...reverseColorPalette({ colorPalette: SUCCESS, isDark: true, by: 0.2 }),
   },
   warning: {
-    ...reverseColorPalette({ colorPalette: WARNING, mode: "dark", by: 0.2 }),
+    ...reverseColorPalette({ colorPalette: WARNING, isDark: true, by: 0.2 }),
   },
   error: {
-    ...reverseColorPalette({ colorPalette: ERROR, mode: "dark", by: 0.2 }),
+    ...reverseColorPalette({ colorPalette: ERROR, isDark: true, by: 0.2 }),
   },
   grey: { ...GREY_DARK },
   divider: GREY_DARK[200],
@@ -128,41 +128,7 @@ export default function themePalette(theme) {
 
   return {
     mode: theme?.customization?.mode,
+    isDark,
     ...(isDark ? paletteDark : paletteLight),
   };
 }
-
-// /**
-//  * Color intention that you want to used in your theme
-//  * @param {JsonObject} theme Theme customization object
-//  */
-
-// export default function themePalette(theme) {
-//   const isDark = theme.customization?.mode === "dark";
-
-//   return {
-//     mode: theme?.customization?.mode,
-//     primary: {
-//       main: theme.colors["primaryMain"],
-//       contrastText: "#fff",
-//     },
-//     secondary: {
-//       main: theme.colors["secondaryMain"],
-//       contrastText: "#000",
-//     },
-//     // teriary: {
-//     //   main: theme.colors["teriaryMain"],
-//     // },
-//     // neutral: {
-//     //   main: theme.colors["neutralMain"],
-//     // },
-//     background: {
-//       default: theme.colors.primary[isDark ? 800 : 50],
-//       alt: theme.colors.primary[isDark ? 500 : 200],
-//     },
-//     error: {
-//       main: theme.colors["errorMain"],
-//     },
-//     // grey,
-//   };
-// }

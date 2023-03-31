@@ -1,4 +1,5 @@
 import { createTheme } from "@mui/material/styles";
+import tinycolor from "tinycolor2";
 
 // assets
 // import cssCustomColors from "assets/scss/_themes-vars.module.scss";
@@ -43,6 +44,22 @@ export const theme = (customization) => {
     // ...(isDark ? colorsDark : colorsLight),
     ...dynColors[customization?.mode],
   };
+
+  const tetradColors = tinycolor(baseColor).tetrad();
+  colors.primary = tetradColors[0].toString();
+  colors.secondary = tetradColors[1].toString();
+  colors.tertiary = tetradColors[2].toString();
+
+  // colors.primary = tinycolor.random().toString();
+  // colors.secondary = tinycolor.random().toString();
+  // colors.tertiary = tinycolor.random().toString();
+
+  // const {h,s,v} = tinycolor(baseColor).toHsv()
+  console.log("baseColor: ", tinycolor(baseColor).toHsvString());
+  console.log("primary: ", tinycolor(colors.primary).toHsvString());
+  console.log("secondary: ", tinycolor(colors.secondary).toHsvString());
+  console.log("tertiary: ", tinycolor(colors.tertiary).toHsvString());
+  console.log("error: ", tinycolor(colors.error).toHsvString());
 
   const themeOption = {
     colors,

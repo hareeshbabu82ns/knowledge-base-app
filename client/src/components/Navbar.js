@@ -125,7 +125,7 @@ function Navbar({ user, isSidebarOpen, setIsSidebarOpen }) {
 
         <FlexBetween gap="1.5rem">
           <IconButton onClick={() => dispatch(setMode())}>
-            {theme.palette.mode === "dark" ? (
+            {theme.palette.isDark ? (
               <DarkModeOutlined sx={{ fontSize: "25px" }} />
             ) : (
               <LightModeOutlined sx={{ fontSize: "25px" }} />

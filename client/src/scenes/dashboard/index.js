@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import FlexBetween from "components/FlexBetween";
 import Header from "components/Header";
 import {
@@ -22,10 +22,14 @@ import OverviewChart from "components/OverviewChart";
 import { useGetDashboardQuery } from "state/api";
 import StatBox from "components/StatBox";
 // import UserTypeStatsChart from "components/UserTypeStatsChart";
-import TagStatsChart from "components/TagStatsChart";
+import ExpensesOverviewChart from "components/ExpensesOverviewChart";
+import { DateTime } from "luxon";
 
 const Dashboard = () => {
   const theme = useTheme();
+
+  const [startDate] = useState(DateTime.now().startOf("month"));
+  const [endDate] = useState(DateTime.now().endOf("month"));
 
   const isNonMediumScreens = useMediaQuery("(min-width: 1200px)");
   const { data, isLoading } = useGetDashboardQuery();
@@ -100,7 +104,10 @@ const Dashboard = () => {
           description="Since last month"
           icon={
             <Email
-              sx={{ color: theme.palette.secondary[300], fontSize: "26px" }}
+              sx={{
+                color: theme.palette.text.onTileSecondary,
+                fontSize: "26px",
+              }}
             />
           }
         />
@@ -111,7 +118,10 @@ const Dashboard = () => {
           description="Since last month"
           icon={
             <PointOfSale
-              sx={{ color: theme.palette.secondary[300], fontSize: "26px" }}
+              sx={{
+                color: theme.palette.text.onTileSecondary,
+                fontSize: "26px",
+              }}
             />
           }
         />
@@ -131,7 +141,10 @@ const Dashboard = () => {
           description="Since last month"
           icon={
             <PersonAdd
-              sx={{ color: theme.palette.secondary[300], fontSize: "26px" }}
+              sx={{
+                color: theme.palette.text.onTileSecondary,
+                fontSize: "26px",
+              }}
             />
           }
         />
@@ -142,7 +155,10 @@ const Dashboard = () => {
           description="Since last month"
           icon={
             <Traffic
-              sx={{ color: theme.palette.secondary[300], fontSize: "26px" }}
+              sx={{
+                color: theme.palette.text.onTileSecondary,
+                fontSize: "26px",
+              }}
             />
           }
         />
@@ -161,7 +177,7 @@ const Dashboard = () => {
             },
             "& .MuiDataGrid-columnHeaders": {
               backgroundColor: theme.palette.background.tile,
-              color: theme.palette.secondary[100],
+              color: theme.palette.text.onTileSecondary,
               borderBottom: "none",
             },
             "& .MuiDataGrid-virtualScroller": {
@@ -169,11 +185,11 @@ const Dashboard = () => {
             },
             "& .MuiDataGrid-footerContainer": {
               backgroundColor: theme.palette.background.tile,
-              color: theme.palette.secondary[100],
+              color: theme.palette.text.onTileSecondary,
               borderTop: "none",
             },
             "& .MuiDataGrid-toolbarContainer .MuiButton-text": {
-              color: `${theme.palette.secondary[200]} !important`,
+              color: `${theme.palette.text.onTileSecondary} !important`,
             },
           }}
         >
@@ -192,11 +208,12 @@ const Dashboard = () => {
           borderRadius="0.55rem"
         >
           <Typography variant="h6">Expenses by Type</Typography>
-          <TagStatsChart isDashboard={true} />
-          {/* <UserTypeStatsChart isDashboard={true} /> */}
-          <Typography p="0 0.6rem" fontSize="0.8rem">
-            Breakdown of expenses by Expense Types.
-          </Typography>
+          <ExpensesOverviewChart
+            view="types"
+            startDate={startDate}
+            endDate={endDate}
+            isDashboard={true}
+          />
         </Box>
       </Box>
     </Box>

@@ -24,6 +24,10 @@ function SketchColorPicker({ color: baseColor, onChange }) {
     if (onChange) onChange(lazyColor);
   }, [lazyColor]);
 
+  useEffect(() => {
+    setColor(baseColor);
+  }, [baseColor]);
+
   const tinyColor = tinycolor(baseColor);
   const hsvStr = tinyColor.toHsvString();
   const textColor = tinyColor.getLuminance() > 0.5 ? "black" : "white";
@@ -45,7 +49,6 @@ function SketchColorPicker({ color: baseColor, onChange }) {
     width: "100%",
     height: 50,
     borderRadius: "2px",
-    background: color,
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
@@ -66,7 +69,7 @@ function SketchColorPicker({ color: baseColor, onChange }) {
   return (
     <div>
       <Box sx={sxSwatch} onClick={handleClick}>
-        <Box sx={sxColor}>
+        <Box sx={{ ...sxColor, backgroundColor: color }}>
           <Stack justifyContent="center" alignItems="center">
             <Typography variant="h4" sx={{ color: textColor }}>
               {color}

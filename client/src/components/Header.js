@@ -8,13 +8,13 @@ function Header({ title, subtitle }) {
     <Box>
       <Typography
         variant="h2"
-        color={theme.palette.secondary[700]}
+        color={theme.palette.text.onDefaultSecondary}
         fontWeight="bold"
         sx={{ mb: "5px" }}
       >
         {title}
       </Typography>
-      <Typography variant="h5" color={theme.palette.secondary[500]}>
+      <Typography variant="h5" color={theme.palette.text.onDefaultTertiary}>
         {subtitle}
       </Typography>
     </Box>
