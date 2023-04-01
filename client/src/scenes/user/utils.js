@@ -16,7 +16,12 @@ export const clearUserLocal = (userData) =>
   localStorage.setItem("profile", JSON.stringify(initState));
 
 /// Theme
-const initThemeState = { mode: "dark", baseColor: "#09D7F9" };
+const initThemeState = {
+  mode: "dark",
+  baseColor: "#303fa0",
+  secondaryColor: "#cf6828",
+  tertiaryColor: "#43bab9",
+};
 
 export const saveThemeLocal = (themeData) =>
   localStorage.setItem("theme", JSON.stringify(themeData));

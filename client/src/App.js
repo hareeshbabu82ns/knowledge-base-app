@@ -5,7 +5,6 @@ import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterLuxon } from "@mui/x-date-pickers/AdapterLuxon";
 
-// import { themeSettings } from "theme";
 import customTheme from "themes";
 import Dashboard from "scenes/dashboard";
 import ProtectedLayout from "scenes/layout";
@@ -34,10 +33,10 @@ function App() {
         baseColor: themeState.baseColor,
         secondaryColor: themeState.secondaryColor,
         tertiaryColor: themeState.tertiaryColor,
+        fontFamily: "Inter, sans-serif",
       }),
     [themeState]
   );
-  // const theme = useMemo(() => createTheme(themeSettings(mode)), [mode]);
 
   return (
     <div className="app" style={{ display: "flex" }}>

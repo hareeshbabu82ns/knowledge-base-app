@@ -2,16 +2,11 @@ import { darken, lighten } from "@mui/material";
 // import { toneByMode } from "./utils";
 
 export default function componentStyleOverrides(theme, palette) {
-  const isDark = theme.customization.mode === "dark";
+  const isDark = palette.isDark;
 
   const bgColor = isDark
     ? darken(palette.primary[500], 0.7)
     : lighten(palette.primary[500], 0.9);
-  // const bgColor = toneByMode(palette.primary[500], isDark, {
-  //   darkBy: 0.8,
-  //   lightBy: 0.9,
-  // });
-  // const bgColor = isDark ? palette?.grey[100] : palette?.grey[600];
 
   return {
     MuiButton: {

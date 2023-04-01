@@ -8,6 +8,7 @@ import SketchColorPicker from "components/SketchColorPicker";
 import { useDispatch, useSelector } from "react-redux";
 import { setThemeColors } from "state/themeSlice";
 import { ColorizeOutlined as BaseColorIcon } from "@mui/icons-material";
+import Grid2 from "@mui/material/Unstable_Grid2/Grid2";
 
 const BaseColors = () => {
   const theme = useTheme();
@@ -15,19 +16,20 @@ const BaseColors = () => {
   const dispatch = useDispatch();
   const themeColors = useSelector((state) => state.theme);
 
-  const [primaryColor, setPrimaryColor] = useState(theme.palette.primary.main);
+  const [primaryColor, setPrimaryColor] = useState(themeColors.baseColor);
   const [secondaryColor, setScondaryColor] = useState(
-    theme.palette.secondary.main
+    themeColors.secondaryColor
   );
-  const [tertiaryColor, setTertiaryColor] = useState(
-    theme.palette.tertiary[500]
-  );
+  const [tertiaryColor, setTertiaryColor] = useState(themeColors.tertiaryColor);
 
   useEffect(() => {
-    setPrimaryColor(theme.palette.primary.main);
-    setScondaryColor(theme.palette.secondary.main);
-    setTertiaryColor(theme.palette.tertiary[500]);
-  }, [theme]);
+    setPrimaryColor(themeColors.baseColor);
+    setScondaryColor(themeColors.secondaryColor);
+    setTertiaryColor(themeColors.tertiaryColor);
+    // setPrimaryColor(theme.palette.primary.main);
+    // setScondaryColor(theme.palette.secondary.main);
+    // setTertiaryColor(theme.palette.tertiary[500]);
+  }, [theme, themeColors]);
 
   const handleColorChange = (colorKey, color) =>
     dispatch(
@@ -54,7 +56,7 @@ const BaseColors = () => {
       setThemeColors({
         baseColor: colors[0],
         secondaryColor: colors[1],
-        tertiaryColor: colors[3],
+        tertiaryColor: colors[2],
       })
     );
   };
@@ -66,7 +68,7 @@ const BaseColors = () => {
       p="1rem"
       mt="2rem"
     >
-      <Stack direction="column" gap={4}>
+      <Stack direction="column" gap={4} sx={{ flexGrow: 1 }}>
         <Stack direction="row" gap={2}>
           <Button color="primary" variant="contained" onClick={genBaseColor}>
             <BaseColorIcon sx={{ mr: "10px" }} />
@@ -81,40 +83,45 @@ const BaseColors = () => {
             Generate Tri Colors
           </Button>
         </Stack>
-        <Stack direction="row" gap={2}>
-          <Stack rowGap={1}>
-            <Typography variant="h4">Base Color</Typography>
-            <SketchColorPicker
-              color={primaryColor}
-              useSlider
-              onChange={(c) => handleColorChange("baseColor", c)}
-            />
-          </Stack>
-          <Stack rowGap={1}>
-            <Typography variant="h4">Secondary Color</Typography>
-            <SketchColorPicker
-              color={secondaryColor}
-              useSlider
-              onChange={(c) => handleColorChange("secondaryColor", c)}
-            />
-          </Stack>
-          <Stack rowGap={1}>
-            <Typography variant="h4">Tertiary Color</Typography>
-            <SketchColorPicker
-              color={tertiaryColor}
-              useSlider
-              onChange={(c) => handleColorChange("tertiaryColor", c)}
-            />
-          </Stack>
-        </Stack>
+
+        <Grid2 container spacing={2} columns={3}>
+          <Grid2 xs={3} md={1}>
+            <Stack rowGap={1}>
+              <Typography variant="h4">Base Color</Typography>
+              <SketchColorPicker
+                color={primaryColor}
+                varient="chrome"
+                onChange={(c) => handleColorChange("baseColor", c)}
+              />
+            </Stack>
+          </Grid2>
+          <Grid2 xs={3} md={1}>
+            <Stack rowGap={1}>
+              <Typography variant="h4">Secondary Color</Typography>
+              <SketchColorPicker
+                color={secondaryColor}
+                varient="chrome"
+                onChange={(c) => handleColorChange("secondaryColor", c)}
+              />
+            </Stack>
+          </Grid2>
+          <Grid2 xs={3} md={1}>
+            <Stack rowGap={1}>
+              <Typography variant="h4">Tertiary Color</Typography>
+              <SketchColorPicker
+                color={tertiaryColor}
+                varient="chrome"
+                onChange={(c) => handleColorChange("tertiaryColor", c)}
+              />
+            </Stack>
+          </Grid2>
+        </Grid2>
       </Stack>
     </Box>
   );
 };
 
 const ThemePage = () => {
-  const theme = useTheme();
-
   return (
     <Box m="1.5rem 2.5rem">
       <FlexBetween>
@@ -122,18 +129,9 @@ const ThemePage = () => {
       </FlexBetween>
 
       <Stack direction="column" gap={2}>
-        {/* Base Colors  */}
         <BaseColors />
 
-        {/* Palette  */}
-        <Box
-          backgroundColor={theme.palette.background.tile}
-          display="flex"
-          p="1rem"
-          mt="1rem"
-        >
-          <PrintPaletteColors />
-        </Box>
+        <PrintPaletteColors />
       </Stack>
     </Box>
   );

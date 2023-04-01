@@ -1,5 +1,4 @@
 import { createTheme } from "@mui/material/styles";
-import tinycolor from "tinycolor2";
 
 // assets
 // import cssCustomColors from "assets/scss/_themes-vars.module.scss";
@@ -10,28 +9,10 @@ import themePalette from "./dynamic-palette";
 import materialDynamicColors from "./material-dynamic-colors";
 import themeTypography from "./typography";
 
-// function that reverses the color palette
-function reverseTokens(tokensDark) {
-  const reversedTokens = {};
-  Object.entries(tokensDark).forEach(([key, val]) => {
-    const keys = Object.keys(val);
-    const values = Object.values(val);
-    const length = keys.length;
-    const reversedObj = {};
-    for (let i = 0; i < length; i++) {
-      reversedObj[keys[i]] = values[length - i - 1];
-    }
-    reversedTokens[key] = reversedObj;
-  });
-  return reversedTokens;
-}
-
 /**
  * Represent theme style and structure as per Material-UI
  * @param {JsonObject} customization customization parameter object
  */
-
-// const baseColor = "#130019";
 
 export const theme = (customization) => {
   const isDark = customization.mode === "dark";

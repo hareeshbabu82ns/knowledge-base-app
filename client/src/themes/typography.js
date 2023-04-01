@@ -4,9 +4,9 @@
  */
 
 export default function themeTypography(theme, palette) {
-  const isDark = theme.customization.mode === "dark";
   return {
     fontFamily: theme.customization.fontFamily,
+    // fontSize: "1rem",
     h6: {
       fontWeight: 500,
       color: palette.text.heading,
