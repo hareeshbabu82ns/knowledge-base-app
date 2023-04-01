@@ -1,69 +1,73 @@
-import User from '../models/User.js'
-import Product from '../models/Product.js'
-import ProductStat from '../models/ProductStat.js'
-import Transaction from '../models/Transaction.js'
-import OverallStat from '../models/OverallStat.js'
-import AffiliateStat from '../models/AffiliateStat.js'
+import User from "../models/User.js";
+import Product from "../models/Product.js";
+import ProductStat from "../models/ProductStat.js";
+import Transaction from "../models/Transaction.js";
+import OverallStat from "../models/OverallStat.js";
+import AffiliateStat from "../models/AffiliateStat.js";
 import {
-  dataUser, dataProduct,
-  dataProductStat, dataTransaction,
-  dataOverallStat, dataAffiliateStat,
-} from "./index.js"
+  dataUser,
+  dataProduct,
+  dataProductStat,
+  dataTransaction,
+  dataOverallStat,
+  dataAffiliateStat,
+} from "./index.js";
 
 export const pushInitUserData = async () => {
-  const user = await User.findOne()
+  const user = await User.findOne();
   // console.log( "🚀 ~ file: utils.js:6 ~ pushInitUserData ~ user:", user )
-  if ( !user ) {
-    await User.insertMany( dataUser )
-    console.log( 'Users mockdata uploaded' )
+  if (!user) {
+    await User.insertMany(dataUser);
+    console.log("Users mockdata uploaded");
   }
-}
+};
 export const pushInitProductData = async () => {
-  const product = await Product.findOne()
+  const product = await Product.findOne();
   // console.log( "🚀 ~ file: utils.js:6 ~ pushInitUserData ~ product:", product )
-  if ( !product ) {
-    await Product.insertMany( dataProduct )
-    console.log( 'Products mockdata uploaded' )
+  if (!product) {
+    await Product.insertMany(dataProduct);
+    console.log("Products mockdata uploaded");
   }
-}
+};
 export const pushInitProductStatData = async () => {
-  const productStat = await ProductStat.findOne()
+  const productStat = await ProductStat.findOne();
   // console.log( "🚀 ~ file: utils.js:6 ~ pushInitUserData ~ productStat:", productStat )
-  if ( !productStat ) {
-    await ProductStat.insertMany( dataProductStat )
-    console.log( 'ProductStats mockdata uploaded' )
+  if (!productStat) {
+    await ProductStat.insertMany(dataProductStat);
+    console.log("ProductStats mockdata uploaded");
   }
-}
+};
 export const pushInitTransactionData = async () => {
-  const productStat = await Transaction.findOne()
+  const productStat = await Transaction.findOne();
   // console.log( "🚀 ~ file: utils.js:6 ~ pushInitUserData ~ productStat:", productStat )
-  if ( !productStat ) {
-    await Transaction.insertMany( dataTransaction )
-    console.log( 'Transaction mockdata uploaded' )
+  if (!productStat) {
+    await Transaction.insertMany(dataTransaction);
+    console.log("Transaction mockdata uploaded");
   }
-}
+};
 export const pushInitOverallStatData = async () => {
-  const overallStat = await OverallStat.findOne()
+  const overallStat = await OverallStat.findOne();
   // console.log( "🚀 ~ file: utils.js:6 ~ pushInitUserData ~ OverallStat:", overallStat )
-  if ( !overallStat ) {
-    await OverallStat.insertMany( dataOverallStat )
-    console.log( 'OverallStat mockdata uploaded' )
+  if (!overallStat) {
+    await OverallStat.insertMany(dataOverallStat);
+    console.log("OverallStat mockdata uploaded");
   }
-}
+};
 export const pushInitAffiliateStatData = async () => {
-  const affiliateStat = await AffiliateStat.findOne()
+  const affiliateStat = await AffiliateStat.findOne();
   // console.log( "🚀 ~ file: utils.js:6 ~ pushInitUserData ~ AffiliateStat:", AffiliateStat )
-  if ( !affiliateStat ) {
-    await AffiliateStat.insertMany( dataAffiliateStat )
-    console.log( 'AffiliateStat mockdata uploaded' )
+  if (!affiliateStat) {
+    await AffiliateStat.insertMany(dataAffiliateStat);
+    console.log("AffiliateStat mockdata uploaded");
   }
-}
+};
 
 export const pushInitData = async () => {
-  await pushInitUserData()
-  await pushInitProductData()
-  await pushInitProductStatData()
-  await pushInitTransactionData()
-  await pushInitOverallStatData()
-  await pushInitAffiliateStatData()
-}
+  if (process.env.ENV !== "DEV") return;
+  await pushInitUserData();
+  await pushInitProductData();
+  await pushInitProductStatData();
+  await pushInitTransactionData();
+  await pushInitOverallStatData();
+  await pushInitAffiliateStatData();
+};
