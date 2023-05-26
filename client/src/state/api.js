@@ -23,6 +23,7 @@ export const api = createApi({
     "Signin",
     "Signup",
     "GoogleSignin",
+    "ExpenseTransactionsUpload",
     "ExpenseTransactions",
     "ExpenseUserStats",
     "ExpenseTagStats",
@@ -50,10 +51,45 @@ export const api = createApi({
       ],
     }),
     updateExpenseTransaction: build.mutation({
-      query: ({ id, amount, tags, type, date, timeZone }) => ({
+      query: ({
+        id,
+        amount,
+        account,
+        description,
+        tags,
+        type,
+        date,
+        timeZone,
+      }) => ({
         url: `api/expenses/transactions/${id}`,
         method: "PATCH",
-        body: { amount, tags, type, date, timeZone },
+        body: { amount, account, description, tags, type, date, timeZone },
+      }),
+      invalidatesTags: [
+        "ExpenseTransactions",
+        "ExpenseTypeStats",
+        "ExpenseTagStats",
+        "ExpenseUserStats",
+      ],
+    }),
+    transactionsUpload: build.mutation({
+      query: (data) => ({
+        url: `api/expenses/upload`,
+        method: "POST",
+        body: data,
+      }),
+      invalidatesTags: [
+        "ExpenseTransactions",
+        "ExpenseTypeStats",
+        "ExpenseTagStats",
+        "ExpenseUserStats",
+      ],
+    }),
+    processUpload: build.mutation({
+      query: ({ file, bankConfig, bankAccount }) => ({
+        url: `api/expenses/processUpload`,
+        method: "POST",
+        body: { file, bankConfig, bankAccount },
       }),
       invalidatesTags: [
         "ExpenseTransactions",
@@ -63,12 +99,20 @@ export const api = createApi({
       ],
     }),
     addExpenseTransaction: build.mutation({
-      query: ({ amount, tags, type, date, timeZone }) => {
+      query: ({ amount, account, description, tags, type, date, timeZone }) => {
         const localTimeZone = timeZone || DateTime.now().zoneName;
         return {
           url: `api/expenses/transactions`,
           method: "POST",
-          body: { amount, tags, type, date, timeZone: localTimeZone },
+          body: {
+            amount,
+            account,
+            description,
+            tags,
+            type,
+            date,
+            timeZone: localTimeZone,
+          },
         };
       },
       invalidatesTags: [
@@ -185,6 +229,8 @@ export const {
   useUserSigninMutation,
   useUserSignupMutation,
   useUserGoogleSigninMutation,
+  useTransactionsUploadMutation,
+  useProcessUploadMutation,
   useGetExpenseTransactionsQuery,
   useAddExpenseTransactionMutation,
   useUpdateExpenseTransactionMutation,

@@ -1,7 +1,9 @@
 import {
+  FormControl,
   Grid,
   IconButton,
   InputAdornment,
+  InputLabel,
   MenuItem,
   Select,
   Switch,
@@ -24,6 +26,7 @@ import {
   useDeleteExpenseTransactionMutation,
 } from "state/api";
 import { DateTimePicker } from "@mui/x-date-pickers";
+import { BANK_ACCOUNTS } from "scenes/accounts/AccountTransactionUploader";
 
 // const initFormData = {
 //   amount: Math.random() * 134,
@@ -91,6 +94,8 @@ const TransactionForm = ({ transactionData }) => {
       type: formData.type,
       tags: formData.tags.split(",").map((t) => t.trim()),
       date: formData.date,
+      account: formData.account,
+      description: formData.description,
       // dateUTC: formData.date.toUTCString(),
     };
 
@@ -198,6 +203,36 @@ const TransactionForm = ({ transactionData }) => {
                 </InputAdornment>
               ),
             }}
+          />
+        </Grid>
+        <Grid item xs={6}>
+          <FormControl fullWidth size="small">
+            <InputLabel id="select-bank-account-label">Bank Account</InputLabel>
+            <Select
+              labelId="select-bank-account"
+              name="account"
+              id="select-bank-account"
+              value={formData.account}
+              label="Bank Account"
+              onChange={onInputChange}
+            >
+              {BANK_ACCOUNTS.map((c) => (
+                <MenuItem value={c}>{c}</MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        </Grid>
+        <Grid item xs={6}>
+          <TextField
+            name="description"
+            required
+            fullWidth
+            id="description"
+            label="Description"
+            value={formData.description}
+            onChange={onInputChange}
+            type="text"
+            size="small"
           />
         </Grid>
         <Grid item xs={9} sm={4} lg={3}>

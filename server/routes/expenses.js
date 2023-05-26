@@ -9,9 +9,23 @@ import {
   getUserStats,
   getTypeStats,
   getTagStats,
+  processUpload,
+  getAccounts,
+  addAccount,
+  updateAccount,
+  deleteAccount,
 } from "../controllers/expenses/index.js";
+import { uploadFile } from "../controllers/utils.js";
 
 const router = express.Router();
+
+router.post("/upload", auth, uploadFile);
+router.post("/processUpload", auth, processUpload);
+
+router.get("/accounts", auth, getAccounts);
+router.post("/accounts", auth, addAccount);
+router.patch("/accounts/:id", auth, updateAccount);
+router.delete("/accounts/:id", auth, deleteAccount);
 
 router.get("/transactions", auth, getTransactions);
 router.post("/transactions", auth, addTransaction);

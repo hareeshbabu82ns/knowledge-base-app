@@ -57,13 +57,22 @@ const updateDailyData = (
 };
 
 export const prepareTransaction = ({
-  transaction: { amount, date, type, tags },
+  transaction: { amount, account, description, date, type, tags },
   user: { _id },
   tagStats = [],
   typeStats,
   userStats,
 }) => {
-  const transactionData = { userId: _id, amount, date, type, tags, dateZ: "" };
+  const transactionData = {
+    userId: _id,
+    amount,
+    account,
+    description,
+    date,
+    type,
+    tags,
+    dateZ: "",
+  };
   const tagData = tags.map((t) => ({ userId: _id, tag: t.trim() }));
   const tagStatsData = [...tagStats];
   const typeStatsData = typeStats ? { ...typeStats } : { userId: _id, type };

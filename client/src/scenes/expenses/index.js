@@ -16,12 +16,16 @@ const initFormData = {
   type: EXPENSE_TYPES[0],
   tags: "",
   date: DateTime.now(),
+  account: "",
+  description: "",
 };
 // const initFormData = {
 //   amount: Math.random() * 134,
 //   type: EXPENSE_TYPES[ 0 ],
 //   tags: 'ui,test',
 //   date: new Date(),
+//   account: "",
+//   description: "",
 // }
 
 const Transactions = () => {

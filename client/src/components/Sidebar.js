@@ -16,6 +16,7 @@ import {
   PieChartOutlined,
   CurrencyRupeeOutlined,
   ColorLensOutlined as ThemeSettingsOutlinedIcon,
+  AccountBalanceWalletOutlined as AccountsIcon,
 } from "@mui/icons-material";
 import FlexBetween from "components/FlexBetween";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -49,6 +50,10 @@ const navItems = [
   {
     text: "Expenses",
     icon: <CurrencyRupeeOutlined />,
+  },
+  {
+    text: "Accounts",
+    icon: <AccountsIcon />,
   },
   {
     text: "Products",
