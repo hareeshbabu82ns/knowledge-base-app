@@ -136,6 +136,11 @@ const columns = [
     ),
   },
   {
+    field: "description",
+    headerName: "Description",
+    flex: 1,
+  },
+  {
     field: "amount",
     headerName: "Amount",
     flex: 1,

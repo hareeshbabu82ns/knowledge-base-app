@@ -679,10 +679,16 @@ export const processUpload = async (req, res) => {
       }
 
       const mdbObj = mdbConvConfig.fields.reduce((acc, fieldConfig, index) => {
-        const value = fieldConfig.prepare({ config: fieldConfig, objToUpload });
+        const value = fieldConfig.prepare({
+          config: fieldConfig,
+          objToUpload,
+        });
         return { ...acc, [fieldConfig.name]: value };
       }, {});
-      dataMdb.push(mdbObj);
+
+      if (!mdbConvConfig.ignore({ obj: mdbObj })) {
+        dataMdb.push(mdbObj);
+      }
 
       // console.log("mdb obj: ", mdbObj);
     });
@@ -693,10 +699,11 @@ export const processUpload = async (req, res) => {
   }
 
   const dataMdbUploaded = [];
-  for (const mdbObj of dataMdb) {
-    const { transaction } = await addExpenseTransaction(mdbObj, user);
-    dataMdbUploaded.push({ ...mdbObj, _id: transaction._id });
-  }
+  // for (const mdbObj of dataMdb) {
+  //   const { transaction } = await addExpenseTransaction(mdbObj, user);
+  //   dataMdbUploaded.push({ ...mdbObj, _id: transaction._id });
+  // }
+  dataMdbUploaded.push(...dataMdb);
 
   console.log(dataToUpload.length, dataToUpload[dataToUpload.length - 1]);
   console.log(dataMdb.length, dataMdb[dataMdb.length - 1]);
@@ -723,8 +730,16 @@ const convFieldWithConfig = ({
   switch (fieldConfig.type) {
     case "date":
       return DateTime.fromFormat(fieldValRaw, fieldConfig.format).toISO();
+    case "dateTime":
+      const dateStr =
+        fieldValRaw +
+        " " +
+        trimQuotes(fieldDataLineRaw[fieldConfig.timeColumIndex - 1] || "");
+      return DateTime.fromFormat(dateStr, fieldConfig.format).toISO();
     case "amount":
-      return fieldValRaw.trim().length === 0 ? 0 : parseFloat(fieldValRaw);
+      return fieldValRaw.trim().length === 0
+        ? 0
+        : parseFloat(fieldValRaw) * (fieldConfig?.negated ? -1 : 1);
     default:
       return fieldValRaw.trim();
   }

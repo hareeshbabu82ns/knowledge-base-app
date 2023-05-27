@@ -27,12 +27,205 @@ export const uploadFile = async (req, res) => {
 
 export const KNOWN_COMMA_STRINGS = [
   { source: "Memory Express,", replaceWith: "Memory Express" },
+  { source: "REMITLY CANADA,", replaceWith: "REMITLY CANADA" },
 ];
 
+export const BANK_TRANSACTION_IGNORE_LINES = [
+  "Transfer from MYCHEQUING",
+  "Transfer to MYCHEQUING",
+  "PAYMENT - THANK YOU",
+  "Transfer to MYSAVINGS",
+  "Transfer from MYSAVINGS",
+  "PAYMENT - ",
+  "Payment PCF",
+];
+export const BANK_TRANSACTION_IGNORE_LINES_STARTS_WITH = [
+  "Loan Payment to GENWORTH",
+  "Principal Pymt to GENWORTH",
+  "Bill Payment ATB Mastercard",
+];
+
+const genericIgnore = ({ obj }) => {
+  if (BANK_TRANSACTION_IGNORE_LINES.includes(obj.description)) return true;
+  if (
+    BANK_TRANSACTION_IGNORE_LINES_STARTS_WITH.findIndex((s) =>
+      obj?.description?.startsWith(s)
+    ) >= 0
+  )
+    return true;
+  return false;
+};
+
+const BANK_TRANSACTION_IGNORE_LINES_PC_MONEY = [
+  "Hareesh PC CC",
+  "eTransfer Autodeposit",
+  "Amazon Hareesh",
+  "Jaya PC CC",
+  "Walmart Hareesh",
+];
 export const BANK_TRANSACTION_CONV_CONFIG = [
+  {
+    bank: "PC",
+    account: "PC Har Money",
+    ignore: ({ obj }) => {
+      if (genericIgnore({ obj })) return true;
+      if (BANK_TRANSACTION_IGNORE_LINES_PC_MONEY.includes(obj.description))
+        return true;
+      return false;
+    },
+    fields: [
+      {
+        name: "amount",
+        prepare: ({ config, objToUpload }) => {
+          return objToUpload.amount > 0
+            ? objToUpload.amount
+            : -1 * objToUpload.amount;
+        },
+      },
+      {
+        name: "account",
+        prepare: ({ config, objToUpload }) => {
+          return objToUpload.bankAccount;
+        },
+      },
+      {
+        name: "description",
+        prepare: ({ config, objToUpload }) => {
+          return objToUpload.description;
+        },
+      },
+      {
+        name: "tags",
+        prepare: ({ config, objToUpload }) => {
+          return [
+            // objToUpload.accountNumber,
+            objToUpload.bankConfig,
+            objToUpload.bankAccount,
+          ];
+        },
+      },
+      {
+        name: "type",
+        prepare: ({ config, objToUpload }) => {
+          return objToUpload.amount > 0
+            ? EXPENSE_TYPE_EXPENSE
+            : EXPENSE_TYPE_INCOME;
+        },
+      },
+      {
+        name: "date",
+        prepare: ({ config, objToUpload }) => {
+          return objToUpload.postingDate;
+        },
+      },
+    ],
+  },
+  {
+    bank: "PC",
+    account: "PC Har CC",
+    ignore: genericIgnore,
+    fields: [
+      {
+        name: "amount",
+        prepare: ({ config, objToUpload }) => {
+          return objToUpload.amount > 0
+            ? objToUpload.amount
+            : -1 * objToUpload.amount;
+        },
+      },
+      {
+        name: "account",
+        prepare: ({ config, objToUpload }) => {
+          return objToUpload.bankAccount;
+        },
+      },
+      {
+        name: "description",
+        prepare: ({ config, objToUpload }) => {
+          return objToUpload.description;
+        },
+      },
+      {
+        name: "tags",
+        prepare: ({ config, objToUpload }) => {
+          return [
+            // objToUpload.accountNumber,
+            objToUpload.bankConfig,
+            objToUpload.bankAccount,
+          ];
+        },
+      },
+      {
+        name: "type",
+        prepare: ({ config, objToUpload }) => {
+          return objToUpload.amount > 0
+            ? EXPENSE_TYPE_EXPENSE
+            : EXPENSE_TYPE_INCOME;
+        },
+      },
+      {
+        name: "date",
+        prepare: ({ config, objToUpload }) => {
+          return objToUpload.postingDate;
+        },
+      },
+    ],
+  },
+  {
+    bank: "Amazon",
+    account: "Amazon MBNA CC",
+    ignore: genericIgnore,
+    fields: [
+      {
+        name: "amount",
+        prepare: ({ config, objToUpload }) => {
+          return objToUpload.amount > 0
+            ? objToUpload.amount
+            : -1 * objToUpload.amount;
+        },
+      },
+      {
+        name: "account",
+        prepare: ({ config, objToUpload }) => {
+          return objToUpload.bankAccount;
+        },
+      },
+      {
+        name: "description",
+        prepare: ({ config, objToUpload }) => {
+          return objToUpload.payee + " - " + objToUpload.address;
+        },
+      },
+      {
+        name: "tags",
+        prepare: ({ config, objToUpload }) => {
+          return [
+            // objToUpload.accountNumber,
+            objToUpload.bankConfig,
+            objToUpload.bankAccount,
+          ];
+        },
+      },
+      {
+        name: "type",
+        prepare: ({ config, objToUpload }) => {
+          return objToUpload.amount > 0
+            ? EXPENSE_TYPE_EXPENSE
+            : EXPENSE_TYPE_INCOME;
+        },
+      },
+      {
+        name: "date",
+        prepare: ({ config, objToUpload }) => {
+          return objToUpload.postingDate;
+        },
+      },
+    ],
+  },
   {
     bank: "ATB",
     account: "ATB Har CC",
+    ignore: genericIgnore,
     fields: [
       {
         name: "amount",
@@ -56,7 +249,7 @@ export const BANK_TRANSACTION_CONV_CONFIG = [
         name: "tags",
         prepare: ({ config, objToUpload }) => {
           return [
-            objToUpload.accountNumber,
+            // objToUpload.accountNumber,
             objToUpload.bankConfig,
             objToUpload.bankAccount,
           ];
@@ -74,6 +267,225 @@ export const BANK_TRANSACTION_CONV_CONFIG = [
         name: "date",
         prepare: ({ config, objToUpload }) => {
           return objToUpload.transactionDate;
+        },
+      },
+    ],
+  },
+  {
+    bank: "ATB",
+    account: "ATB Har Sav",
+    ignore: genericIgnore,
+    fields: [
+      {
+        name: "amount",
+        prepare: ({ config, objToUpload }) => {
+          return objToUpload.debitAmount + objToUpload.creditAmount;
+        },
+      },
+      {
+        name: "account",
+        prepare: ({ config, objToUpload }) => {
+          return objToUpload.bankAccount;
+        },
+      },
+      {
+        name: "description",
+        prepare: ({ config, objToUpload }) => {
+          return objToUpload.extendedText;
+        },
+      },
+      {
+        name: "tags",
+        prepare: ({ config, objToUpload }) => {
+          return [
+            // objToUpload.accountNumber,
+            objToUpload.bankConfig,
+            objToUpload.bankAccount,
+          ];
+        },
+      },
+      {
+        name: "type",
+        prepare: ({ config, objToUpload }) => {
+          return objToUpload.debitAmount > 0
+            ? EXPENSE_TYPE_EXPENSE
+            : EXPENSE_TYPE_INCOME;
+        },
+      },
+      {
+        name: "date",
+        prepare: ({ config, objToUpload }) => {
+          return objToUpload.transactionDate;
+        },
+      },
+    ],
+  },
+  {
+    bank: "ATB",
+    account: "ATB Har Chq",
+    ignore: genericIgnore,
+    fields: [
+      {
+        name: "amount",
+        prepare: ({ config, objToUpload }) => {
+          return objToUpload.debitAmount + objToUpload.creditAmount;
+        },
+      },
+      {
+        name: "account",
+        prepare: ({ config, objToUpload }) => {
+          return objToUpload.bankAccount;
+        },
+      },
+      {
+        name: "description",
+        prepare: ({ config, objToUpload }) => {
+          return objToUpload.extendedText;
+        },
+      },
+      {
+        name: "tags",
+        prepare: ({ config, objToUpload }) => {
+          return [
+            // objToUpload.accountNumber,
+            objToUpload.bankConfig,
+            objToUpload.bankAccount,
+          ];
+        },
+      },
+      {
+        name: "type",
+        prepare: ({ config, objToUpload }) => {
+          return objToUpload.debitAmount > 0
+            ? EXPENSE_TYPE_EXPENSE
+            : EXPENSE_TYPE_INCOME;
+        },
+      },
+      {
+        name: "date",
+        prepare: ({ config, objToUpload }) => {
+          return objToUpload.transactionDate;
+        },
+      },
+    ],
+  },
+  {
+    bank: "TD",
+    account: "TD Har Sav",
+    ignore: ({ obj }) => {
+      if (genericIgnore({ obj })) return true;
+      if (["PTS FRM:"].findIndex((s) => obj?.description?.startsWith(s)) >= 0)
+        return true;
+      if (["TFR-TO "].findIndex((s) => obj?.description?.includes(s)) >= 0)
+        return true;
+      return false;
+    },
+    fields: [
+      {
+        name: "amount",
+        prepare: ({ config, objToUpload }) => {
+          return objToUpload.dipositAmount + objToUpload.creditAmount;
+        },
+      },
+      {
+        name: "account",
+        prepare: ({ config, objToUpload }) => {
+          return objToUpload.bankAccount;
+        },
+      },
+      {
+        name: "description",
+        prepare: ({ config, objToUpload }) => {
+          return objToUpload.description;
+        },
+      },
+      {
+        name: "tags",
+        prepare: ({ config, objToUpload }) => {
+          return [
+            // objToUpload.accountNumber,
+            objToUpload.bankConfig,
+            objToUpload.bankAccount,
+          ];
+        },
+      },
+      {
+        name: "type",
+        prepare: ({ config, objToUpload }) => {
+          return objToUpload.dipositAmount > 0
+            ? EXPENSE_TYPE_EXPENSE
+            : EXPENSE_TYPE_INCOME;
+        },
+      },
+      {
+        name: "date",
+        prepare: ({ config, objToUpload }) => {
+          return objToUpload.postingDate;
+        },
+      },
+    ],
+  },
+  {
+    bank: "TD",
+    account: "TD Har Chq",
+    ignore: ({ obj }) => {
+      if (genericIgnore({ obj })) return true;
+      // if (["REMITLY CANADA MSP"].includes(obj?.description)) return true;
+      if (
+        ["PTS FRM:", "PTS TO:", "REMITLY CANADA"].findIndex((s) =>
+          obj?.description?.startsWith(s)
+        ) >= 0
+      )
+        return true;
+      if (
+        ["TFR-TO ", "TFR-FR 6070101"].findIndex((s) =>
+          obj?.description?.includes(s)
+        ) >= 0
+      )
+        return true;
+      return false;
+    },
+    fields: [
+      {
+        name: "amount",
+        prepare: ({ config, objToUpload }) => {
+          return objToUpload.dipositAmount + objToUpload.creditAmount;
+        },
+      },
+      {
+        name: "account",
+        prepare: ({ config, objToUpload }) => {
+          return objToUpload.bankAccount;
+        },
+      },
+      {
+        name: "description",
+        prepare: ({ config, objToUpload }) => {
+          return objToUpload.description;
+        },
+      },
+      {
+        name: "tags",
+        prepare: ({ config, objToUpload }) => {
+          return [
+            // objToUpload.accountNumber,
+            objToUpload.bankConfig,
+            objToUpload.bankAccount,
+          ];
+        },
+      },
+      {
+        name: "type",
+        prepare: ({ config, objToUpload }) => {
+          return objToUpload.creditAmount > 0
+            ? EXPENSE_TYPE_EXPENSE
+            : EXPENSE_TYPE_INCOME;
+        },
+      },
+      {
+        name: "date",
+        prepare: ({ config, objToUpload }) => {
+          return objToUpload.postingDate;
         },
       },
     ],
@@ -109,7 +521,7 @@ export const BANK_CSV_CONV_CONFIG = [
     ],
   },
   {
-    bank: "Amazon MBNA CC",
+    bank: "Amazon",
     headerLine: true,
     separator: ",",
     fields: [
@@ -129,6 +541,7 @@ export const BANK_CSV_CONV_CONFIG = [
       {
         name: "amount",
         type: "amount",
+        negated: true,
       },
     ],
   },
@@ -205,8 +618,9 @@ export const BANK_CSV_CONV_CONFIG = [
       },
       {
         name: "postingDate",
-        type: "date",
-        format: "LL/dd/yyyy",
+        type: "dateTime",
+        timeColumIndex: 5,
+        format: "LL/dd/yyyy h:mm a",
       },
       {
         name: "postingTime",
@@ -215,6 +629,7 @@ export const BANK_CSV_CONV_CONFIG = [
       {
         name: "amount",
         type: "amount",
+        negated: true,
       },
     ],
   },

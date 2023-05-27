@@ -100,7 +100,7 @@ const AccountTransactionUploader = () => {
               label="Bank Name"
               onChange={onBankNameSelected}
             >
-              {["TD", "Amazon MBNA CC", "ATB", "PC"].map((c) => (
+              {["TD", "Amazon", "ATB", "PC"].map((c) => (
                 <MenuItem value={c}>{c}</MenuItem>
               ))}
             </Select>
@@ -245,6 +245,7 @@ export const BANK_ACCOUNTS = [
   "TD Jaya Sav",
   "TD Jaya Chq",
   "PC Har CC",
+  "PC Har Money",
   "Amazon MBNA CC",
   "ATB Har Chq",
   "ATB Har Sav",
