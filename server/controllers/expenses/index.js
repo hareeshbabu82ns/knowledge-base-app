@@ -430,7 +430,7 @@ export const getTransactions = async (req, res) => {
 
 // Accounts //
 
-const validateAccountData = ({ name, type }) => {
+const validateAccountData = ({ name, type, description }) => {
   if (name === 0) {
     throw new Error("name can not be empty");
   }
@@ -462,13 +462,13 @@ export const deleteAccount = async (req, res) => {
     const session = await mongoose.startSession();
 
     try {
-      session.startAccount();
+      session.startTransaction();
       // delete transaction entry
       const trans = await oldAccount.deleteOne({ session });
 
       // TODO delete related transactions
 
-      await session.commitAccount();
+      await session.commitTransaction();
       session.endSession();
 
       res.status(200).json({ id: oldAccount._id });
@@ -487,7 +487,7 @@ export const updateAccount = async (req, res) => {
   try {
     const { user } = req.auth;
 
-    const { name, type } = req.body;
+    const { name, type, description } = req.body;
 
     const { id } = req.params;
 
@@ -503,13 +503,14 @@ export const updateAccount = async (req, res) => {
     const isValid = validateAccountData({
       name,
       type,
+      description,
     });
     if (!isValid) {
       res.status(500).json({ message: "Account validation failed" });
       return;
     }
 
-    oldAccount.set({ userId: user._id, name, type });
+    oldAccount.set({ userId: user._id, name, type, description });
 
     const trans = await oldAccount.save();
 
@@ -524,16 +525,21 @@ export const addAccount = async (req, res) => {
   try {
     const { user } = req.auth;
 
-    const { name, type } = req.body;
+    const { name, type, description } = req.body;
 
-    const isValid = validateAccountData({ name, type });
+    const isValid = validateAccountData({ name, type, description });
     if (!isValid) {
       res.status(500).json({ message: "Account validation failed" });
       return;
     }
 
     try {
-      const newAccount = new Account({ userId: user._id, name, type });
+      const newAccount = new Account({
+        userId: user._id,
+        name,
+        type,
+        description,
+      });
 
       const trans = await newAccount.save();
 

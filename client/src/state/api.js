@@ -38,6 +38,43 @@ export const api = createApi({
     "Dashboard",
   ],
   endpoints: (build) => ({
+    deleteExpenseAccount: build.mutation({
+      query: (id) => ({
+        url: `api/expenses/accounts/${id}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["ExpenseAccounts"],
+    }),
+
+    updateExpenseAccount: build.mutation({
+      query: ({ id, name, description, type }) => ({
+        url: `api/expenses/accounts/${id}`,
+        method: "PATCH",
+        body: { name, description, type },
+      }),
+      invalidatesTags: ["ExpenseAccounts"],
+    }),
+
+    addExpenseAccount: build.mutation({
+      query: ({ id, name, description, type }) => {
+        return {
+          url: `api/expenses/accounts`,
+          method: "POST",
+          body: { name, description, type },
+        };
+      },
+      invalidatesTags: ["ExpenseAccounts"],
+    }),
+
+    getExpenseAccounts: build.query({
+      query: ({ page, pageSize, sort, search }) => ({
+        url: `api/expenses/accounts`,
+        method: "GET",
+        params: { page, pageSize, sort, search },
+      }),
+      providesTags: ["ExpenseAccounts"],
+    }),
+
     deleteExpenseTransaction: build.mutation({
       query: (id) => ({
         url: `api/expenses/transactions/${id}`,
@@ -231,6 +268,10 @@ export const {
   useUserGoogleSigninMutation,
   useTransactionsUploadMutation,
   useProcessUploadMutation,
+  useGetExpenseAccountsQuery,
+  useAddExpenseAccountMutation,
+  useUpdateExpenseAccountMutation,
+  useDeleteExpenseAccountMutation,
   useGetExpenseTransactionsQuery,
   useAddExpenseTransactionMutation,
   useUpdateExpenseTransactionMutation,

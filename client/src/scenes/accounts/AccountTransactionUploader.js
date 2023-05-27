@@ -16,6 +16,7 @@ import React, { useState } from "react";
 import {
   useProcessUploadMutation,
   useTransactionsUploadMutation,
+  useGetExpenseAccountsQuery,
 } from "state/api";
 
 const AccountTransactionUploader = () => {
@@ -25,6 +26,9 @@ const AccountTransactionUploader = () => {
   const [config, setConfig] = useState(null);
   const [dataToUpload, setDataToUpload] = useState(null);
   const [dataMdb, setDataMdb] = useState(null);
+
+  const { data: bankAccounts, isLoading: bankAccountsLoading } =
+    useGetExpenseAccountsQuery({});
 
   const [uploadTransactions] = useTransactionsUploadMutation();
   const [processUpload] = useProcessUploadMutation();
@@ -116,9 +120,13 @@ const AccountTransactionUploader = () => {
               label="Bank Account"
               onChange={onBankAccountSelected}
             >
-              {BANK_ACCOUNTS.map((c) => (
-                <MenuItem value={c}>{c}</MenuItem>
-              ))}
+              {bankAccountsLoading ? (
+                <MenuItem value={""}>{"Loading..."}</MenuItem>
+              ) : (
+                bankAccounts?.accounts?.map((c) => (
+                  <MenuItem value={c._id}>{c.name}</MenuItem>
+                ))
+              )}
             </Select>
           </FormControl>
         </Grid>
@@ -184,7 +192,7 @@ const columnsMDB = [
     field: "description",
     headerName: "Descripiton",
     resizable: false,
-    flex: 1,
+    flex: 2.5,
   },
   {
     field: "date",
@@ -199,7 +207,7 @@ const columnsMDB = [
   {
     field: "amount",
     headerName: "Amount",
-    flex: 1,
+    flex: 0.5,
     renderCell: ({ value }) => (
       <Typography variant="h5">{Number(value).toFixed(2)}</Typography>
     ),
@@ -234,22 +242,19 @@ const ResultMDBTable = ({ data }) => {
         columns={columnsMDB}
         rowCount={data.length || 0}
         pagination
+        initialState={{
+          pagination: {
+            paginationModel: { pageSize: 25 },
+          },
+          columns: {
+            columnVisibilityModel: {
+              _id: false,
+            },
+          },
+        }}
       />
     </Box>
   );
 };
-
-export const BANK_ACCOUNTS = [
-  "TD Har Sav",
-  "TD Har Chq",
-  "TD Jaya Sav",
-  "TD Jaya Chq",
-  "PC Har CC",
-  "PC Har Money",
-  "Amazon MBNA CC",
-  "ATB Har Chq",
-  "ATB Har Sav",
-  "ATB Har CC",
-];
 
 export default AccountTransactionUploader;

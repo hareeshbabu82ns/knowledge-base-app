@@ -24,22 +24,9 @@ import {
   useAddExpenseTransactionMutation,
   useUpdateExpenseTransactionMutation,
   useDeleteExpenseTransactionMutation,
+  useGetExpenseAccountsQuery,
 } from "state/api";
 import { DateTimePicker } from "@mui/x-date-pickers";
-import { BANK_ACCOUNTS } from "scenes/accounts/AccountTransactionUploader";
-
-// const initFormData = {
-//   amount: Math.random() * 134,
-//   type: EXPENSE_TYPES[ 0 ],
-//   tags: 'ui,test',
-//   date: DateTime.local(),
-// }
-// const initFormData = {
-//   amount: 0,
-//   type: EXPENSE_TYPES[ 0 ],
-//   tags: '',
-//   date: DateTime.local(),
-// }
 
 const TransactionForm = ({ transactionData }) => {
   const [formData, setFormData] = React.useState(transactionData);
@@ -47,6 +34,9 @@ const TransactionForm = ({ transactionData }) => {
   const [addTransaction] = useAddExpenseTransactionMutation();
   const [updateTransaction] = useUpdateExpenseTransactionMutation();
   const [deleteTransaction] = useDeleteExpenseTransactionMutation();
+
+  const { data: bankAccounts, isLoading: bankAccountsLoading } =
+    useGetExpenseAccountsQuery({});
 
   const onInputChange = (e) =>
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -75,6 +65,7 @@ const TransactionForm = ({ transactionData }) => {
         autoClose: true,
       });
       setFormData(transactionData);
+      return payload;
     } catch (error) {
       // console.error( 'signup failed', error );
       toast.update(toastId, {
@@ -118,6 +109,7 @@ const TransactionForm = ({ transactionData }) => {
         autoClose: true,
       });
       setFormData(transactionData);
+      return payload;
     } catch (error) {
       // console.error( 'signup failed', error );
       toast.update(toastId, {
@@ -216,9 +208,13 @@ const TransactionForm = ({ transactionData }) => {
               label="Bank Account"
               onChange={onInputChange}
             >
-              {BANK_ACCOUNTS.map((c) => (
-                <MenuItem value={c}>{c}</MenuItem>
-              ))}
+              {bankAccountsLoading ? (
+                <MenuItem value={""}>{"Loading..."}</MenuItem>
+              ) : (
+                bankAccounts?.accounts?.map((c) => (
+                  <MenuItem value={c._id}>{c.name}</MenuItem>
+                ))
+              )}
             </Select>
           </FormControl>
         </Grid>
