@@ -18,16 +18,14 @@ import {
 
 import {
   useAddExpenseAccountMutation,
-  useUpdateExpenseAccountMutation,
   useDeleteExpenseAccountMutation,
 } from "state/api";
 import { ACCOUNT_TYPES, BANK_ACCOUNTS_DEFAULT } from "constants";
 
-const AccountForm = ({ accountData }) => {
+const AccountForm = ({ accountData, updateAccount }) => {
   const [formData, setFormData] = React.useState(accountData);
 
   const [addAccount] = useAddExpenseAccountMutation();
-  const [updateAccount] = useUpdateExpenseAccountMutation();
   const [deleteAccount] = useDeleteExpenseAccountMutation();
 
   const onInputChange = (e) =>
@@ -108,7 +106,7 @@ const AccountForm = ({ accountData }) => {
     });
     try {
       const payload = formData?._id
-        ? await updateAccount({ id: formData?._id, ...postData }).unwrap()
+        ? await updateAccount({ id: formData?._id, ...postData })
         : await addAccount(postData).unwrap();
       // console.log( 'signup successful', payload )
       toast.update(toastId, {

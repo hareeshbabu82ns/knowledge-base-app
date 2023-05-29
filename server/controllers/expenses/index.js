@@ -11,11 +11,8 @@ import ExpenseTag from "../../models/Expenses/ExpenseTag.js";
 import ExpenseTagStat from "../../models/Expenses/ExpenseTagStat.js";
 import ExpenseTypeStat from "../../models/Expenses/ExpenseTypeStat.js";
 import ExpenseUserStat from "../../models/Expenses/ExpenseUserStat.js";
-import {
-  BANK_CSV_CONV_CONFIG,
-  BANK_TRANSACTION_CONV_CONFIG,
-  KNOWN_COMMA_STRINGS,
-} from "../utils.js";
+import { BANK_TRANSACTION_CONV_CONFIG, KNOWN_COMMA_STRINGS } from "../utils.js";
+
 // Transactions //
 const validateTransactionData = ({ amount, tags, type }) => {
   if (amount === 0) {
@@ -487,7 +484,7 @@ export const updateAccount = async (req, res) => {
   try {
     const { user } = req.auth;
 
-    const { name, type, description } = req.body;
+    const { name, type, description, config } = req.body;
 
     const { id } = req.params;
 
@@ -504,13 +501,14 @@ export const updateAccount = async (req, res) => {
       name,
       type,
       description,
+      config,
     });
     if (!isValid) {
       res.status(500).json({ message: "Account validation failed" });
       return;
     }
 
-    oldAccount.set({ userId: user._id, name, type, description });
+    oldAccount.set({ userId: user._id, name, type, description, config });
 
     const trans = await oldAccount.save();
 
@@ -525,9 +523,9 @@ export const addAccount = async (req, res) => {
   try {
     const { user } = req.auth;
 
-    const { name, type, description } = req.body;
+    const { name, type, description, config } = req.body;
 
-    const isValid = validateAccountData({ name, type, description });
+    const isValid = validateAccountData({ name, type, description, config });
     if (!isValid) {
       res.status(500).json({ message: "Account validation failed" });
       return;
@@ -539,6 +537,7 @@ export const addAccount = async (req, res) => {
         name,
         type,
         description,
+        config,
       });
 
       const trans = await newAccount.save();
@@ -599,13 +598,14 @@ export const processUpload = async (req, res) => {
   // const data = {};
 
   // check if bank config exists
-  const config = BANK_CSV_CONV_CONFIG.find(
-    (e) => e.bank === req.body.bankConfig
-  );
-  if (!config) {
+
+  const accountDB = await Account.findById(req.body.bankAccount);
+  if (!accountDB) {
     res.status(500).json({ message: "bank config not found" });
     return;
   }
+
+  const config = accountDB.get("config").toJSON();
 
   // read csv file
   const fileContentsRaw = fs.readFileSync(`tmp/${req.body.file}`, "utf8");
@@ -618,36 +618,36 @@ export const processUpload = async (req, res) => {
   try {
     fileContents.forEach((line, lineIndex) => {
       if (line.trim().length === 0) return;
-      if (config.headerLine && lineIndex === 0) return;
+      if (config.headerLines > lineIndex) return;
 
       const fieldDataRaw = [];
       const fieldDataRawTmp = line.split(config.separator);
 
-      if (fieldDataRawTmp.length !== config.fields.length) {
+      if (fieldDataRawTmp.length !== config.fileFields.length) {
         // try correcting the line
         KNOWN_COMMA_STRINGS.forEach((s) => {
           line = line.replace(s.source, s.replaceWith);
         });
         const fieldDataTmp = line.split(config.separator);
-        if (fieldDataTmp.length === config.fields.length) {
+        if (fieldDataTmp.length === config.fileFields.length) {
           // seems corrected
           fieldDataRaw.push(...fieldDataTmp);
         } else {
           console.log("config mismatch", fieldDataTmp);
           res.status(500).json({
-            message: `${config.bank}: fields per line do not match with config`,
+            message: `${config.bank}: fileFields per line do not match with config`,
             fileFileds: fieldDataTmp.length,
-            configFields: config.fields.length,
+            configFields: config.fileFields.length,
             fieldData: fieldDataTmp,
           });
-          throw Exception("conversion failed");
+          throw "conversion failed";
         }
       } else {
         fieldDataRaw.push(...fieldDataRawTmp);
       }
 
       // prepare mongo objects to save to db
-      const obj = config.fields.reduce((acc, fieldConfig, index) => {
+      const obj = config.fileFields.reduce((acc, fieldConfig, index) => {
         const fieldValRaw = trimQuotes(fieldDataRaw[index]);
         const fieldName = fieldConfig.name;
 
@@ -671,11 +671,13 @@ export const processUpload = async (req, res) => {
       // console.log("done", dataToUpload.length);
 
       // upload to MongoDB
+
       const mdbConvConfig = BANK_TRANSACTION_CONV_CONFIG.find(
         (c) =>
           c.bank === objToUpload.bankConfig &&
-          c.account === objToUpload.bankAccount
+          c.account === accountDB.get("name")
       );
+      // const mdbConvConfig = accountDB.get("config");
 
       if (!mdbConvConfig) {
         res.status(500).json({
@@ -740,7 +742,7 @@ const convFieldWithConfig = ({
       const dateStr =
         fieldValRaw +
         " " +
-        trimQuotes(fieldDataLineRaw[fieldConfig.timeColumIndex - 1] || "");
+        trimQuotes(fieldDataLineRaw[fieldConfig.timeColumnIndex - 1] || "");
       return DateTime.fromFormat(dateStr, fieldConfig.format).toISO();
     case "amount":
       return fieldValRaw.trim().length === 0

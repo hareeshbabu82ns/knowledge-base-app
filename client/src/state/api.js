@@ -47,20 +47,20 @@ export const api = createApi({
     }),
 
     updateExpenseAccount: build.mutation({
-      query: ({ id, name, description, type }) => ({
+      query: ({ id, name, description, type, config }) => ({
         url: `api/expenses/accounts/${id}`,
         method: "PATCH",
-        body: { name, description, type },
+        body: { name, description, type, config },
       }),
       invalidatesTags: ["ExpenseAccounts"],
     }),
 
     addExpenseAccount: build.mutation({
-      query: ({ id, name, description, type }) => {
+      query: ({ id, name, description, type, config }) => {
         return {
           url: `api/expenses/accounts`,
           method: "POST",
-          body: { name, description, type },
+          body: { name, description, type, config },
         };
       },
       invalidatesTags: ["ExpenseAccounts"],

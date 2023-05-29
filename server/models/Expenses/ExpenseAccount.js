@@ -1,5 +1,49 @@
 import mongoose from "mongoose";
-import { ACCOUNT_TYPES } from "./const.js";
+import { ACCOUNT_TYPES, FIELD_TYPES } from "./const.js";
+
+const configSchema = new mongoose.Schema({
+  headerLines: {
+    type: Number,
+    default: 0,
+  },
+  separator: {
+    type: String,
+    default: ",",
+  },
+  trimQuotes: {
+    type: Boolean,
+    default: false,
+  },
+  fileFields: [
+    {
+      name: {
+        type: String,
+        required: true,
+      },
+      type: {
+        type: String,
+        enum: FIELD_TYPES,
+        required: true,
+      },
+      format: {
+        type: String,
+        default: "",
+      },
+      negated: {
+        type: Boolean,
+        default: false,
+      },
+      ignore: {
+        type: Boolean,
+        default: false,
+      },
+      timeColumnIndex: {
+        type: Number,
+        default: 0, // starts from coulmn 1...
+      },
+    },
+  ],
+});
 
 const ExpenseAccountSchema = new mongoose.Schema(
   {
@@ -17,6 +61,10 @@ const ExpenseAccountSchema = new mongoose.Schema(
     type: {
       type: String,
       enum: ACCOUNT_TYPES,
+      required: true,
+    },
+    config: {
+      type: configSchema,
       required: true,
     },
   },

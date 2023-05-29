@@ -12,20 +12,24 @@ import {
 } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import { INTL_DATE_LONG_OPTIONS } from "constants";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   useProcessUploadMutation,
   useTransactionsUploadMutation,
   useGetExpenseAccountsQuery,
 } from "state/api";
 
-const AccountTransactionUploader = () => {
+const AccountTransactionUploader = ({ account }) => {
   const [selectedFile, setSelectedFile] = useState("");
   const [bankNameConfig, setBankNameConfig] = useState("ATB");
-  const [bankAccount, setBankAccount] = useState("ATB Har CC");
+  const [bankAccount, setBankAccount] = useState("");
   const [config, setConfig] = useState(null);
   const [dataToUpload, setDataToUpload] = useState(null);
   const [dataMdb, setDataMdb] = useState(null);
+
+  useEffect(() => {
+    setBankAccount(account?._id);
+  }, [account]);
 
   const { data: bankAccounts, isLoading: bankAccountsLoading } =
     useGetExpenseAccountsQuery({});
@@ -148,7 +152,7 @@ const AccountTransactionUploader = () => {
 };
 
 const ResultUploadTable = ({ config, data }) => {
-  const columns = config.fields.map((f) => ({
+  const columns = config.fileFields.map((f) => ({
     field: f.name,
     headerName: f.name,
     flex: 1,

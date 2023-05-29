@@ -619,7 +619,7 @@ export const BANK_CSV_CONV_CONFIG = [
       {
         name: "postingDate",
         type: "dateTime",
-        timeColumIndex: 5,
+        timeColumnIndex: 5,
         format: "LL/dd/yyyy h:mm a",
       },
       {
