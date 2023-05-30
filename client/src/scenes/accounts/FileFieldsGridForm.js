@@ -15,7 +15,11 @@ import {
 } from "@mui/x-data-grid";
 import { v4 as uuidV4 } from "uuid";
 import { MenuItem, Select, Typography } from "@mui/material";
-import { ACCOUNT_CONFIG_FIELD_TYPES } from "constants";
+import {
+  ACCOUNT_CONFIG_FIELD_TYPES,
+  EXPENSE_FIELDS,
+  EXPENSE_TYPE_COND,
+} from "constants";
 
 const initialRows = [
   {
@@ -44,6 +48,7 @@ function EditToolbar(props) {
         negated: false,
         timeColumnIndex: 0,
         type: "",
+        expenseColumn: "",
         isNew: true,
       },
     ]);
@@ -65,7 +70,7 @@ function EditToolbar(props) {
   );
 }
 
-function SelectEditInputCell({ id, value, field }) {
+function AccountFieldTypeSelectEditInputCell({ id, value, field }) {
   const apiRef = useGridApiContext();
 
   const handleChange = async (event) => {
@@ -87,6 +92,64 @@ function SelectEditInputCell({ id, value, field }) {
       autoFocus
     >
       {ACCOUNT_CONFIG_FIELD_TYPES.map((t) => (
+        <MenuItem key={t} value={t}>
+          {t}
+        </MenuItem>
+      ))}
+    </Select>
+  );
+}
+function ExpenseFieldSelectEditInputCell({ id, value, field }) {
+  const apiRef = useGridApiContext();
+
+  const handleChange = async (event) => {
+    await apiRef.current.setEditCellValue({
+      id,
+      field,
+      value: event.target.value,
+    });
+    apiRef.current.stopCellEditMode({ id, field });
+  };
+
+  return (
+    <Select
+      size="small"
+      fullWidth
+      value={value}
+      onChange={handleChange}
+      sx={{ height: 1 }}
+      autoFocus
+    >
+      {EXPENSE_FIELDS.map((t) => (
+        <MenuItem key={t} value={t}>
+          {t}
+        </MenuItem>
+      ))}
+    </Select>
+  );
+}
+function ExpenseTypeSelectEditInputCell({ id, value, field }) {
+  const apiRef = useGridApiContext();
+
+  const handleChange = async (event) => {
+    await apiRef.current.setEditCellValue({
+      id,
+      field,
+      value: event.target.value,
+    });
+    apiRef.current.stopCellEditMode({ id, field });
+  };
+
+  return (
+    <Select
+      size="small"
+      fullWidth
+      value={value}
+      onChange={handleChange}
+      sx={{ height: 1 }}
+      autoFocus
+    >
+      {EXPENSE_TYPE_COND.map((t) => (
         <MenuItem key={t} value={t}>
           {t}
         </MenuItem>
@@ -153,7 +216,9 @@ export default function FileFieldsGridForm({ fileFields, onConfigUpdated }) {
       field: "type",
       headerName: "Type",
       editable: true,
-      renderEditCell: (props) => <SelectEditInputCell {...props} />,
+      renderEditCell: (props) => (
+        <AccountFieldTypeSelectEditInputCell {...props} />
+      ),
     },
     {
       field: "format",
@@ -161,6 +226,19 @@ export default function FileFieldsGridForm({ fileFields, onConfigUpdated }) {
       width: 120,
       editable: true,
       sortable: false,
+    },
+    {
+      field: "expenseColumn",
+      headerName: "Expense Column",
+      editable: true,
+      renderEditCell: (props) => <ExpenseFieldSelectEditInputCell {...props} />,
+    },
+    {
+      field: "expenseType",
+      headerName: "Expense Type",
+      width: 180,
+      editable: true,
+      renderEditCell: (props) => <ExpenseTypeSelectEditInputCell {...props} />,
     },
     {
       field: "ignore",

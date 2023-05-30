@@ -3,7 +3,7 @@ import React from "react";
 import { v4 as uuidV4 } from "uuid";
 import Header from "components/Header";
 import AccountForm from "./AccountForm";
-import { ACCOUNT_TYPES } from "constants";
+import { ACCOUNT_TYPES, EXPENSE_FIELDS } from "constants";
 import Grid from "@mui/material/Unstable_Grid2/Grid2";
 import AccountsGrid from "./AccountsGrid";
 import AccountTransactionUploader from "./AccountTransactionUploader";
@@ -26,6 +26,7 @@ const initFormData = {
         negated: false,
         ignore: false,
         timeColumnIndex: 0,
+        expenseColumn: "date",
         _id: uuidV4(),
       },
       {
@@ -35,6 +36,7 @@ const initFormData = {
         negated: false,
         ignore: false,
         timeColumnIndex: 0,
+        expenseColumn: "description",
         _id: uuidV4(),
       },
       {
@@ -44,6 +46,7 @@ const initFormData = {
         negated: false,
         ignore: false,
         timeColumnIndex: 0,
+        expenseColumn: "amount",
         _id: uuidV4(),
       },
       {
@@ -53,6 +56,7 @@ const initFormData = {
         negated: false,
         ignore: false,
         timeColumnIndex: 0,
+        expenseColumn: "amount",
         _id: uuidV4(),
       },
       {
@@ -62,6 +66,7 @@ const initFormData = {
         negated: false,
         ignore: false,
         timeColumnIndex: 0,
+        expenseColumn: EXPENSE_FIELDS[0],
         _id: uuidV4(),
       },
     ],

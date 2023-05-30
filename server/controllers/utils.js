@@ -99,7 +99,7 @@ export const BANK_TRANSACTION_CONV_CONFIG = [
         prepare: ({ config, objToUpload }) => {
           return [
             // objToUpload.accountNumber,
-            objToUpload.bankConfig,
+            // objToUpload.bankConfig,
             objToUpload.bankAccount,
           ];
         },
@@ -150,7 +150,7 @@ export const BANK_TRANSACTION_CONV_CONFIG = [
         prepare: ({ config, objToUpload }) => {
           return [
             // objToUpload.accountNumber,
-            objToUpload.bankConfig,
+            // objToUpload.bankConfig,
             objToUpload.bankAccount,
           ];
         },
@@ -201,7 +201,7 @@ export const BANK_TRANSACTION_CONV_CONFIG = [
         prepare: ({ config, objToUpload }) => {
           return [
             // objToUpload.accountNumber,
-            objToUpload.bankConfig,
+            // objToUpload.bankConfig,
             objToUpload.bankAccount,
           ];
         },
@@ -250,7 +250,7 @@ export const BANK_TRANSACTION_CONV_CONFIG = [
         prepare: ({ config, objToUpload }) => {
           return [
             // objToUpload.accountNumber,
-            objToUpload.bankConfig,
+            // objToUpload.bankConfig,
             objToUpload.bankAccount,
           ];
         },
@@ -299,7 +299,7 @@ export const BANK_TRANSACTION_CONV_CONFIG = [
         prepare: ({ config, objToUpload }) => {
           return [
             // objToUpload.accountNumber,
-            objToUpload.bankConfig,
+            // objToUpload.bankConfig,
             objToUpload.bankAccount,
           ];
         },
@@ -348,7 +348,7 @@ export const BANK_TRANSACTION_CONV_CONFIG = [
         prepare: ({ config, objToUpload }) => {
           return [
             // objToUpload.accountNumber,
-            objToUpload.bankConfig,
+            // objToUpload.bankConfig,
             objToUpload.bankAccount,
           ];
         },
@@ -404,7 +404,7 @@ export const BANK_TRANSACTION_CONV_CONFIG = [
         prepare: ({ config, objToUpload }) => {
           return [
             // objToUpload.accountNumber,
-            objToUpload.bankConfig,
+            // objToUpload.bankConfig,
             objToUpload.bankAccount,
           ];
         },
@@ -469,7 +469,7 @@ export const BANK_TRANSACTION_CONV_CONFIG = [
         prepare: ({ config, objToUpload }) => {
           return [
             // objToUpload.accountNumber,
-            objToUpload.bankConfig,
+            // objToUpload.bankConfig,
             objToUpload.bankAccount,
           ];
         },
@@ -491,146 +491,146 @@ export const BANK_TRANSACTION_CONV_CONFIG = [
     ],
   },
 ];
-export const BANK_CSV_CONV_CONFIG = [
-  {
-    bank: "TD",
-    headerLine: false,
-    separator: ",",
-    fields: [
-      {
-        name: "postingDate",
-        type: "date",
-        format: "LL/dd/yyyy",
-      },
-      {
-        name: "description",
-        type: "string",
-      },
-      {
-        name: "creditAmount",
-        type: "amount",
-      },
-      {
-        name: "dipositAmount",
-        type: "amount",
-      },
-      {
-        name: "balanceAmount",
-        type: "amount",
-      },
-    ],
-  },
-  {
-    bank: "Amazon",
-    headerLine: true,
-    separator: ",",
-    fields: [
-      {
-        name: "postingDate",
-        type: "date",
-        format: "LL/dd/yyyy",
-      },
-      {
-        name: "payee",
-        type: "string",
-      },
-      {
-        name: "address",
-        type: "string",
-      },
-      {
-        name: "amount",
-        type: "amount",
-        negated: true,
-      },
-    ],
-  },
-  {
-    bank: "ATB",
-    headerLine: true,
-    separator: ",",
-    fields: [
-      {
-        name: "transactionDate",
-        type: "date",
-        format: "LL/dd/yyyy",
-      },
-      {
-        name: "accountRtn",
-        type: "string",
-      },
-      {
-        name: "accountNumber",
-        type: "string",
-      },
-      {
-        name: "transactionType",
-        type: "string",
-      },
-      {
-        name: "customerRefNumber",
-        type: "string",
-      },
-      {
-        name: "debitAmount",
-        type: "amount",
-      },
-      {
-        name: "creditAmount",
-        type: "amount",
-      },
-      {
-        name: "runningBalanceAmount",
-        type: "amount",
-      },
-      {
-        name: "extendedText",
-        type: "string",
-      },
-      {
-        name: "bankRefNumber",
-        type: "string",
-      },
-      {
-        name: "emptyEnding",
-        type: "string",
-        ignore: true,
-      },
-    ],
-  },
-  {
-    bank: "PC",
-    headerLine: true,
-    separator: ",",
-    trimQuotes: true,
-    fields: [
-      {
-        name: "description",
-        type: "string",
-      },
-      {
-        name: "transactionType",
-        type: "string",
-      },
-      {
-        name: "cardHolderName",
-        type: "string",
-      },
-      {
-        name: "postingDate",
-        type: "dateTime",
-        timeColumnIndex: 5,
-        format: "LL/dd/yyyy h:mm a",
-      },
-      {
-        name: "postingTime",
-        type: "string",
-      },
-      {
-        name: "amount",
-        type: "amount",
-        negated: true,
-      },
-    ],
-  },
-];
+// export const BANK_CSV_CONV_CONFIG = [
+//   {
+//     bank: "TD",
+//     headerLine: false,
+//     separator: ",",
+//     fields: [
+//       {
+//         name: "postingDate",
+//         type: "date",
+//         format: "LL/dd/yyyy",
+//       },
+//       {
+//         name: "description",
+//         type: "string",
+//       },
+//       {
+//         name: "creditAmount",
+//         type: "amount",
+//       },
+//       {
+//         name: "dipositAmount",
+//         type: "amount",
+//       },
+//       {
+//         name: "balanceAmount",
+//         type: "amount",
+//       },
+//     ],
+//   },
+//   {
+//     bank: "Amazon",
+//     headerLine: true,
+//     separator: ",",
+//     fields: [
+//       {
+//         name: "postingDate",
+//         type: "date",
+//         format: "LL/dd/yyyy",
+//       },
+//       {
+//         name: "payee",
+//         type: "string",
+//       },
+//       {
+//         name: "address",
+//         type: "string",
+//       },
+//       {
+//         name: "amount",
+//         type: "amount",
+//         negated: true,
+//       },
+//     ],
+//   },
+//   {
+//     bank: "ATB",
+//     headerLine: true,
+//     separator: ",",
+//     fields: [
+//       {
+//         name: "transactionDate",
+//         type: "date",
+//         format: "LL/dd/yyyy",
+//       },
+//       {
+//         name: "accountRtn",
+//         type: "string",
+//       },
+//       {
+//         name: "accountNumber",
+//         type: "string",
+//       },
+//       {
+//         name: "transactionType",
+//         type: "string",
+//       },
+//       {
+//         name: "customerRefNumber",
+//         type: "string",
+//       },
+//       {
+//         name: "debitAmount",
+//         type: "amount",
+//       },
+//       {
+//         name: "creditAmount",
+//         type: "amount",
+//       },
+//       {
+//         name: "runningBalanceAmount",
+//         type: "amount",
+//       },
+//       {
+//         name: "extendedText",
+//         type: "string",
+//       },
+//       {
+//         name: "bankRefNumber",
+//         type: "string",
+//       },
+//       {
+//         name: "emptyEnding",
+//         type: "string",
+//         ignore: true,
+//       },
+//     ],
+//   },
+//   {
+//     bank: "PC",
+//     headerLine: true,
+//     separator: ",",
+//     trimQuotes: true,
+//     fields: [
+//       {
+//         name: "description",
+//         type: "string",
+//       },
+//       {
+//         name: "transactionType",
+//         type: "string",
+//       },
+//       {
+//         name: "cardHolderName",
+//         type: "string",
+//       },
+//       {
+//         name: "postingDate",
+//         type: "dateTime",
+//         timeColumnIndex: 5,
+//         format: "LL/dd/yyyy h:mm a",
+//       },
+//       {
+//         name: "postingTime",
+//         type: "string",
+//       },
+//       {
+//         name: "amount",
+//         type: "amount",
+//         negated: true,
+//       },
+//     ],
+//   },
+// ];

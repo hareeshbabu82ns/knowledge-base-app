@@ -2,7 +2,21 @@ import mongoose from "mongoose";
 import { DateTime } from "luxon";
 import fs from "fs";
 
-import { ACCOUNT_TYPES, EXPENSE_TYPES } from "../../models/Expenses/const.js";
+import {
+  ACCOUNT_TYPES,
+  EXPENSE_FIELD_AMOUNT,
+  EXPENSE_FIELD_DATE,
+  EXPENSE_FIELD_DESCRIPTION,
+  EXPENSE_FIELD_NONE,
+  EXPENSE_TYPES,
+  EXPENSE_FIELDS,
+  EXPENSE_TYPE_EXPENSE,
+  EXPENSE_TYPE_COND_EXPENSE_IF_GT_0,
+  EXPENSE_TYPE_COND_INCOME_IF_GT_0,
+  EXPENSE_TYPE_COND_EXPENSE_IF_GT_0_EL_INCOME,
+  EXPENSE_TYPE_INCOME,
+  EXPENSE_TYPE_COND_INCOME_IF_GT_0_EL_EXPENSE,
+} from "../../models/Expenses/const.js";
 
 import Transaction from "../../models/Expenses/ExpenseTransaction.js";
 import Account from "../../models/Expenses/ExpenseAccount.js";
@@ -665,7 +679,6 @@ export const processUpload = async (req, res) => {
       const objToUpload = {
         ...obj,
         bankAccount: req.body.bankAccount,
-        bankConfig: req.body.bankConfig,
       };
       dataToUpload.push(objToUpload);
       // console.log("done", dataToUpload.length);
@@ -673,26 +686,90 @@ export const processUpload = async (req, res) => {
       // upload to MongoDB
 
       const mdbConvConfig = BANK_TRANSACTION_CONV_CONFIG.find(
-        (c) =>
-          c.bank === objToUpload.bankConfig &&
-          c.account === accountDB.get("name")
+        (c) => c.account === accountDB.get("name")
       );
       // const mdbConvConfig = accountDB.get("config");
 
       if (!mdbConvConfig) {
         res.status(500).json({
-          message: `${objToUpload.bankConfig}-${objToUpload.bankAccount}: config not found`,
+          message: `${accountDB.get("name")}: config not found`,
         });
-        throw `${objToUpload.bankConfig}-${objToUpload.bankAccount}: config not found`;
+        throw `${accountDB.get("name")}: config not found`;
       }
 
-      const mdbObj = mdbConvConfig.fields.reduce((acc, fieldConfig, index) => {
-        const value = fieldConfig.prepare({
-          config: fieldConfig,
-          objToUpload,
-        });
-        return { ...acc, [fieldConfig.name]: value };
-      }, {});
+      const baseExpenseObj = {
+        account: objToUpload.bankAccount,
+        tags: [accountDB.get("name")],
+      };
+
+      // fill expense model fields
+      const mdbObj = EXPENSE_FIELDS.reduce((acc, field, index) => {
+        const fieldAssigns = config.fileFields.filter(
+          (f) => f?.expenseColumn === field
+        );
+        var value = "";
+
+        switch (field) {
+          case EXPENSE_FIELD_DATE:
+            value = objToUpload[fieldAssigns[0].name];
+            break;
+
+          case EXPENSE_FIELD_DESCRIPTION:
+            value = fieldAssigns.reduce(
+              (a, f) => `${a} ${objToUpload[f.name]}`,
+              ""
+            );
+            break;
+
+          case EXPENSE_FIELD_AMOUNT:
+            value = fieldAssigns.reduce(
+              (a, f) => a + Math.abs(objToUpload[f.name]),
+              0
+            );
+            break;
+
+          case EXPENSE_FIELD_NONE:
+          default:
+            return acc;
+        }
+
+        return { ...acc, [field]: value };
+      }, baseExpenseObj);
+
+      // find expense type
+      const expenseType = config.fileFields.reduce((acc, field, index) => {
+        switch (field.expenseType) {
+          case EXPENSE_TYPE_COND_EXPENSE_IF_GT_0:
+            if (objToUpload[field.name] > 0) acc = EXPENSE_TYPE_EXPENSE;
+            break;
+          case EXPENSE_TYPE_COND_INCOME_IF_GT_0:
+            if (objToUpload[field.name] > 0) acc = EXPENSE_TYPE_INCOME;
+            break;
+          case EXPENSE_TYPE_COND_EXPENSE_IF_GT_0_EL_INCOME:
+            acc =
+              objToUpload[field.name] > 0
+                ? EXPENSE_TYPE_EXPENSE
+                : EXPENSE_TYPE_INCOME;
+            break;
+          case EXPENSE_TYPE_COND_INCOME_IF_GT_0_EL_EXPENSE:
+            acc =
+              objToUpload[field.name] > 0
+                ? EXPENSE_TYPE_INCOME
+                : EXPENSE_TYPE_EXPENSE;
+            break;
+        }
+        return acc;
+      }, EXPENSE_TYPE_EXPENSE);
+
+      mdbObj["type"] = expenseType;
+
+      // const mdbObj = mdbConvConfig.fields.reduce((acc, fieldConfig, index) => {
+      //   const value = fieldConfig.prepare({
+      //     config: fieldConfig,
+      //     objToUpload,
+      //   });
+      //   return { ...acc, [fieldConfig.name]: value };
+      // }, baseExpenseObj);
 
       if (!mdbConvConfig.ignore({ obj: mdbObj })) {
         dataMdb.push(mdbObj);

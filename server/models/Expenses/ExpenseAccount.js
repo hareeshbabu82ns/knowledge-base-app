@@ -1,5 +1,10 @@
 import mongoose from "mongoose";
-import { ACCOUNT_TYPES, FIELD_TYPES } from "./const.js";
+import {
+  ACCOUNT_TYPES,
+  FIELD_TYPES,
+  EXPENSE_FIELDS,
+  EXPENSE_TYPE_COND,
+} from "./const.js";
 
 const configSchema = new mongoose.Schema({
   headerLines: {
@@ -40,6 +45,18 @@ const configSchema = new mongoose.Schema({
       timeColumnIndex: {
         type: Number,
         default: 0, // starts from coulmn 1...
+      },
+      expenseColumn: {
+        type: String,
+        enum: EXPENSE_FIELDS,
+        required: true,
+        default: "none",
+      },
+      expenseType: {
+        type: String,
+        enum: EXPENSE_TYPE_COND,
+        required: false,
+        default: "",
       },
     },
   ],

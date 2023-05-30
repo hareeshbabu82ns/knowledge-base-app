@@ -8,6 +8,21 @@ export const ACCOUNT_TYPES = [
   "Vehicle Loan",
 ];
 
+export const EXPENSE_FIELDS = ["none", "date", "description", "amount"];
+export const EXPENSE_TYPE_COND_EXPENSE_IF_GT_0 = "EXPENSE_IF_GT_0";
+export const EXPENSE_TYPE_COND_INCOME_IF_GT_0 = "INCOME_IF_GT_0";
+export const EXPENSE_TYPE_COND_INCOME_IF_GT_0_EL_EXPENSE =
+  "INCOME_IF_GT_0_EL_EXPENSE";
+export const EXPENSE_TYPE_COND_EXPENSE_IF_GT_0_EL_INCOME =
+  "EXPENSE_IF_GT_0_EL_INCOME";
+export const EXPENSE_TYPE_COND = [
+  "",
+  EXPENSE_TYPE_COND_EXPENSE_IF_GT_0,
+  EXPENSE_TYPE_COND_EXPENSE_IF_GT_0_EL_INCOME,
+  EXPENSE_TYPE_COND_INCOME_IF_GT_0,
+  EXPENSE_TYPE_COND_INCOME_IF_GT_0_EL_EXPENSE,
+];
+
 export const INTL_DATE_LONG_OPTIONS = {
   month: "short",
   day: "numeric",
@@ -38,22 +53,29 @@ export const BANK_ACCOUNTS_DEFAULT = [
           name: "postingDate",
           type: "date",
           format: "LL/dd/yyyy",
+          expenseColumn: "date",
         },
         {
           name: "description",
           type: "string",
+          expenseColumn: "description",
         },
         {
           name: "creditAmount",
           type: "amount",
+          expenseColumn: "amount",
+          expenseType: EXPENSE_TYPE_COND_EXPENSE_IF_GT_0,
         },
         {
           name: "dipositAmount",
           type: "amount",
+          expenseColumn: "amount",
+          expenseType: EXPENSE_TYPE_COND_INCOME_IF_GT_0,
         },
         {
           name: "balanceAmount",
           type: "amount",
+          expenseColumn: "none",
         },
       ],
     },
@@ -70,22 +92,29 @@ export const BANK_ACCOUNTS_DEFAULT = [
           name: "postingDate",
           type: "date",
           format: "LL/dd/yyyy",
+          expenseColumn: "date",
         },
         {
           name: "description",
           type: "string",
+          expenseColumn: "description",
         },
         {
           name: "creditAmount",
           type: "amount",
+          expenseColumn: "amount",
+          expenseType: EXPENSE_TYPE_COND_EXPENSE_IF_GT_0,
         },
         {
           name: "dipositAmount",
           type: "amount",
+          expenseColumn: "amount",
+          expenseType: EXPENSE_TYPE_COND_INCOME_IF_GT_0,
         },
         {
           name: "balanceAmount",
           type: "amount",
+          expenseColumn: "none",
         },
       ],
     },
@@ -102,22 +131,29 @@ export const BANK_ACCOUNTS_DEFAULT = [
           name: "postingDate",
           type: "date",
           format: "LL/dd/yyyy",
+          expenseColumn: "date",
         },
         {
           name: "description",
           type: "string",
+          expenseColumn: "description",
         },
         {
           name: "creditAmount",
           type: "amount",
+          expenseColumn: "amount",
+          expenseType: EXPENSE_TYPE_COND_EXPENSE_IF_GT_0,
         },
         {
           name: "dipositAmount",
           type: "amount",
+          expenseColumn: "amount",
+          expenseType: EXPENSE_TYPE_COND_INCOME_IF_GT_0,
         },
         {
           name: "balanceAmount",
           type: "amount",
+          expenseColumn: "none",
         },
       ],
     },
@@ -134,22 +170,29 @@ export const BANK_ACCOUNTS_DEFAULT = [
           name: "postingDate",
           type: "date",
           format: "LL/dd/yyyy",
+          expenseColumn: "date",
         },
         {
           name: "description",
           type: "string",
+          expenseColumn: "description",
         },
         {
           name: "creditAmount",
           type: "amount",
+          expenseColumn: "amount",
+          expenseType: EXPENSE_TYPE_COND_EXPENSE_IF_GT_0,
         },
         {
           name: "dipositAmount",
           type: "amount",
+          expenseColumn: "amount",
+          expenseType: EXPENSE_TYPE_COND_INCOME_IF_GT_0,
         },
         {
           name: "balanceAmount",
           type: "amount",
+          expenseColumn: "none",
         },
       ],
     },
@@ -166,29 +209,36 @@ export const BANK_ACCOUNTS_DEFAULT = [
         {
           name: "description",
           type: "string",
+          expenseColumn: "description",
         },
         {
           name: "transactionType",
           type: "string",
+          expenseColumn: "none",
         },
         {
           name: "cardHolderName",
           type: "string",
+          expenseColumn: "none",
         },
         {
           name: "postingDate",
           type: "dateTime",
           timeColumnIndex: 5,
           format: "LL/dd/yyyy h:mm a",
+          expenseColumn: "date",
         },
         {
           name: "postingTime",
           type: "string",
+          expenseColumn: "none",
         },
         {
           name: "amount",
           type: "amount",
           negated: true,
+          expenseColumn: "amount",
+          expenseType: EXPENSE_TYPE_COND_EXPENSE_IF_GT_0_EL_INCOME,
         },
       ],
     },
@@ -205,29 +255,36 @@ export const BANK_ACCOUNTS_DEFAULT = [
         {
           name: "description",
           type: "string",
+          expenseColumn: "description",
         },
         {
           name: "transactionType",
           type: "string",
+          expenseColumn: "none",
         },
         {
           name: "cardHolderName",
           type: "string",
+          expenseColumn: "none",
         },
         {
           name: "postingDate",
           type: "dateTime",
           timeColumnIndex: 5,
           format: "LL/dd/yyyy h:mm a",
+          expenseColumn: "date",
         },
         {
           name: "postingTime",
           type: "string",
+          expenseColumn: "none",
         },
         {
           name: "amount",
           type: "amount",
           negated: true,
+          expenseColumn: "amount",
+          expenseType: EXPENSE_TYPE_COND_EXPENSE_IF_GT_0_EL_INCOME,
         },
       ],
     },
@@ -245,19 +302,24 @@ export const BANK_ACCOUNTS_DEFAULT = [
           name: "postingDate",
           type: "date",
           format: "LL/dd/yyyy",
+          expenseColumn: "date",
         },
         {
           name: "payee",
           type: "string",
+          expenseColumn: "description",
         },
         {
           name: "address",
           type: "string",
+          expenseColumn: "description",
         },
         {
           name: "amount",
           type: "amount",
           negated: true,
+          expenseColumn: "amount",
+          expenseType: EXPENSE_TYPE_COND_EXPENSE_IF_GT_0_EL_INCOME,
         },
       ],
     },
@@ -274,47 +336,60 @@ export const BANK_ACCOUNTS_DEFAULT = [
           name: "transactionDate",
           type: "date",
           format: "LL/dd/yyyy",
+          expenseColumn: "date",
         },
         {
           name: "accountRtn",
           type: "string",
+          expenseColumn: "none",
         },
         {
           name: "accountNumber",
           type: "string",
+          expenseColumn: "none",
         },
         {
           name: "transactionType",
           type: "string",
+          expenseColumn: "none",
         },
         {
           name: "customerRefNumber",
           type: "string",
+          expenseColumn: "none",
         },
         {
           name: "debitAmount",
           type: "amount",
+          expenseColumn: "amount",
+          expenseType: EXPENSE_TYPE_COND_EXPENSE_IF_GT_0,
         },
         {
           name: "creditAmount",
           type: "amount",
+          expenseColumn: "amount",
+          expenseType: EXPENSE_TYPE_COND_INCOME_IF_GT_0,
         },
         {
           name: "runningBalanceAmount",
           type: "amount",
+          expenseColumn: "none",
         },
         {
           name: "extendedText",
           type: "string",
+          expenseColumn: "description",
         },
         {
           name: "bankRefNumber",
           type: "string",
+          expenseColumn: "none",
         },
         {
           name: "emptyEnding",
           type: "string",
           ignore: true,
+          expenseColumn: "none",
         },
       ],
     },
@@ -331,47 +406,60 @@ export const BANK_ACCOUNTS_DEFAULT = [
           name: "transactionDate",
           type: "date",
           format: "LL/dd/yyyy",
+          expenseColumn: "date",
         },
         {
           name: "accountRtn",
           type: "string",
+          expenseColumn: "none",
         },
         {
           name: "accountNumber",
           type: "string",
+          expenseColumn: "none",
         },
         {
           name: "transactionType",
           type: "string",
+          expenseColumn: "none",
         },
         {
           name: "customerRefNumber",
           type: "string",
+          expenseColumn: "none",
         },
         {
           name: "debitAmount",
           type: "amount",
+          expenseColumn: "amount",
+          expenseType: EXPENSE_TYPE_COND_EXPENSE_IF_GT_0,
         },
         {
           name: "creditAmount",
           type: "amount",
+          expenseColumn: "amount",
+          expenseType: EXPENSE_TYPE_COND_INCOME_IF_GT_0,
         },
         {
           name: "runningBalanceAmount",
           type: "amount",
+          expenseColumn: "none",
         },
         {
           name: "extendedText",
           type: "string",
+          expenseColumn: "description",
         },
         {
           name: "bankRefNumber",
           type: "string",
+          expenseColumn: "none",
         },
         {
           name: "emptyEnding",
           type: "string",
           ignore: true,
+          expenseColumn: "none",
         },
       ],
     },
@@ -389,47 +477,60 @@ export const BANK_ACCOUNTS_DEFAULT = [
           name: "transactionDate",
           type: "date",
           format: "LL/dd/yyyy",
+          expenseColumn: "date",
         },
         {
           name: "accountRtn",
           type: "string",
+          expenseColumn: "none",
         },
         {
           name: "accountNumber",
           type: "string",
+          expenseColumn: "none",
         },
         {
           name: "transactionType",
           type: "string",
+          expenseColumn: "none",
         },
         {
           name: "customerRefNumber",
           type: "string",
+          expenseColumn: "none",
         },
         {
           name: "debitAmount",
           type: "amount",
+          expenseColumn: "amount",
+          expenseType: EXPENSE_TYPE_COND_EXPENSE_IF_GT_0,
         },
         {
           name: "creditAmount",
           type: "amount",
+          expenseColumn: "amount",
+          expenseType: EXPENSE_TYPE_COND_INCOME_IF_GT_0,
         },
         {
           name: "runningBalanceAmount",
           type: "amount",
+          expenseColumn: "none",
         },
         {
           name: "extendedText",
           type: "string",
+          expenseColumn: "description",
         },
         {
           name: "bankRefNumber",
           type: "string",
+          expenseColumn: "none",
         },
         {
           name: "emptyEnding",
           type: "string",
           ignore: true,
+          expenseColumn: "none",
         },
       ],
     },
