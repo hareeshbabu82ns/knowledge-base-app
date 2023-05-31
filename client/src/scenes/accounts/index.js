@@ -9,6 +9,7 @@ import AccountsGrid from "./AccountsGrid";
 import AccountTransactionUploader from "./AccountTransactionUploader";
 import AccountConfigForm from "./AccountConfigForm";
 import { useUpdateExpenseAccountMutation } from "state/api";
+import { COMPARISION_OPS_EQ } from "constants";
 
 const initFormData = {
   name: "",
@@ -18,6 +19,14 @@ const initFormData = {
     headerLines: 0,
     separator: ",",
     trimQuotes: false,
+    ignoreOps: [
+      {
+        name: "description",
+        comparision: COMPARISION_OPS_EQ,
+        value: "",
+        _id: uuidV4(),
+      },
+    ],
     fileFields: [
       {
         name: "postingDate",

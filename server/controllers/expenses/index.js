@@ -16,6 +16,10 @@ import {
   EXPENSE_TYPE_COND_EXPENSE_IF_GT_0_EL_INCOME,
   EXPENSE_TYPE_INCOME,
   EXPENSE_TYPE_COND_INCOME_IF_GT_0_EL_EXPENSE,
+  COMPARISION_OPS_EQ,
+  COMPARISION_OPS_NE,
+  COMPARISION_OPS_STARTS_WITH,
+  COMPARISION_OPS_CONTAINS,
 } from "../../models/Expenses/const.js";
 
 import Transaction from "../../models/Expenses/ExpenseTransaction.js";
@@ -685,17 +689,17 @@ export const processUpload = async (req, res) => {
 
       // upload to MongoDB
 
-      const mdbConvConfig = BANK_TRANSACTION_CONV_CONFIG.find(
-        (c) => c.account === accountDB.get("name")
-      );
-      // const mdbConvConfig = accountDB.get("config");
+      // const mdbConvConfig = BANK_TRANSACTION_CONV_CONFIG.find(
+      //   (c) => c.account === accountDB.get("name")
+      // );
+      // // const mdbConvConfig = accountDB.get("config");
 
-      if (!mdbConvConfig) {
-        res.status(500).json({
-          message: `${accountDB.get("name")}: config not found`,
-        });
-        throw `${accountDB.get("name")}: config not found`;
-      }
+      // if (!mdbConvConfig) {
+      //   res.status(500).json({
+      //     message: `${accountDB.get("name")}: config not found`,
+      //   });
+      //   throw `${accountDB.get("name")}: config not found`;
+      // }
 
       const baseExpenseObj = {
         account: objToUpload.bankAccount,
@@ -715,10 +719,9 @@ export const processUpload = async (req, res) => {
             break;
 
           case EXPENSE_FIELD_DESCRIPTION:
-            value = fieldAssigns.reduce(
-              (a, f) => `${a} ${objToUpload[f.name]}`,
-              ""
-            );
+            value = fieldAssigns
+              .reduce((a, f) => `${a} ${objToUpload[f.name].trim()}`, "")
+              .trim();
             break;
 
           case EXPENSE_FIELD_AMOUNT:
@@ -771,9 +774,15 @@ export const processUpload = async (req, res) => {
       //   return { ...acc, [fieldConfig.name]: value };
       // }, baseExpenseObj);
 
-      if (!mdbConvConfig.ignore({ obj: mdbObj })) {
+      // eliminate ignored values
+      const ignoreLine = genericIgnore({ config, obj: mdbObj });
+      if (!ignoreLine) {
         dataMdb.push(mdbObj);
       }
+
+      // if (!mdbConvConfig.ignore({ obj: mdbObj })) {
+      //   dataMdb.push(mdbObj);
+      // }
 
       // console.log("mdb obj: ", mdbObj);
     });
@@ -798,6 +807,28 @@ export const processUpload = async (req, res) => {
     data: dataToUpload,
     dataMdb: dataMdbUploaded,
   });
+};
+
+const genericIgnore = ({ config, obj }) => {
+  for (const ignore of config.ignoreOps) {
+    if (ignore.name === "description") {
+      switch (ignore.comparision) {
+        case COMPARISION_OPS_EQ:
+          if (obj[ignore.name] === ignore.value) return true;
+          break;
+        case COMPARISION_OPS_NE:
+          if (obj[ignore.name] !== ignore.value) return true;
+          break;
+        case COMPARISION_OPS_CONTAINS:
+          if (obj[ignore.name].includes(ignore.value)) return true;
+          break;
+        case COMPARISION_OPS_STARTS_WITH:
+          if (obj[ignore.name].startsWith(ignore.value)) return true;
+          break;
+      }
+    }
+  }
+  return false;
 };
 
 const trimQuotes = (val) => {

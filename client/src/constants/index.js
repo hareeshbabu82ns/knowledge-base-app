@@ -8,6 +8,26 @@ export const ACCOUNT_TYPES = [
   "Vehicle Loan",
 ];
 
+export const EXPENSE_IGNORE_FIELDS = ["description"];
+
+export const COMPARISION_OPS_EQ = "EQ";
+export const COMPARISION_OPS_NE = "NE";
+export const COMPARISION_OPS_GT = "GT";
+export const COMPARISION_OPS_LT = "LT";
+export const COMPARISION_OPS_STARTS_WITH = "STARTS_WITH";
+export const COMPARISION_OPS_CONTAINS = "CONTAINS";
+export const COMPARISION_OPS_REGEX = "REGEX";
+
+export const COMPARISION_OPS = [
+  COMPARISION_OPS_EQ,
+  COMPARISION_OPS_NE,
+  COMPARISION_OPS_GT,
+  COMPARISION_OPS_LT,
+  COMPARISION_OPS_STARTS_WITH,
+  COMPARISION_OPS_CONTAINS,
+  COMPARISION_OPS_REGEX,
+];
+
 export const EXPENSE_FIELDS = ["none", "date", "description", "amount"];
 export const EXPENSE_TYPE_COND_EXPENSE_IF_GT_0 = "EXPENSE_IF_GT_0";
 export const EXPENSE_TYPE_COND_INCOME_IF_GT_0 = "INCOME_IF_GT_0";
@@ -48,6 +68,23 @@ export const BANK_ACCOUNTS_DEFAULT = [
     config: {
       headerLines: 0,
       separator: ",",
+      ignoreOps: [
+        {
+          name: "description",
+          comparision: COMPARISION_OPS_EQ,
+          value: "PTS FRM: 80816063318",
+        },
+        {
+          name: "description",
+          comparision: COMPARISION_OPS_CONTAINS,
+          value: "TFR-TO 6063318",
+        },
+        {
+          name: "description",
+          comparision: COMPARISION_OPS_STARTS_WITH,
+          value: "CAD DRAFT",
+        },
+      ],
       fileFields: [
         {
           name: "postingDate",
@@ -87,6 +124,33 @@ export const BANK_ACCOUNTS_DEFAULT = [
     config: {
       headerLines: 0,
       separator: ",",
+      ignoreOps: [
+        {
+          name: "description",
+          comparision: COMPARISION_OPS_EQ,
+          value: "PTS TO:  80816070101",
+        },
+        {
+          name: "description",
+          comparision: COMPARISION_OPS_STARTS_WITH,
+          value: "REMITLY CANADA",
+        },
+        {
+          name: "description",
+          comparision: COMPARISION_OPS_CONTAINS,
+          value: "TFR-FR 6070101",
+        },
+        {
+          name: "description",
+          comparision: COMPARISION_OPS_STARTS_WITH,
+          value: "E-TRANSFER ***",
+        },
+        {
+          name: "description",
+          comparision: COMPARISION_OPS_STARTS_WITH,
+          value: "SEND E-TFR ***",
+        },
+      ],
       fileFields: [
         {
           name: "postingDate",
@@ -126,6 +190,28 @@ export const BANK_ACCOUNTS_DEFAULT = [
     config: {
       headerLines: 0,
       separator: ",",
+      ignoreOps: [
+        {
+          name: "description",
+          comparision: COMPARISION_OPS_CONTAINS,
+          value: "TFR-TO 6889907",
+        },
+        {
+          name: "description",
+          comparision: COMPARISION_OPS_CONTAINS,
+          value: "TFR-FR 6889907",
+        },
+        {
+          name: "description",
+          comparision: COMPARISION_OPS_STARTS_WITH,
+          value: "SEND E-TFR ***",
+        },
+        {
+          name: "description",
+          comparision: COMPARISION_OPS_EQ,
+          value: "CAD DRAFT 03024417",
+        },
+      ],
       fileFields: [
         {
           name: "postingDate",
@@ -165,6 +251,23 @@ export const BANK_ACCOUNTS_DEFAULT = [
     config: {
       headerLines: 0,
       separator: ",",
+      ignoreOps: [
+        {
+          name: "description",
+          comparision: COMPARISION_OPS_CONTAINS,
+          value: "TFR-TO 6888064",
+        },
+        {
+          name: "description",
+          comparision: COMPARISION_OPS_CONTAINS,
+          value: "TFR-FR 6888064",
+        },
+        {
+          name: "description",
+          comparision: COMPARISION_OPS_STARTS_WITH,
+          value: "SEND E-TFR ***",
+        },
+      ],
       fileFields: [
         {
           name: "postingDate",
@@ -205,6 +308,13 @@ export const BANK_ACCOUNTS_DEFAULT = [
       headerLines: 1,
       separator: ",",
       trimQuotes: true,
+      ignoreOps: [
+        {
+          name: "description",
+          comparision: COMPARISION_OPS_EQ,
+          value: "Payment PCF",
+        },
+      ],
       fileFields: [
         {
           name: "description",
@@ -251,6 +361,28 @@ export const BANK_ACCOUNTS_DEFAULT = [
       headerLines: 1,
       separator: ",",
       trimQuotes: true,
+      ignoreOps: [
+        {
+          name: "description",
+          comparision: COMPARISION_OPS_EQ,
+          value: "Hareesh PC CC",
+        },
+        {
+          name: "description",
+          comparision: COMPARISION_OPS_EQ,
+          value: "Amazon Hareesh",
+        },
+        {
+          name: "description",
+          comparision: COMPARISION_OPS_EQ,
+          value: "Jaya PC CC",
+        },
+        {
+          name: "description",
+          comparision: COMPARISION_OPS_EQ,
+          value: "eTransfer Autodeposit",
+        },
+      ],
       fileFields: [
         {
           name: "description",
@@ -297,6 +429,13 @@ export const BANK_ACCOUNTS_DEFAULT = [
       headerLines: 1,
       separator: ",",
       trimQuotes: true,
+      ignoreOps: [
+        {
+          name: "description",
+          comparision: COMPARISION_OPS_EQ,
+          value: "PAYMENT",
+        },
+      ],
       fileFields: [
         {
           name: "postingDate",
@@ -331,6 +470,33 @@ export const BANK_ACCOUNTS_DEFAULT = [
     config: {
       headerLines: 1,
       separator: ",",
+      ignoreOps: [
+        {
+          name: "description",
+          comparision: COMPARISION_OPS_EQ,
+          value: "Bill Payment ATB Mastercard to ATB CC",
+        },
+        {
+          name: "description",
+          comparision: COMPARISION_OPS_EQ,
+          value: "Bill Payment to Amazaon Hareesh",
+        },
+        {
+          name: "description",
+          comparision: COMPARISION_OPS_EQ,
+          value: "Transfer to MYSAVINGS",
+        },
+        {
+          name: "description",
+          comparision: COMPARISION_OPS_EQ,
+          value: "Transfer from MYSAVINGS",
+        },
+        {
+          name: "description",
+          comparision: COMPARISION_OPS_EQ,
+          value: "INTERAC e-Transfer Sent - Har TD",
+        },
+      ],
       fileFields: [
         {
           name: "transactionDate",
@@ -401,6 +567,18 @@ export const BANK_ACCOUNTS_DEFAULT = [
     config: {
       headerLines: 1,
       separator: ",",
+      ignoreOps: [
+        {
+          name: "description",
+          comparision: COMPARISION_OPS_EQ,
+          value: "Transfer from MYCHEQUING",
+        },
+        {
+          name: "description",
+          comparision: COMPARISION_OPS_EQ,
+          value: "Transfer to MYCHEQUING",
+        },
+      ],
       fileFields: [
         {
           name: "transactionDate",
@@ -464,7 +642,6 @@ export const BANK_ACCOUNTS_DEFAULT = [
       ],
     },
   },
-
   {
     name: "ATB Har CC",
     description: "",
@@ -472,6 +649,13 @@ export const BANK_ACCOUNTS_DEFAULT = [
     config: {
       headerLines: 1,
       separator: ",",
+      ignoreOps: [
+        {
+          name: "description",
+          comparision: COMPARISION_OPS_EQ,
+          value: "PAYMENT - THANK YOU",
+        },
+      ],
       fileFields: [
         {
           name: "transactionDate",

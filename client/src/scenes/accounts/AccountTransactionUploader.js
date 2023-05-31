@@ -96,7 +96,7 @@ const AccountTransactionUploader = ({ account }) => {
         <Grid item xs={12}>
           <input type="file" name="file" onChange={onFileSelected} />
         </Grid>
-        <Grid item xs={4}>
+        {/* <Grid item xs={4}>
           <FormControl fullWidth size="small">
             <InputLabel id="select-bank-name-raw-conf-label">
               Upload Raw Config
@@ -113,7 +113,7 @@ const AccountTransactionUploader = ({ account }) => {
               ))}
             </Select>
           </FormControl>
-        </Grid>
+        </Grid> */}
         <Grid item xs={4}>
           <FormControl fullWidth size="small">
             <InputLabel id="select-bank-account-label">Bank Account</InputLabel>

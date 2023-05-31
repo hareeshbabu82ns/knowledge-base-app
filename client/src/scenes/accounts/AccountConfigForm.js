@@ -7,12 +7,14 @@ import {
 } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import FileFieldsGridForm from "./FileFieldsGridForm";
+import IgnoreFieldsGridForm from "./IgnoreFieldsGridForm";
 
 const CONFIG_INIT = {
   headerLines: 0,
   separator: ",",
   trimQuotes: false,
   fileFields: [],
+  ignoreOps: [],
 };
 const AccountConfigForm = ({ account, onConfigUpdate }) => {
   const [formData, setFormData] = useState({
@@ -88,6 +90,14 @@ const AccountConfigForm = ({ account, onConfigUpdate }) => {
           fileFields={formData.fileFields?.map((f) => ({ ...f, id: f._id }))}
           onConfigUpdated={({ rows }) =>
             handleChange({ name: "fileFields", value: rows })
+          }
+        />
+      </Grid>
+      <Grid item xs={12}>
+        <IgnoreFieldsGridForm
+          fields={account?.config?.ignoreOps.map((f) => ({ ...f, id: f._id }))}
+          onConfigUpdated={({ rows }) =>
+            handleChange({ name: "ignoreOps", value: rows })
           }
         />
       </Grid>

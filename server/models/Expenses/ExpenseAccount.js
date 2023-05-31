@@ -4,6 +4,8 @@ import {
   FIELD_TYPES,
   EXPENSE_FIELDS,
   EXPENSE_TYPE_COND,
+  COMPARISION_OPS,
+  COMPARISION_OPS_EQ,
 } from "./const.js";
 
 const configSchema = new mongoose.Schema({
@@ -19,6 +21,25 @@ const configSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
+  ignoreOps: [
+    {
+      name: {
+        type: String,
+        required: true,
+      },
+      comparision: {
+        type: String,
+        enum: COMPARISION_OPS,
+        required: true,
+        default: COMPARISION_OPS_EQ,
+      },
+      value: {
+        type: String,
+        required: false,
+        default: "",
+      },
+    },
+  ],
   fileFields: [
     {
       name: {
