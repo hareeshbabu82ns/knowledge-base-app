@@ -8,6 +8,7 @@ import {
 import React, { useEffect, useState } from "react";
 import FileFieldsGridForm from "./FileFieldsGridForm";
 import IgnoreFieldsGridForm from "./IgnoreFieldsGridForm";
+import TextAdjustFieldsGridForm from "./TextAdjustFieldsGridForm";
 
 const CONFIG_INIT = {
   headerLines: 0,
@@ -98,6 +99,17 @@ const AccountConfigForm = ({ account, onConfigUpdate }) => {
           fields={account?.config?.ignoreOps.map((f) => ({ ...f, id: f._id }))}
           onConfigUpdated={({ rows }) =>
             handleChange({ name: "ignoreOps", value: rows })
+          }
+        />
+      </Grid>
+      <Grid item xs={12}>
+        <TextAdjustFieldsGridForm
+          fields={account?.config?.textToAdjust.map((f) => ({
+            ...f,
+            id: f._id,
+          }))}
+          onConfigUpdated={({ rows }) =>
+            handleChange({ name: "textToAdjust", value: rows })
           }
         />
       </Grid>

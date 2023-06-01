@@ -29,7 +29,6 @@ import ExpenseTag from "../../models/Expenses/ExpenseTag.js";
 import ExpenseTagStat from "../../models/Expenses/ExpenseTagStat.js";
 import ExpenseTypeStat from "../../models/Expenses/ExpenseTypeStat.js";
 import ExpenseUserStat from "../../models/Expenses/ExpenseUserStat.js";
-import { BANK_TRANSACTION_CONV_CONFIG, KNOWN_COMMA_STRINGS } from "../utils.js";
 
 // Transactions //
 const validateTransactionData = ({ amount, tags, type }) => {
@@ -643,9 +642,12 @@ export const processUpload = async (req, res) => {
 
       if (fieldDataRawTmp.length !== config.fileFields.length) {
         // try correcting the line
-        KNOWN_COMMA_STRINGS.forEach((s) => {
-          line = line.replace(s.source, s.replaceWith);
-        });
+        config?.textToAdjust
+          .filter((f) => f.scope === "line")
+          .forEach((s) => {
+            line = line.replace(s.source, s.replaceWith);
+          });
+
         const fieldDataTmp = line.split(config.separator);
         if (fieldDataTmp.length === config.fileFields.length) {
           // seems corrected
@@ -687,20 +689,7 @@ export const processUpload = async (req, res) => {
       dataToUpload.push(objToUpload);
       // console.log("done", dataToUpload.length);
 
-      // upload to MongoDB
-
-      // const mdbConvConfig = BANK_TRANSACTION_CONV_CONFIG.find(
-      //   (c) => c.account === accountDB.get("name")
-      // );
-      // // const mdbConvConfig = accountDB.get("config");
-
-      // if (!mdbConvConfig) {
-      //   res.status(500).json({
-      //     message: `${accountDB.get("name")}: config not found`,
-      //   });
-      //   throw `${accountDB.get("name")}: config not found`;
-      // }
-
+      // prepare database object
       const baseExpenseObj = {
         account: objToUpload.bankAccount,
         tags: [accountDB.get("name")],
@@ -766,23 +755,11 @@ export const processUpload = async (req, res) => {
 
       mdbObj["type"] = expenseType;
 
-      // const mdbObj = mdbConvConfig.fields.reduce((acc, fieldConfig, index) => {
-      //   const value = fieldConfig.prepare({
-      //     config: fieldConfig,
-      //     objToUpload,
-      //   });
-      //   return { ...acc, [fieldConfig.name]: value };
-      // }, baseExpenseObj);
-
       // eliminate ignored values
       const ignoreLine = genericIgnore({ config, obj: mdbObj });
       if (!ignoreLine) {
         dataMdb.push(mdbObj);
       }
-
-      // if (!mdbConvConfig.ignore({ obj: mdbObj })) {
-      //   dataMdb.push(mdbObj);
-      // }
 
       // console.log("mdb obj: ", mdbObj);
     });
@@ -792,6 +769,7 @@ export const processUpload = async (req, res) => {
     return;
   }
 
+  // upload to MongoDB
   const dataMdbUploaded = [];
   // for (const mdbObj of dataMdb) {
   //   const { transaction } = await addExpenseTransaction(mdbObj, user);

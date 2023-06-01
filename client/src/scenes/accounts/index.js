@@ -19,6 +19,14 @@ const initFormData = {
     headerLines: 0,
     separator: ",",
     trimQuotes: false,
+    textToAdjust: [
+      {
+        scope: "line",
+        source: "",
+        replaceWith: "",
+        _id: uuidV4(),
+      },
+    ],
     ignoreOps: [
       {
         name: "description",

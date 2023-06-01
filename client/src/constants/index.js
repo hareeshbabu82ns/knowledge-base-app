@@ -9,6 +9,7 @@ export const ACCOUNT_TYPES = [
 ];
 
 export const EXPENSE_IGNORE_FIELDS = ["description"];
+export const EXPENSE_TEXT_ADJUST_SCOPES = ["line"];
 
 export const COMPARISION_OPS_EQ = "EQ";
 export const COMPARISION_OPS_NE = "NE";
@@ -124,6 +125,13 @@ export const BANK_ACCOUNTS_DEFAULT = [
     config: {
       headerLines: 0,
       separator: ",",
+      textToAdjust: [
+        {
+          scope: "line",
+          source: "REMITLY CANADA,",
+          replaceWith: "REMITLY CANADA",
+        },
+      ],
       ignoreOps: [
         {
           name: "description",
@@ -308,6 +316,13 @@ export const BANK_ACCOUNTS_DEFAULT = [
       headerLines: 1,
       separator: ",",
       trimQuotes: true,
+      textToAdjust: [
+        {
+          scope: "line",
+          source: "Memory Express,",
+          replaceWith: "Memory Express",
+        },
+      ],
       ignoreOps: [
         {
           name: "description",
@@ -371,6 +386,11 @@ export const BANK_ACCOUNTS_DEFAULT = [
           name: "description",
           comparision: COMPARISION_OPS_EQ,
           value: "Amazon Hareesh",
+        },
+        {
+          name: "description",
+          comparision: COMPARISION_OPS_EQ,
+          value: "Walmart Hareesh",
         },
         {
           name: "description",
@@ -475,6 +495,11 @@ export const BANK_ACCOUNTS_DEFAULT = [
           name: "description",
           comparision: COMPARISION_OPS_EQ,
           value: "Bill Payment ATB Mastercard to ATB CC",
+        },
+        {
+          name: "description",
+          comparision: COMPARISION_OPS_STARTS_WITH,
+          value: "Principal Pymt to GENWORTH",
         },
         {
           name: "description",

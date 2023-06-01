@@ -21,6 +21,24 @@ const configSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
+  textToAdjust: [
+    {
+      scope: {
+        type: String,
+        required: true,
+        default: "line",
+      },
+      source: {
+        type: String,
+        required: true,
+      },
+      replaceWith: {
+        type: String,
+        required: true,
+        default: "",
+      },
+    },
+  ],
   ignoreOps: [
     {
       name: {

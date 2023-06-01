@@ -21,7 +21,6 @@ import {
 
 const AccountTransactionUploader = ({ account }) => {
   const [selectedFile, setSelectedFile] = useState("");
-  const [bankNameConfig, setBankNameConfig] = useState("ATB");
   const [bankAccount, setBankAccount] = useState("");
   const [config, setConfig] = useState(null);
   const [dataToUpload, setDataToUpload] = useState(null);
@@ -42,9 +41,6 @@ const AccountTransactionUploader = ({ account }) => {
     setSelectedFile(event.target.files[0]);
   };
 
-  const onBankNameSelected = (event) => {
-    setBankNameConfig(event.target.value);
-  };
   const onBankAccountSelected = (event) => {
     setBankAccount(event.target.value);
   };
@@ -68,7 +64,6 @@ const AccountTransactionUploader = ({ account }) => {
       config,
     } = await processUpload({
       file,
-      bankConfig: bankNameConfig,
       bankAccount,
     }).unwrap();
     console.log(message, resData, config, resDataMdb);
@@ -96,24 +91,6 @@ const AccountTransactionUploader = ({ account }) => {
         <Grid item xs={12}>
           <input type="file" name="file" onChange={onFileSelected} />
         </Grid>
-        {/* <Grid item xs={4}>
-          <FormControl fullWidth size="small">
-            <InputLabel id="select-bank-name-raw-conf-label">
-              Upload Raw Config
-            </InputLabel>
-            <Select
-              labelId="select-bank-name-raw-conf"
-              id="select-bank-name-raw-conf"
-              value={bankNameConfig}
-              label="Bank Name"
-              onChange={onBankNameSelected}
-            >
-              {["TD", "Amazon", "ATB", "PC"].map((c) => (
-                <MenuItem value={c}>{c}</MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-        </Grid> */}
         <Grid item xs={4}>
           <FormControl fullWidth size="small">
             <InputLabel id="select-bank-account-label">Bank Account</InputLabel>
