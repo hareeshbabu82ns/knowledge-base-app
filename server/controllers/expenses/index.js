@@ -610,12 +610,9 @@ export const getAccounts = async (req, res) => {
 // Utils //
 export const processUpload = async (req, res) => {
   const { user } = req.auth;
-
   // console.log(req.body);
-  // const data = {};
 
   // check if bank config exists
-
   const accountDB = await Account.findById(req.body.bankAccount);
   if (!accountDB) {
     res.status(500).json({ message: "bank config not found" });
@@ -690,70 +687,11 @@ export const processUpload = async (req, res) => {
       // console.log("done", dataToUpload.length);
 
       // prepare database object
-      const baseExpenseObj = {
-        account: objToUpload.bankAccount,
-        tags: [accountDB.get("name")],
-      };
-
-      // fill expense model fields
-      const mdbObj = EXPENSE_FIELDS.reduce((acc, field, index) => {
-        const fieldAssigns = config.fileFields.filter(
-          (f) => f?.expenseColumn === field
-        );
-        var value = "";
-
-        switch (field) {
-          case EXPENSE_FIELD_DATE:
-            value = objToUpload[fieldAssigns[0].name];
-            break;
-
-          case EXPENSE_FIELD_DESCRIPTION:
-            value = fieldAssigns
-              .reduce((a, f) => `${a} ${objToUpload[f.name].trim()}`, "")
-              .trim();
-            break;
-
-          case EXPENSE_FIELD_AMOUNT:
-            value = fieldAssigns.reduce(
-              (a, f) => a + Math.abs(objToUpload[f.name]),
-              0
-            );
-            break;
-
-          case EXPENSE_FIELD_NONE:
-          default:
-            return acc;
-        }
-
-        return { ...acc, [field]: value };
-      }, baseExpenseObj);
-
-      // find expense type
-      const expenseType = config.fileFields.reduce((acc, field, index) => {
-        switch (field.expenseType) {
-          case EXPENSE_TYPE_COND_EXPENSE_IF_GT_0:
-            if (objToUpload[field.name] > 0) acc = EXPENSE_TYPE_EXPENSE;
-            break;
-          case EXPENSE_TYPE_COND_INCOME_IF_GT_0:
-            if (objToUpload[field.name] > 0) acc = EXPENSE_TYPE_INCOME;
-            break;
-          case EXPENSE_TYPE_COND_EXPENSE_IF_GT_0_EL_INCOME:
-            acc =
-              objToUpload[field.name] > 0
-                ? EXPENSE_TYPE_EXPENSE
-                : EXPENSE_TYPE_INCOME;
-            break;
-          case EXPENSE_TYPE_COND_INCOME_IF_GT_0_EL_EXPENSE:
-            acc =
-              objToUpload[field.name] > 0
-                ? EXPENSE_TYPE_INCOME
-                : EXPENSE_TYPE_EXPENSE;
-            break;
-        }
-        return acc;
-      }, EXPENSE_TYPE_EXPENSE);
-
-      mdbObj["type"] = expenseType;
+      const mdbObj = prepareDBObject({
+        accountName: accountDB.get("name"),
+        config,
+        objToUpload,
+      });
 
       // eliminate ignored values
       const ignoreLine = genericIgnore({ config, obj: mdbObj });
@@ -771,20 +709,94 @@ export const processUpload = async (req, res) => {
 
   // upload to MongoDB
   const dataMdbUploaded = [];
-  // for (const mdbObj of dataMdb) {
-  //   const { transaction } = await addExpenseTransaction(mdbObj, user);
-  //   dataMdbUploaded.push({ ...mdbObj, _id: transaction._id });
-  // }
-  dataMdbUploaded.push(...dataMdb);
+  for (const mdbObj of dataMdb) {
+    const { transaction } = await addExpenseTransaction(mdbObj, user);
+    dataMdbUploaded.push({ ...mdbObj, _id: transaction._id });
+  }
+  // dataMdbUploaded.push(...dataMdb);
 
   console.log(dataToUpload.length, dataToUpload[dataToUpload.length - 1]);
   console.log(dataMdb.length, dataMdb[dataMdb.length - 1]);
+
+  // delete file at the end
+  fs.rmSync(`tmp/${req.body.file}`);
+
   res.status(201).json({
     message: "file processed",
     config,
     data: dataToUpload,
     dataMdb: dataMdbUploaded,
   });
+};
+
+const prepareDBObject = ({ accountName, config, objToUpload }) => {
+  const baseExpenseObj = {
+    account: objToUpload.bankAccount,
+    tags: [accountName],
+  };
+
+  // fill expense model fields
+  const mdbObj = EXPENSE_FIELDS.reduce((acc, field, index) => {
+    const fieldAssigns = config.fileFields.filter(
+      (f) => f?.expenseColumn === field
+    );
+    var value = "";
+
+    switch (field) {
+      case EXPENSE_FIELD_DATE:
+        value = objToUpload[fieldAssigns[0].name];
+        break;
+
+      case EXPENSE_FIELD_DESCRIPTION:
+        value = fieldAssigns
+          .reduce((a, f) => `${a} ${objToUpload[f.name].trim()}`, "")
+          .trim();
+        break;
+
+      case EXPENSE_FIELD_AMOUNT:
+        value = fieldAssigns.reduce(
+          (a, f) => a + Math.abs(objToUpload[f.name]),
+          0
+        );
+        break;
+
+      case EXPENSE_FIELD_NONE:
+      default:
+        return acc;
+    }
+
+    return { ...acc, [field]: value };
+  }, baseExpenseObj);
+
+  // find expense type
+  mdbObj["type"] = deriveExpenseType({ config, objToUpload, obj: mdbObj });
+  return mdbObj;
+};
+
+const deriveExpenseType = ({ config, objToUpload, obj }) => {
+  return config.fileFields.reduce((acc, field, index) => {
+    switch (field.expenseType) {
+      case EXPENSE_TYPE_COND_EXPENSE_IF_GT_0:
+        if (objToUpload[field.name] > 0) acc = EXPENSE_TYPE_EXPENSE;
+        break;
+      case EXPENSE_TYPE_COND_INCOME_IF_GT_0:
+        if (objToUpload[field.name] > 0) acc = EXPENSE_TYPE_INCOME;
+        break;
+      case EXPENSE_TYPE_COND_EXPENSE_IF_GT_0_EL_INCOME:
+        acc =
+          objToUpload[field.name] > 0
+            ? EXPENSE_TYPE_EXPENSE
+            : EXPENSE_TYPE_INCOME;
+        break;
+      case EXPENSE_TYPE_COND_INCOME_IF_GT_0_EL_EXPENSE:
+        acc =
+          objToUpload[field.name] > 0
+            ? EXPENSE_TYPE_INCOME
+            : EXPENSE_TYPE_EXPENSE;
+        break;
+    }
+    return acc;
+  }, EXPENSE_TYPE_EXPENSE);
 };
 
 const genericIgnore = ({ config, obj }) => {

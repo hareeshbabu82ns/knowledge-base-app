@@ -1,6 +1,7 @@
 import { Box, Stack, Tab, Tabs } from "@mui/material";
 import React from "react";
 import { v4 as uuidV4 } from "uuid";
+import { toast } from "react-toastify";
 import Header from "components/Header";
 import AccountForm from "./AccountForm";
 import { ACCOUNT_TYPES, EXPENSE_FIELDS } from "constants";
@@ -96,12 +97,30 @@ const Accounts = () => {
   const [selectedAccount, setSelectedAccount] = React.useState(initFormData);
 
   const onAccountUpdate = async (postData) => {
-    const payload = await updateAccount({
-      ...selectedAccount,
-      id: selectedAccount._id,
-      ...postData,
-    }).unwrap();
-    return payload;
+    const toastId = toast.loading("Updating Account...", {
+      toastId: "account-upd-action",
+    });
+    try {
+      const payload = await updateAccount({
+        ...selectedAccount,
+        id: selectedAccount._id,
+        ...postData,
+      }).unwrap();
+      toast.update(toastId, {
+        render: "Account Saved",
+        type: "success",
+        isLoading: false,
+        autoClose: true,
+      });
+      return payload;
+    } catch (e) {
+      toast.update(toastId, {
+        render: "Account failed",
+        type: "error",
+        isLoading: false,
+        autoClose: true,
+      });
+    }
   };
 
   return (

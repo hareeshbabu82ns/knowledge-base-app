@@ -10,6 +10,7 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
+import { toast } from "react-toastify";
 import { DataGrid } from "@mui/x-data-grid";
 import { INTL_DATE_LONG_OPTIONS } from "constants";
 import React, { useEffect, useState } from "react";
@@ -50,39 +51,51 @@ const AccountTransactionUploader = ({ account }) => {
     const data = new FormData();
     data.append("file", selectedFile);
 
-    // send file to server
-    const res = await uploadTransactions(data).unwrap();
-    // receive two parameter endpoint url ,form data
-    // console.log(res);
-    const file = res.filename;
+    const toastId = toast.loading("Uploading Transactions...", {
+      toastId: "trans-upl-action",
+    });
 
-    // 1. get field headers (dont send titleFieldsMap)
-    const {
-      message,
-      data: resData,
-      dataMdb: resDataMdb,
-      config,
-    } = await processUpload({
-      file,
-      bankAccount,
-    }).unwrap();
-    console.log(message, resData, config, resDataMdb);
-    if (config || resData) {
-      setConfig(config);
-      setDataToUpload(resData);
-      setDataMdb(resDataMdb);
-    } else {
-      setConfig(null);
-      setDataToUpload(null);
-      setDataMdb(null);
+    try {
+      // send file to server
+      const res = await uploadTransactions(data).unwrap();
+      // receive two parameter endpoint url ,form data
+      // console.log(res);
+      const file = res.filename;
+
+      const {
+        message,
+        data: resData,
+        dataMdb: resDataMdb,
+        config,
+      } = await processUpload({
+        file,
+        bankAccount,
+      }).unwrap();
+      console.log(message, resData, config, resDataMdb);
+      if (config || resData) {
+        setConfig(config);
+        setDataToUpload(resData);
+        setDataMdb(resDataMdb);
+      } else {
+        setConfig(null);
+        setDataToUpload(null);
+        setDataMdb(null);
+      }
+
+      toast.update(toastId, {
+        render: "Transactions Uploaded",
+        type: "success",
+        isLoading: false,
+        autoClose: true,
+      });
+    } catch (e) {
+      toast.update(toastId, {
+        render: "Upload failed",
+        type: "error",
+        isLoading: false,
+        autoClose: true,
+      });
     }
-
-    // 2. prepare mapping of headers to db fields
-    const titleFieldsMap = [];
-    console.log(titleFieldsMap);
-
-    // 3. save to db (send titleFieldsMap)
-    // await processUpload({ file, titleFieldsMap });
   };
 
   return (
