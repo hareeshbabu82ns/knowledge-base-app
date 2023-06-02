@@ -1,6 +1,6 @@
 import React, { useMemo } from "react";
 import { ResponsiveLine } from "@nivo/line";
-import { useTheme } from "@mui/material";
+import { Box, Stack, useTheme } from "@mui/material";
 
 import {
   useGetExpenseTagStatsQuery,
@@ -16,11 +16,12 @@ function ExpensesOverviewChart({
 }) {
   const theme = useTheme();
   const isDark = theme.palette.isDark;
-  const { data, isLoading } = useGetExpenseTagStatsQuery({
-    depth: "monthly",
-    dateFrom: startDate.toISO(),
-    dateTo: endDate.toISO(),
-  });
+  const { data: dataTags, isLoading: isLoadingTags } =
+    useGetExpenseTagStatsQuery({
+      depth: "monthly",
+      dateFrom: startDate.toISO(),
+      dateTo: endDate.toISO(),
+    });
   const { data: dataTypes, isLoading: isLoadingTypes } =
     useGetExpenseTypeStatsQuery({
       depth: "monthly",
@@ -29,18 +30,17 @@ function ExpensesOverviewChart({
     });
 
   const [totalTags, totalTypes] = useMemo(() => {
-    const totalTags = data
-      ? data.stats.reduce((acc, { tag, monthlyData, year, yearlyTotal }) => {
-          const mdata = monthlyData.map(({ month, total }) => {
+    const totalTags = dataTags
+      ? Object.keys(dataTags.stats).reduce((acc, tag) => {
+          const mdata = dataTags.stats[tag]?.map(({ year, month, total }) => {
             const dt = DateTime.local(year, month, 1);
             return {
               tag,
               monthYear: dt.toFormat("LLL yy"),
               year,
-              yearlyTotal,
               month,
               x: dt.toFormat("LLL yy"),
-              monthlyTotal: total,
+              total,
               y: total,
             };
           });
@@ -57,43 +57,42 @@ function ExpensesOverviewChart({
       : [];
 
     const totalTypes = dataTypes
-      ? dataTypes.stats.reduce(
-          (acc, { type, monthlyData, year, yearlyTotal }) => {
-            const mdata = monthlyData.map(({ month, total }) => {
-              const dt = DateTime.local(year, month, 1);
-              return {
-                type,
-                monthYear: dt.toFormat("LLL yy"),
-                year,
-                yearlyTotal,
-                month,
-                x: dt.toFormat("LLL yy"),
-                monthlyTotal: total,
-                y: total,
-              };
-            });
-
-            const typeData = {
-              id: type,
-              color: theme.palette.secondary[600],
-              data: mdata,
+      ? Object.keys(dataTypes.stats).reduce((acc, type) => {
+          const mdata = dataTypes.stats[type]?.map(({ year, month, total }) => {
+            const dt = DateTime.local(year, month, 1);
+            return {
+              type,
+              monthYear: dt.toFormat("LLL yy"),
+              year,
+              month,
+              x: dt.toFormat("LLL yy"),
+              total,
+              y: total,
             };
+          });
 
-            return [...acc, typeData];
-          },
-          []
-        )
+          const typeData = {
+            id: type,
+            color: theme.palette.secondary[600],
+            data: mdata,
+          };
+
+          return [...acc, typeData];
+        }, [])
       : [];
 
     // console.log(totalTags, totalTypes);
     return [totalTags, totalTypes];
-  }, [data, dataTypes, theme]);
+  }, [dataTags, dataTypes, theme]);
 
-  if (!data || isLoading) return <>Loading...</>;
+  if (!dataTags || isLoadingTags) return <>Loading...</>;
 
   return (
     <ResponsiveLine
       data={view === "tags" ? totalTags : totalTypes}
+      tooltip={({ point }) => {
+        return <CustomToolTip point={point} />;
+      }}
       theme={{
         axis: {
           domain: {
@@ -207,5 +206,27 @@ function ExpensesOverviewChart({
     />
   );
 }
+
+const CustomToolTip = ({ point }) => {
+  const theme = useTheme();
+  // console.log(point);
+  return (
+    <Box
+      color={theme.palette.getContrastText(point.borderColor)}
+      bgcolor={point.borderColor}
+      p={1}
+    >
+      <Stack>
+        <div>
+          {point.data?.type
+            ? `Type: ${point.data?.type}`
+            : `Tag: ${point.data?.tag}`}
+        </div>
+        <div>Date: {point.data?.xFormatted}</div>
+        <div>Total: {point.data?.yFormatted}</div>
+      </Stack>
+    </Box>
+  );
+};
 
 export default ExpensesOverviewChart;

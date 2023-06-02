@@ -15,7 +15,7 @@ import { Stack } from "@mui/system";
 import { DateTime } from "luxon";
 
 function ExpenseStatsChart({ hideHeading = false }) {
-  const [view, setView] = useState("tags");
+  const [view, setView] = useState("types");
   const [startDate, setStartDate] = useState(DateTime.now().startOf("year"));
   const [endDate, setEndDate] = useState(DateTime.now().endOf("year"));
 

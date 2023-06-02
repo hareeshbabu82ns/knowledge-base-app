@@ -1012,7 +1012,40 @@ export const getTypeStats = async (req, res) => {
       };
     });
 
-    res.status(200).json({ stats });
+    const statsByType = {};
+
+    stats.forEach((stat) => {
+      const statArr = statsByType[stat.type] || [];
+
+      if (depth === "yearly") {
+        statArr.push({
+          year: stat.year,
+          total: stat.yearlyTotal,
+          // id: stat._id,
+        });
+      } else if (depth === "monthly") {
+        const arr = stat.monthlyData?.map(({ month, total, _id }) => ({
+          year: stat.year,
+          month,
+          total,
+          // id: _id,
+        }));
+        statArr.push(...arr);
+      } else if (depth === "daily") {
+        const arr = stat.dailyData?.map(({ month, date, total, _id }) => ({
+          year: stat.year,
+          month,
+          day: date,
+          total,
+          // id: _id,
+        }));
+        statArr.push(...arr);
+      }
+
+      if (statArr.length > 0) statsByType[stat.type] = statArr;
+    });
+
+    res.status(200).json({ stats: statsByType });
   } catch (err) {
     res.status(404).json({ message: err.message });
   }
@@ -1098,7 +1131,40 @@ export const getTagStats = async (req, res) => {
       };
     });
 
-    res.status(200).json({ stats });
+    const statsByTag = {};
+
+    stats.forEach((stat) => {
+      const statArr = statsByTag[stat.tag] || [];
+
+      if (depth === "yearly") {
+        statArr.push({
+          year: stat.year,
+          total: stat.yearlyTotal,
+          // id: stat._id,
+        });
+      } else if (depth === "monthly") {
+        const arr = stat.monthlyData?.map(({ month, total, _id }) => ({
+          year: stat.year,
+          month,
+          total,
+          // id: _id,
+        }));
+        statArr.push(...arr);
+      } else if (depth === "daily") {
+        const arr = stat.dailyData?.map(({ month, date, total, _id }) => ({
+          year: stat.year,
+          month,
+          day: date,
+          total,
+          // id: _id,
+        }));
+        statArr.push(...arr);
+      }
+
+      if (statArr.length > 0) statsByTag[stat.tag] = statArr;
+    });
+
+    res.status(200).json({ stats: statsByTag });
   } catch (err) {
     res.status(404).json({ message: err.message });
   }
