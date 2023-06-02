@@ -44,6 +44,7 @@ function ExpensesOverviewChart({
               y: total,
             };
           });
+          console.log(mdata);
 
           const tagData = {
             id: tag,

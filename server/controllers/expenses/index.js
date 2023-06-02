@@ -889,7 +889,45 @@ export const getUserStats = async (req, res) => {
 
     const sort = { year: 1 };
 
-    const stats = await ExpenseUserStat.find(query, projection).sort(sort);
+    const statsDB = await ExpenseUserStat.find(query, projection).sort(sort);
+
+    // sort monthly data
+    const stats = statsDB.map((s) => {
+      var ret = true;
+      const sjson = s.toJSON();
+
+      const monthlyData = sjson.monthlyData
+        ?.filter((v) =>
+          filterStats({
+            transactionYearFrom,
+            transactionYearTo,
+            transactionMonthFrom,
+            transactionMonthTo,
+            year: sjson.year,
+            month: v.month,
+          })
+        )
+        .sort((a, b) => a.month - b.month);
+
+      const dailyData = sjson.dailyData
+        ?.filter((v) =>
+          filterDailyStats({
+            dateFrom: clientDateFrom,
+            dateTo: clientDateTo,
+            date: DateTime.fromObject({
+              year: sjson.year,
+              month: v.month,
+              day: v.date,
+            }),
+          })
+        )
+        .sort((a, b) => a.month * 100 + a.date - (b.month * 100 + b.date));
+      return {
+        ...sjson,
+        monthlyData,
+        dailyData,
+      };
+    });
 
     res.status(200).json({ stats });
   } catch (err) {
@@ -937,7 +975,42 @@ export const getTypeStats = async (req, res) => {
       year: 1,
     };
 
-    const stats = await ExpenseTypeStat.find(query, projection).sort(sort);
+    const statsDB = await ExpenseTypeStat.find(query, projection).sort(sort);
+
+    // sort monthly data
+    const stats = statsDB.map((s) => {
+      const sjson = s.toJSON();
+      const monthlyData = sjson.monthlyData
+        ?.filter((v) =>
+          filterStats({
+            transactionYearFrom,
+            transactionYearTo,
+            transactionMonthFrom,
+            transactionMonthTo,
+            year: sjson.year,
+            month: v.month,
+          })
+        )
+        .sort((a, b) => a.month - b.month);
+      const dailyData = sjson.dailyData
+        ?.filter((v) =>
+          filterDailyStats({
+            dateFrom: clientDateFrom,
+            dateTo: clientDateTo,
+            date: DateTime.fromObject({
+              year: sjson.year,
+              month: v.month,
+              day: v.date,
+            }),
+          })
+        )
+        .sort((a, b) => a.month * 100 + a.date - (b.month * 100 + b.date));
+      return {
+        ...sjson,
+        monthlyData,
+        dailyData,
+      };
+    });
 
     res.status(200).json({ stats });
   } catch (err) {
@@ -987,10 +1060,77 @@ export const getTagStats = async (req, res) => {
       year: 1,
     };
 
-    const stats = await ExpenseTagStat.find(query, projection).sort(sort);
+    const statsDB = await ExpenseTagStat.find(query, projection).sort(sort);
+
+    // sort monthly data
+    const stats = statsDB.map((s) => {
+      var ret = true;
+      const sjson = s.toJSON();
+      const monthlyData = sjson.monthlyData
+        ?.filter((v) =>
+          filterStats({
+            transactionYearFrom,
+            transactionYearTo,
+            transactionMonthFrom,
+            transactionMonthTo,
+            year: sjson.year,
+            month: v.month,
+          })
+        )
+        .sort((a, b) => a.month - b.month);
+      const dailyData = sjson.dailyData
+        ?.filter((v) =>
+          filterDailyStats({
+            dateFrom: clientDateFrom,
+            dateTo: clientDateTo,
+            date: DateTime.fromObject({
+              year: sjson.year,
+              month: v.month,
+              day: v.date,
+            }),
+          })
+        )
+        .sort((a, b) => a.month * 100 + a.date - (b.month * 100 + b.date));
+      return {
+        ...sjson,
+        monthlyData,
+        dailyData,
+      };
+    });
 
     res.status(200).json({ stats });
   } catch (err) {
     res.status(404).json({ message: err.message });
   }
+};
+
+const filterStats = ({
+  transactionYearFrom,
+  transactionYearTo,
+  transactionMonthFrom,
+  transactionMonthTo,
+  year,
+  month,
+}) => {
+  if (transactionYearFrom === transactionYearTo) {
+    return month >= transactionMonthFrom && month <= transactionMonthTo;
+  }
+  if (year === transactionYearFrom) {
+    return month >= transactionMonthFrom;
+  }
+  if (year === transactionYearTo) {
+    return month <= transactionMonthTo;
+  }
+  return true;
+};
+
+const filterDailyStats = ({ dateFrom, dateTo, date }) => {
+  const diffFrom = date.diff(dateFrom);
+  const diffTo = dateTo.diff(date);
+
+  if (diffFrom.milliseconds > 0 && diffTo.milliseconds > 0) return true;
+  // console.log(date.toISO(), dateFrom.toISO(), diffFrom.milliseconds);
+  // console.log(date.toISO(), dateTo.toISO(), diffTo.milliseconds);
+
+  return false;
 };

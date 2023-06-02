@@ -16,8 +16,8 @@ import { DateTime } from "luxon";
 
 function ExpenseStatsChart({ hideHeading = false }) {
   const [view, setView] = useState("tags");
-  const [startDate, setStartDate] = useState(DateTime.now().startOf("month"));
-  const [endDate, setEndDate] = useState(DateTime.now().endOf("month"));
+  const [startDate, setStartDate] = useState(DateTime.now().startOf("year"));
+  const [endDate, setEndDate] = useState(DateTime.now().endOf("year"));
 
   return (
     <Box m="1.5rem 2.5rem">
