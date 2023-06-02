@@ -44,6 +44,7 @@ const Daily = () => {
     });
 
     const formattedData = [totalSalesLine, totalUnitsLine];
+    console.log(formattedData);
     return [formattedData];
   }, [data, startDate, endDate]); // eslint-disable-line react-hooks/exhaustive-deps
 

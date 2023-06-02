@@ -194,3 +194,48 @@ export const prepareTransaction = ({
     userStatsData,
   };
 };
+
+export const fillStatDates = ({ statArr = [], depth, dateFrom, dateTo }) => {
+  const filledStats = fillDates({ depth, dateFrom, dateTo });
+
+  return filledStats.map((stat) => {
+    const statOriginal =
+      depth === "yearly"
+        ? statArr.find((s) => s.year === stat.year)
+        : depth === "monthly"
+        ? statArr.find((s) => s.year === stat.year && s.month === stat.month)
+        : statArr.find(
+            (s) =>
+              s.year === stat.year &&
+              s.month === stat.month &&
+              s.day === stat.day
+          );
+    return statOriginal ? { ...statOriginal } : { ...stat };
+  });
+};
+
+export const fillDates = ({ depth, dateFrom, dateTo }) => {
+  const result = [];
+  let currDate =
+    depth === "yearly"
+      ? dateFrom.startOf("year")
+      : depth === "monthly"
+      ? dateFrom.startOf("month")
+      : dateFrom;
+
+  while (currDate.diff(dateTo).valueOf() < 0) {
+    // Extract the year, month, and day for currDate
+    const year = currDate.year;
+    const month = depth === "monthly" ? currDate.month : undefined;
+    const day = depth === "daily" ? currDate.day : undefined;
+    // Create the array format of the date and add it to result
+    result.push({ year, month, day, total: 0 });
+    // Increment to the next day
+    currDate = currDate.plus({
+      days: depth === "daily" ? 1 : 0,
+      months: depth === "monthly" ? 1 : 0,
+      years: depth === "yearly" ? 1 : 0,
+    });
+  }
+  return result;
+};

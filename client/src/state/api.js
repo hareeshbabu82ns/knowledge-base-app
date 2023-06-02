@@ -171,7 +171,7 @@ export const api = createApi({
       query: ({ depth, dateFrom, dateTo }) => ({
         url: `api/expenses/userStats`,
         method: "GET",
-        params: { depth, dateFrom, dateTo },
+        params: { depth, dateFrom, dateTo, fillTimeline: "X" },
       }),
       providesTags: ["ExpenseUserStats"],
     }),
@@ -179,7 +179,7 @@ export const api = createApi({
       query: ({ depth, tag, dateFrom, dateTo }) => ({
         url: `api/expenses/tagStats`,
         method: "GET",
-        params: { depth, tag, dateFrom, dateTo },
+        params: { depth, tag, dateFrom, dateTo, fillTimeline: "X" },
       }),
       providesTags: ["ExpenseTagStats"],
     }),
@@ -187,7 +187,7 @@ export const api = createApi({
       query: ({ depth, type, dateFrom, dateTo }) => ({
         url: `api/expenses/typeStats`,
         method: "GET",
-        params: { depth, type, dateFrom, dateTo },
+        params: { depth, type, dateFrom, dateTo, fillTimeline: "X" },
       }),
       providesTags: ["ExpenseTypeStats"],
     }),

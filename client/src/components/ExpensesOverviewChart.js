@@ -44,7 +44,6 @@ function ExpensesOverviewChart({
               y: total,
             };
           });
-          console.log(mdata);
 
           const tagData = {
             id: tag,
@@ -81,7 +80,6 @@ function ExpensesOverviewChart({
         }, [])
       : [];
 
-    // console.log(totalTags, totalTypes);
     return [totalTags, totalTypes];
   }, [dataTags, dataTypes, theme]);
 

@@ -24,7 +24,11 @@ import {
 
 import Transaction from "../../models/Expenses/ExpenseTransaction.js";
 import Account from "../../models/Expenses/ExpenseAccount.js";
-import { getClientDateTime, prepareTransaction } from "./logic.js";
+import {
+  fillStatDates,
+  getClientDateTime,
+  prepareTransaction,
+} from "./logic.js";
 import ExpenseTag from "../../models/Expenses/ExpenseTag.js";
 import ExpenseTagStat from "../../models/Expenses/ExpenseTagStat.js";
 import ExpenseTypeStat from "../../models/Expenses/ExpenseTypeStat.js";
@@ -940,7 +944,13 @@ export const getTypeStats = async (req, res) => {
     const { user } = req.auth;
 
     // dates in ISO format
-    const { type, dateFrom, dateTo, depth = "yearly" } = req.query;
+    const {
+      type,
+      dateFrom,
+      dateTo,
+      depth = "yearly",
+      fillTimeline = "",
+    } = req.query;
 
     const clientDateFrom = dateFrom
       ? getClientDateTime({ date: dateFrom })
@@ -1045,6 +1055,16 @@ export const getTypeStats = async (req, res) => {
       if (statArr.length > 0) statsByType[stat.type] = statArr;
     });
 
+    if (fillTimeline === "X")
+      Object.keys(statsByType).forEach((type) => {
+        statsByType[type] = fillStatDates({
+          statArr: statsByType[type],
+          depth,
+          dateFrom: clientDateFrom,
+          dateTo: clientDateTo,
+        });
+      });
+
     res.status(200).json({ stats: statsByType });
   } catch (err) {
     res.status(404).json({ message: err.message });
@@ -1056,7 +1076,13 @@ export const getTagStats = async (req, res) => {
     const { user } = req.auth;
 
     // dates in ISO format
-    const { tag, dateFrom, dateTo, depth = "yearly" } = req.query;
+    const {
+      tag,
+      dateFrom,
+      dateTo,
+      depth = "yearly",
+      fillTimeline = "",
+    } = req.query;
 
     const clientDateFrom = dateFrom
       ? getClientDateTime({ date: dateFrom })
@@ -1163,6 +1189,16 @@ export const getTagStats = async (req, res) => {
 
       if (statArr.length > 0) statsByTag[stat.tag] = statArr;
     });
+
+    if (fillTimeline === "X")
+      Object.keys(statsByTag).forEach((tag) => {
+        statsByTag[tag] = fillStatDates({
+          statArr: statsByTag[tag],
+          depth,
+          dateFrom: clientDateFrom,
+          dateTo: clientDateTo,
+        });
+      });
 
     res.status(200).json({ stats: statsByTag });
   } catch (err) {
