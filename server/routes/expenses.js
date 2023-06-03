@@ -14,6 +14,7 @@ import {
   addAccount,
   updateAccount,
   deleteAccount,
+  recalculateStats,
 } from "../controllers/expenses/index.js";
 import { uploadFile } from "../controllers/utils.js";
 
@@ -35,5 +36,6 @@ router.delete("/transactions/:id", auth, deleteTransaction);
 router.get("/userStats", auth, getUserStats);
 router.get("/typeStats", auth, getTypeStats);
 router.get("/tagStats", auth, getTagStats);
+router.post("/recalculateStats", auth, recalculateStats);
 
 export default router;

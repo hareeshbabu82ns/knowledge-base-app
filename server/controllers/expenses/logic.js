@@ -239,3 +239,125 @@ export const fillDates = ({ depth, dateFrom, dateTo }) => {
   }
   return result;
 };
+
+export const prepareDBObject = ({ accountName, config, objToUpload }) => {
+  const baseExpenseObj = {
+    account: objToUpload.bankAccount,
+    tags: [accountName],
+  };
+
+  // fill expense model fields
+  const mdbObj = EXPENSE_FIELDS.reduce((acc, field, index) => {
+    const fieldAssigns = config.fileFields.filter(
+      (f) => f?.expenseColumn === field
+    );
+    var value = "";
+
+    switch (field) {
+      case EXPENSE_FIELD_DATE:
+        value = objToUpload[fieldAssigns[0].name];
+        break;
+
+      case EXPENSE_FIELD_DESCRIPTION:
+        value = fieldAssigns
+          .reduce((a, f) => `${a} ${objToUpload[f.name].trim()}`, "")
+          .trim();
+        break;
+
+      case EXPENSE_FIELD_AMOUNT:
+        value = fieldAssigns.reduce(
+          (a, f) => a + Math.abs(objToUpload[f.name]),
+          0
+        );
+        break;
+
+      case EXPENSE_FIELD_NONE:
+      default:
+        return acc;
+    }
+
+    return { ...acc, [field]: value };
+  }, baseExpenseObj);
+
+  // find expense type
+  mdbObj["type"] = deriveExpenseType({ config, objToUpload, obj: mdbObj });
+  return mdbObj;
+};
+
+const deriveExpenseType = ({ config, objToUpload, obj }) => {
+  return config.fileFields.reduce((acc, field, index) => {
+    switch (field.expenseType) {
+      case EXPENSE_TYPE_COND_EXPENSE_IF_GT_0:
+        if (objToUpload[field.name] > 0) acc = EXPENSE_TYPE_EXPENSE;
+        break;
+      case EXPENSE_TYPE_COND_INCOME_IF_GT_0:
+        if (objToUpload[field.name] > 0) acc = EXPENSE_TYPE_INCOME;
+        break;
+      case EXPENSE_TYPE_COND_EXPENSE_IF_GT_0_EL_INCOME:
+        acc =
+          objToUpload[field.name] > 0
+            ? EXPENSE_TYPE_EXPENSE
+            : EXPENSE_TYPE_INCOME;
+        break;
+      case EXPENSE_TYPE_COND_INCOME_IF_GT_0_EL_EXPENSE:
+        acc =
+          objToUpload[field.name] > 0
+            ? EXPENSE_TYPE_INCOME
+            : EXPENSE_TYPE_EXPENSE;
+        break;
+    }
+    return acc;
+  }, EXPENSE_TYPE_EXPENSE);
+};
+
+export const genericIgnore = ({ config, obj }) => {
+  for (const ignore of config.ignoreOps) {
+    if (ignore.name === "description") {
+      switch (ignore.comparision) {
+        case COMPARISION_OPS_EQ:
+          if (obj[ignore.name] === ignore.value) return true;
+          break;
+        case COMPARISION_OPS_NE:
+          if (obj[ignore.name] !== ignore.value) return true;
+          break;
+        case COMPARISION_OPS_CONTAINS:
+          if (obj[ignore.name].includes(ignore.value)) return true;
+          break;
+        case COMPARISION_OPS_STARTS_WITH:
+          if (obj[ignore.name].startsWith(ignore.value)) return true;
+          break;
+      }
+    }
+  }
+  return false;
+};
+
+export const trimQuotes = (val) => {
+  if (typeof val === "string") {
+    return val.replace(/^["']+|["']+$/g, "");
+  }
+  return val;
+};
+
+export const convFieldWithConfig = ({
+  fieldValRaw,
+  fieldConfig,
+  fieldDataLineRaw,
+}) => {
+  switch (fieldConfig.type) {
+    case "date":
+      return DateTime.fromFormat(fieldValRaw, fieldConfig.format).toISO();
+    case "dateTime":
+      const dateStr =
+        fieldValRaw +
+        " " +
+        trimQuotes(fieldDataLineRaw[fieldConfig.timeColumnIndex - 1] || "");
+      return DateTime.fromFormat(dateStr, fieldConfig.format).toISO();
+    case "amount":
+      return fieldValRaw.trim().length === 0
+        ? 0
+        : parseFloat(fieldValRaw) * (fieldConfig?.negated ? -1 : 1);
+    default:
+      return fieldValRaw.trim();
+  }
+};

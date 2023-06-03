@@ -2,37 +2,288 @@ import mongoose from "mongoose";
 import { DateTime } from "luxon";
 import fs from "fs";
 
-import {
-  ACCOUNT_TYPES,
-  EXPENSE_FIELD_AMOUNT,
-  EXPENSE_FIELD_DATE,
-  EXPENSE_FIELD_DESCRIPTION,
-  EXPENSE_FIELD_NONE,
-  EXPENSE_TYPES,
-  EXPENSE_FIELDS,
-  EXPENSE_TYPE_EXPENSE,
-  EXPENSE_TYPE_COND_EXPENSE_IF_GT_0,
-  EXPENSE_TYPE_COND_INCOME_IF_GT_0,
-  EXPENSE_TYPE_COND_EXPENSE_IF_GT_0_EL_INCOME,
-  EXPENSE_TYPE_INCOME,
-  EXPENSE_TYPE_COND_INCOME_IF_GT_0_EL_EXPENSE,
-  COMPARISION_OPS_EQ,
-  COMPARISION_OPS_NE,
-  COMPARISION_OPS_STARTS_WITH,
-  COMPARISION_OPS_CONTAINS,
-} from "../../models/Expenses/const.js";
+import { ACCOUNT_TYPES, EXPENSE_TYPES } from "../../models/Expenses/const.js";
 
 import Transaction from "../../models/Expenses/ExpenseTransaction.js";
 import Account from "../../models/Expenses/ExpenseAccount.js";
 import {
+  convFieldWithConfig,
   fillStatDates,
+  genericIgnore,
   getClientDateTime,
+  prepareDBObject,
   prepareTransaction,
+  trimQuotes,
 } from "./logic.js";
 import ExpenseTag from "../../models/Expenses/ExpenseTag.js";
 import ExpenseTagStat from "../../models/Expenses/ExpenseTagStat.js";
 import ExpenseTypeStat from "../../models/Expenses/ExpenseTypeStat.js";
 import ExpenseUserStat from "../../models/Expenses/ExpenseUserStat.js";
+import ExpenseTransaction from "../../models/Expenses/ExpenseTransaction.js";
+
+export const recalculateStatsForYear = async ({ year, user }) => {
+  const tagStats = {};
+  const typeStats = {};
+  const userStats = {};
+  const batchSize = 150;
+
+  const dateFrom = DateTime.fromObject({ year });
+  const dateTo = dateFrom.endOf("year");
+
+  // fetch initial set of transactions to process
+  let trans = await ExpenseTransaction.find({
+    date: { $gte: dateFrom.toISODate(), $lte: dateTo.toISODate() },
+  }).limit(batchSize);
+  let len = trans.length;
+  let skip = len;
+
+  while (len > 0) {
+    trans.forEach((t) => {
+      const {
+        amount,
+        account,
+        description,
+        tags,
+        type,
+        dateZ: date,
+      } = t.toObject();
+
+      // calculate stats
+      const tagStatFiltered = Object.entries(tagStats)
+        .filter(([tag, tagStat]) => tags.includes(tag))
+        .map(([tag, tagStat]) => ({ ...tagStat }));
+      const { tagStatsData, typeStatsData, userStatsData } = prepareTransaction(
+        {
+          transaction: { amount, account, description, tags, type, date },
+          user,
+          tagStats: tagStatFiltered,
+          typeStats: typeStats[type],
+          userStats: userStats[year],
+        }
+      );
+      tagStatsData.forEach((t) => (tagStats[t.tag] = { ...t }));
+      typeStats[type] = { ...typeStatsData, _id: "t" };
+      userStats[year] = { ...userStatsData, _id: "t" };
+    });
+
+    // fetch next set of transactions to process
+    trans = await ExpenseTransaction.find({
+      date: { $gte: dateFrom.toISODate(), $lte: dateTo.toISODate() },
+    })
+      .skip(skip)
+      .limit(batchSize);
+    len = trans.length;
+    skip = skip + len;
+  }
+
+  // save stats to db
+  // const tagStatsDB = tagStats.map((t) => ({ ...t, _id: undefined }));
+  const tagStatsDB = Object.values(tagStats).map((t) => ({
+    ...t,
+    _id: undefined,
+  }));
+
+  const typeStatsDB = Object.values(typeStats).map((t) => ({
+    ...t,
+    _id: undefined,
+  }));
+  const userStatsDB = Object.values(userStats).map((t) => ({
+    ...t,
+    _id: undefined,
+  }));
+
+  return {
+    tagStats: tagStatsDB,
+    typeStats: typeStatsDB,
+    userStats: userStatsDB,
+  };
+};
+
+// db transaction sample
+// try {
+//   session.startTransaction();
+
+//   await session.commitTransaction();
+//   await session.endSession();
+// } catch (ex) {
+//   console.log(ex);
+//   await session.abortTransaction();
+//   await session.endSession();
+//   throw "Database update failed";
+// }
+
+export const recalculateStats = async (req, res) => {
+  const tagStatsDB = [];
+  const typeStatsDB = [];
+  const userStatsDB = [];
+
+  try {
+    const { user } = req.auth;
+    const { year } = req.query;
+
+    // find min date
+    const transMin = year
+      ? {}
+      : await ExpenseTransaction.findOne({}).limit(1).sort({ date: 1 });
+    const transMax = year
+      ? {}
+      : await ExpenseTransaction.findOne({}).limit(1).sort({ date: -1 });
+
+    const yearMin = year
+      ? Number(year)
+      : Number(transMin.get("dateZ").split("-")[0]);
+    const yearMax = year
+      ? Number(year)
+      : Number(transMax.get("dateZ").split("-")[0]);
+
+    const session = await mongoose.startSession();
+
+    // procees for each year
+    for (let year = yearMin; year <= yearMax; year++) {
+      const { tagStats, typeStats, userStats } = await recalculateStatsForYear({
+        year,
+        user,
+      });
+      tagStatsDB.push(...tagStats);
+      typeStatsDB.push(...typeStats);
+      userStatsDB.push(...userStats);
+
+      try {
+        session.startTransaction();
+
+        // delete db entries for current year
+        await ExpenseTagStat.deleteMany({ year }, { session });
+        await ExpenseTypeStat.deleteMany({ year }, { session });
+        await ExpenseUserStat.deleteMany({ year }, { session });
+
+        // save new db entries for current year
+        await ExpenseTagStat.create(tagStats, { session });
+        await ExpenseTypeStat.create(typeStats, { session });
+        await ExpenseUserStat.create(userStats, { session });
+
+        await session.commitTransaction();
+        await session.endSession();
+      } catch (ex) {
+        console.log(ex);
+        await session.abortTransaction();
+        await session.endSession();
+        throw "Database update failed";
+      }
+    } // end year loop
+
+    res.status(201).json({
+      message: "Stats Re-Calculated",
+      tagStats: tagStatsDB,
+      typeStats: typeStatsDB,
+      userStats: userStatsDB,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(501).json({ message: error });
+  }
+
+  // const tagStats = {};
+  // const typeStats = {};
+  // const userStats = {};
+
+  // try {
+  //   const { user } = req.auth;
+
+  //   // delete existing stats
+  //   await ExpenseTagStat.deleteMany({});
+  //   await ExpenseTypeStat.deleteMany({});
+  //   await ExpenseUserStat.deleteMany({});
+
+  //   // fetch initial set of transactions to process
+  //   let trans = await ExpenseTransaction.find().limit(150);
+  //   let len = trans.length;
+  //   let skip = 100;
+
+  //   // while (len > 0) {
+
+  //   trans.forEach((t) => {
+  //     const {
+  //       amount,
+  //       account,
+  //       description,
+  //       tags,
+  //       type,
+  //       dateZ: date,
+  //     } = t.toObject();
+
+  //     const trClientDate = getClientDateTime({ date });
+  //     const year = trClientDate.year;
+
+  //     // calculate stats
+  //     const {
+  //       transactionData,
+  //       tagData,
+  //       tagStatsData,
+  //       typeStatsData,
+  //       userStatsData,
+  //     } = prepareTransaction({
+  //       transaction: { amount, account, description, tags, type, date },
+  //       user,
+  //       tagStats: tagStats[year],
+  //       typeStats: typeStats[`${type}_${year}`],
+  //       userStats: userStats[year],
+  //     });
+  //     tagStats[year] = [...tagStatsData];
+  //     typeStats[`${type}_${year}`] = { ...typeStatsData, _id: "" };
+  //     userStats[year] = { ...userStatsData, _id: "" };
+  //   });
+
+  //   //   // fetch next set of transactions to process
+  //   //   trans = await ExpenseTransaction.find({}).skip(skip).limit(100);
+  //   //   len = trans.length;
+  //   //   skip = skip + len;
+  //   // }
+
+  //   // save stats to db
+  //   const tagStatsDB = [];
+  //   for (const tagYear of Object.keys(tagStats)) {
+  //     tagStats[tagYear].forEach((tagStat) =>
+  //       tagStatsDB.push({ ...tagStat, _id: undefined })
+  //     );
+  //   }
+  //   const typeStatsDB = Object.values(typeStats).map((t) => ({
+  //     ...t,
+  //     _id: undefined,
+  //   }));
+  //   const userStatsDB = Object.values(userStats).map((t) => ({
+  //     ...t,
+  //     _id: undefined,
+  //   }));
+
+  //   const session = await mongoose.startSession();
+
+  //   try {
+  //     session.startTransaction();
+
+  //     // await ExpenseTagStat.create(tagStatsDB, { session });
+  //     // await ExpenseTypeStat.create(typeStatsDB, { session });
+  //     await ExpenseUserStat.create(userStatsDB, { session });
+
+  //     await session.commitTransaction();
+  //     await session.endSession();
+  //   } catch (ex) {
+  //     console.log(ex);
+  //     await session.abortTransaction();
+  //     await session.endSession();
+  //     throw "Database update failed";
+  //   }
+
+  //   res.status(201).json({
+  //     message: "Stats Re-Calculated",
+  //     tagStats: tagStatsDB,
+  //     typeStats: typeStatsDB,
+  //     userStats: userStatsDB,
+  //   });
+  // } catch (error) {
+  //   console.log(error);
+  //   res.status(501).json({ message: error });
+  // }
+};
 
 // Transactions //
 const validateTransactionData = ({ amount, tags, type }) => {
@@ -731,128 +982,6 @@ export const processUpload = async (req, res) => {
     data: dataToUpload,
     dataMdb: dataMdbUploaded,
   });
-};
-
-const prepareDBObject = ({ accountName, config, objToUpload }) => {
-  const baseExpenseObj = {
-    account: objToUpload.bankAccount,
-    tags: [accountName],
-  };
-
-  // fill expense model fields
-  const mdbObj = EXPENSE_FIELDS.reduce((acc, field, index) => {
-    const fieldAssigns = config.fileFields.filter(
-      (f) => f?.expenseColumn === field
-    );
-    var value = "";
-
-    switch (field) {
-      case EXPENSE_FIELD_DATE:
-        value = objToUpload[fieldAssigns[0].name];
-        break;
-
-      case EXPENSE_FIELD_DESCRIPTION:
-        value = fieldAssigns
-          .reduce((a, f) => `${a} ${objToUpload[f.name].trim()}`, "")
-          .trim();
-        break;
-
-      case EXPENSE_FIELD_AMOUNT:
-        value = fieldAssigns.reduce(
-          (a, f) => a + Math.abs(objToUpload[f.name]),
-          0
-        );
-        break;
-
-      case EXPENSE_FIELD_NONE:
-      default:
-        return acc;
-    }
-
-    return { ...acc, [field]: value };
-  }, baseExpenseObj);
-
-  // find expense type
-  mdbObj["type"] = deriveExpenseType({ config, objToUpload, obj: mdbObj });
-  return mdbObj;
-};
-
-const deriveExpenseType = ({ config, objToUpload, obj }) => {
-  return config.fileFields.reduce((acc, field, index) => {
-    switch (field.expenseType) {
-      case EXPENSE_TYPE_COND_EXPENSE_IF_GT_0:
-        if (objToUpload[field.name] > 0) acc = EXPENSE_TYPE_EXPENSE;
-        break;
-      case EXPENSE_TYPE_COND_INCOME_IF_GT_0:
-        if (objToUpload[field.name] > 0) acc = EXPENSE_TYPE_INCOME;
-        break;
-      case EXPENSE_TYPE_COND_EXPENSE_IF_GT_0_EL_INCOME:
-        acc =
-          objToUpload[field.name] > 0
-            ? EXPENSE_TYPE_EXPENSE
-            : EXPENSE_TYPE_INCOME;
-        break;
-      case EXPENSE_TYPE_COND_INCOME_IF_GT_0_EL_EXPENSE:
-        acc =
-          objToUpload[field.name] > 0
-            ? EXPENSE_TYPE_INCOME
-            : EXPENSE_TYPE_EXPENSE;
-        break;
-    }
-    return acc;
-  }, EXPENSE_TYPE_EXPENSE);
-};
-
-const genericIgnore = ({ config, obj }) => {
-  for (const ignore of config.ignoreOps) {
-    if (ignore.name === "description") {
-      switch (ignore.comparision) {
-        case COMPARISION_OPS_EQ:
-          if (obj[ignore.name] === ignore.value) return true;
-          break;
-        case COMPARISION_OPS_NE:
-          if (obj[ignore.name] !== ignore.value) return true;
-          break;
-        case COMPARISION_OPS_CONTAINS:
-          if (obj[ignore.name].includes(ignore.value)) return true;
-          break;
-        case COMPARISION_OPS_STARTS_WITH:
-          if (obj[ignore.name].startsWith(ignore.value)) return true;
-          break;
-      }
-    }
-  }
-  return false;
-};
-
-const trimQuotes = (val) => {
-  if (typeof val === "string") {
-    return val.replace(/^["']+|["']+$/g, "");
-  }
-  return val;
-};
-
-const convFieldWithConfig = ({
-  fieldValRaw,
-  fieldConfig,
-  fieldDataLineRaw,
-}) => {
-  switch (fieldConfig.type) {
-    case "date":
-      return DateTime.fromFormat(fieldValRaw, fieldConfig.format).toISO();
-    case "dateTime":
-      const dateStr =
-        fieldValRaw +
-        " " +
-        trimQuotes(fieldDataLineRaw[fieldConfig.timeColumnIndex - 1] || "");
-      return DateTime.fromFormat(dateStr, fieldConfig.format).toISO();
-    case "amount":
-      return fieldValRaw.trim().length === 0
-        ? 0
-        : parseFloat(fieldValRaw) * (fieldConfig?.negated ? -1 : 1);
-    default:
-      return fieldValRaw.trim();
-  }
 };
 
 export const getUserStats = async (req, res) => {
