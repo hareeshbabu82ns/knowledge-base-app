@@ -5,6 +5,7 @@ import { Box, Stack, useTheme } from "@mui/material";
 import {
   useGetExpenseTagStatsQuery,
   useGetExpenseTypeStatsQuery,
+  useGetExpenseUserStatsQuery,
 } from "state/api";
 import { DateTime } from "luxon";
 
@@ -28,8 +29,14 @@ function ExpensesOverviewChart({
       dateFrom: startDate.toISO(),
       dateTo: endDate.toISO(),
     });
+  const { data: dataUser, isLoading: isLoadingUser } =
+    useGetExpenseUserStatsQuery({
+      depth: "monthly",
+      dateFrom: startDate.toISO(),
+      dateTo: endDate.toISO(),
+    });
 
-  const [totalTags, totalTypes] = useMemo(() => {
+  const [totalTags, totalTypes, totalUser] = useMemo(() => {
     const totalTags = dataTags
       ? Object.keys(dataTags.stats).reduce((acc, tag) => {
           const mdata = dataTags.stats[tag]?.map(({ year, month, total }) => {
@@ -80,14 +87,36 @@ function ExpensesOverviewChart({
         }, [])
       : [];
 
-    return [totalTags, totalTypes];
-  }, [dataTags, dataTypes, theme]);
+    const totalUser = dataUser
+      ? [
+          {
+            id: "tally",
+            color: theme.palette.secondary[600],
+            data: dataUser.stats?.map(({ year, month, total }) => {
+              const dt = DateTime.local(year, month, 1);
+              return {
+                monthYear: dt.toFormat("LLL yy"),
+                year,
+                month,
+                x: dt.toFormat("LLL yy"),
+                total,
+                y: total,
+              };
+            }),
+          },
+        ]
+      : [];
+
+    return [totalTags, totalTypes, totalUser];
+  }, [dataTags, dataTypes, dataUser, theme]);
 
   if (!dataTags || isLoadingTags) return <>Loading...</>;
 
   return (
     <ResponsiveLine
-      data={view === "tags" ? totalTags : totalTypes}
+      data={
+        view === "tags" ? totalTags : view === "types" ? totalTypes : totalUser
+      }
       tooltip={({ point }) => {
         return <CustomToolTip point={point} />;
       }}
@@ -165,11 +194,19 @@ function ExpensesOverviewChart({
       }}
       enableGridX={false}
       enableGridY={false}
+      lineWidth={3}
+      activeLineWidth={6}
+      inactiveLineWidth={3}
+      inactiveOpacity={0.15}
       pointSize={10}
+      activePointSize={16}
+      inactivePointSize={0}
       pointColor={{ theme: "background" }}
-      pointBorderWidth={2}
+      pointBorderWidth={3}
+      activePointBorderWidth={3}
       pointBorderColor={{ from: "serieColor" }}
       pointLabelYOffset={-12}
+      colors={{ scheme: "spectral" }}
       useMesh={true}
       legends={
         !isDashboard
@@ -218,7 +255,9 @@ const CustomToolTip = ({ point }) => {
         <div>
           {point.data?.type
             ? `Type: ${point.data?.type}`
-            : `Tag: ${point.data?.tag}`}
+            : point.data?.tag
+            ? `Tag: ${point.data?.tag}`
+            : ""}
         </div>
         <div>Date: {point.data?.xFormatted}</div>
         <div>Total: {point.data?.yFormatted}</div>

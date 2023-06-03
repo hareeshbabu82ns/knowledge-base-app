@@ -38,6 +38,7 @@ function ExpenseStatsChart({ hideHeading = false }) {
             >
               <MenuItem value="tags">Tags</MenuItem>
               <MenuItem value="types">Types</MenuItem>
+              <MenuItem value="user">User</MenuItem>
             </Select>
           </FormControl>
           <Stack direction="row" gap={2} alignItems="center">

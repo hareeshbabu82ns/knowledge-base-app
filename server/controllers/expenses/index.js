@@ -990,7 +990,7 @@ export const getUserStats = async (req, res) => {
 
     // dates in ISO format
     // depth in yearly monthly daily
-    const { dateFrom, dateTo, depth = "yearly" } = req.query;
+    const { dateFrom, dateTo, depth = "yearly", fillTimeline = "" } = req.query;
 
     const clientDateFrom = dateFrom
       ? getClientDateTime({ date: dateFrom })
@@ -1061,6 +1061,46 @@ export const getUserStats = async (req, res) => {
         dailyData,
       };
     });
+
+    if (fillTimeline === "X") {
+      const statArr = [];
+
+      stats.forEach((stat) => {
+        if (depth === "yearly") {
+          statArr.push({
+            year: stat.year,
+            total: stat.yearlyTotal,
+            // id: stat._id,
+          });
+        } else if (depth === "monthly") {
+          const arr = stat.monthlyData?.map(({ month, total, _id }) => ({
+            year: stat.year,
+            month,
+            total,
+            // id: _id,
+          }));
+          statArr.push(...arr);
+        } else if (depth === "daily") {
+          const arr = stat.dailyData?.map(({ month, date, total, _id }) => ({
+            year: stat.year,
+            month,
+            day: date,
+            total,
+            // id: _id,
+          }));
+          statArr.push(...arr);
+        }
+      });
+
+      const statsFilled = fillStatDates({
+        statArr,
+        depth,
+        dateFrom: clientDateFrom,
+        dateTo: clientDateTo,
+      });
+      res.status(200).json({ stats: statsFilled });
+      return;
+    }
 
     res.status(200).json({ stats });
   } catch (err) {
