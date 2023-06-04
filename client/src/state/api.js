@@ -38,6 +38,17 @@ export const api = createApi({
     "Dashboard",
   ],
   endpoints: (build) => ({
+    recalculateExpenseStats: build.mutation({
+      query: ({ year }) => {
+        return {
+          url: `api/expenses/recalculateStats`,
+          method: "POST",
+          params: { year },
+        };
+      },
+      invalidatesTags: ["ExpenseTransactions", "ExpenseAccounts"],
+    }),
+
     deleteExpenseAccount: build.mutation({
       query: (id) => ({
         url: `api/expenses/accounts/${id}`,
@@ -268,6 +279,7 @@ export const {
   useUserGoogleSigninMutation,
   useTransactionsUploadMutation,
   useProcessUploadMutation,
+  useRecalculateExpenseStatsMutation,
   useGetExpenseAccountsQuery,
   useAddExpenseAccountMutation,
   useUpdateExpenseAccountMutation,

@@ -27,6 +27,7 @@ export const recalculateStatsForYear = async ({ year, user }) => {
   const tagStats = {};
   const typeStats = {};
   const userStats = {};
+  const transactionUpdates = [];
   const batchSize = 150;
 
   const dateFrom = DateTime.fromObject({ year });
@@ -72,8 +73,8 @@ export const recalculateStatsForYear = async ({ year, user }) => {
           })
         : tags;
 
-      const { tagStatsData, typeStatsData, userStatsData } = prepareTransaction(
-        {
+      const { transactionData, tagStatsData, typeStatsData, userStatsData } =
+        prepareTransaction({
           transaction: {
             amount,
             account,
@@ -86,8 +87,10 @@ export const recalculateStatsForYear = async ({ year, user }) => {
           tagStats: tagStatFiltered,
           typeStats: typeStats[type],
           userStats: userStats[year],
-        }
-      );
+        });
+
+      if (transactionData.tags !== tags)
+        transactionUpdates.push({ ...transactionData, _id: t._id });
       tagStatsData.forEach((t) => (tagStats[t.tag] = { ...t }));
       typeStats[type] = { ...typeStatsData, _id: "t" };
       userStats[year] = { ...userStatsData, _id: "t" };
@@ -120,6 +123,7 @@ export const recalculateStatsForYear = async ({ year, user }) => {
   }));
 
   return {
+    transactionUpdates,
     tagStats: tagStatsDB,
     typeStats: typeStatsDB,
     userStats: userStatsDB,
@@ -140,6 +144,7 @@ export const recalculateStatsForYear = async ({ year, user }) => {
 // }
 
 export const recalculateStats = async (req, res) => {
+  const transactionUpdatesDB = [];
   const tagStatsDB = [];
   const typeStatsDB = [];
   const userStatsDB = [];
@@ -167,10 +172,12 @@ export const recalculateStats = async (req, res) => {
 
     // procees for each year
     for (let year = yearMin; year <= yearMax; year++) {
-      const { tagStats, typeStats, userStats } = await recalculateStatsForYear({
-        year,
-        user,
-      });
+      const { transactionUpdates, tagStats, typeStats, userStats } =
+        await recalculateStatsForYear({
+          year,
+          user,
+        });
+      transactionUpdatesDB.push(...transactionUpdates);
       tagStatsDB.push(...tagStats);
       typeStatsDB.push(...typeStats);
       userStatsDB.push(...userStats);
@@ -182,6 +189,15 @@ export const recalculateStats = async (req, res) => {
         await ExpenseTagStat.deleteMany({ year }, { session });
         await ExpenseTypeStat.deleteMany({ year }, { session });
         await ExpenseUserStat.deleteMany({ year }, { session });
+
+        // update transaction data changes (only tags supported now)
+        for (const trans of transactionUpdatesDB) {
+          await Transaction.updateOne(
+            { _id: trans._id },
+            { tags: trans.tags },
+            { session }
+          );
+        }
 
         // save new db entries for current year
         await ExpenseTagStat.create(tagStats, { session });
@@ -468,7 +484,7 @@ export const updateTransaction = async (req, res) => {
   try {
     const { user } = req.auth;
 
-    const { amount, account, description, tags, type, dateUTC } = req.body;
+    const { amount, account, description, tags, type, date } = req.body;
 
     const { id } = req.params;
 
@@ -483,35 +499,199 @@ export const updateTransaction = async (req, res) => {
     if (oldTransaction.userId !== user.id)
       throw new Error(`Transaction is not from same user`);
 
-    const isValid = validateTransactionData({
+    const newTransaction = {
       amount,
       account,
       description,
       tags,
       type,
-      date: dateUTC,
-    });
+      date,
+    };
 
-    oldTransaction.set({
-      userId: user._id,
-      amount,
-      account,
-      description,
-      tags,
-      type,
-      date: dateUTC,
-    });
-
-    const trans = await oldTransaction.save();
-
-    // console.log( 'date utc: ', dateUTC )
-    // console.log( 'date db: ', trans.date )
-    // console.log( trans )
+    await updateExpenseTransaction(
+      {
+        ...oldTransaction.toObject(),
+        _id: oldTransaction._id,
+        date: oldTransaction.date.toISOString(),
+      },
+      newTransaction,
+      user
+    );
 
     res.status(200).json({ id: oldTransaction._id });
   } catch (err) {
     console.log(err);
     res.status(404).json({ message: err.message });
+  }
+};
+
+const updateExpenseTransaction = async (
+  oldTransaction,
+  newTransaction,
+  user
+) => {
+  const {
+    _id,
+    amount: amountOld,
+    account: accountOld,
+    description: descriptionOld,
+    tags: tagsOld,
+    type: typeOld,
+    date: dateOld,
+  } = oldTransaction;
+
+  const { amount, account, description, tags, type, date } = newTransaction;
+
+  const { _id: userId } = user;
+
+  const isValid = validateTransactionData({
+    amount,
+    account,
+    description,
+    tags,
+    type,
+    date,
+  });
+
+  const clientDate = getClientDateTime({ date: dateOld });
+  const transactionYear = clientDate.year;
+
+  const tagStats = [];
+  const tagStatsRef = {};
+
+  for (const tag of tagsOld) {
+    const existingTagStats = await ExpenseTagStat.findOne({
+      userId,
+      tag,
+      year: transactionYear,
+    });
+    if (existingTagStats) {
+      tagStatsRef[existingTagStats._id] = existingTagStats;
+      tagStats.push({
+        ...existingTagStats.toObject(),
+        _id: existingTagStats._id,
+      });
+    }
+  }
+
+  const typeStatsRef = await ExpenseTypeStat.findOne({
+    userId,
+    type: typeOld,
+    year: transactionYear,
+  });
+
+  const typeStats = typeStatsRef
+    ? { ...typeStatsRef.toObject(), _id: typeStatsRef._id }
+    : {};
+
+  const userStatsRef = await ExpenseUserStat.findOne({
+    userId,
+    year: transactionYear,
+  });
+
+  const userStats = userStatsRef
+    ? { ...userStatsRef.toObject(), _id: userStatsRef._id }
+    : {};
+
+  // reverse old transaction
+  const {
+    tagData: tagDataOld,
+    tagStatsData: tagStatsDataOld,
+    typeStatsData: typeStatsDataOld,
+    userStatsData: userStatsDataOld,
+  } = prepareTransaction({
+    transaction: { ...oldTransaction, amount: amountOld * -1 },
+    user,
+    tagStats,
+    typeStats,
+    userStats,
+  });
+
+  // update with new transaction
+  const {
+    transactionData,
+    tagData,
+    tagStatsData,
+    typeStatsData,
+    userStatsData,
+  } = prepareTransaction({
+    transaction: { amount, account, description, tags, type, date },
+    user,
+    tagStats: tagStatsDataOld,
+    typeStats: typeStatsDataOld,
+    userStats: userStatsDataOld,
+  });
+
+  const session = await mongoose.startSession();
+
+  try {
+    session.startTransaction();
+    // update transaction entry
+    const trans = await Transaction.updateOne({ _id }, transactionData, {
+      session,
+    });
+
+    // save tag entries
+    for (const tag of tagData) {
+      const existingTag = await ExpenseTag.findOne(tag);
+      if (!existingTag) {
+        // tag not available - create new
+        const exTag = new ExpenseTag(tag, { session });
+        await exTag.save({ session });
+      }
+    }
+
+    // save tagStats
+    for (const tagStatsItem of tagStatsData) {
+      if (tagStatsItem._id) {
+        // existing tag stats
+        const exTagStats = tagStatsRef[tagStatsItem._id];
+        exTagStats.set("yearlyTotal", tagStatsItem.yearlyTotal);
+        exTagStats.set("monthlyData", tagStatsItem.monthlyData);
+        exTagStats.set("dailyData", tagStatsItem.dailyData);
+        await exTagStats.save({ session });
+      } else {
+        // new tag stats
+        const exTagStats = new ExpenseTagStat(tagStatsItem, { session });
+        await exTagStats.save({ session });
+      }
+    }
+
+    // save typeStats
+    if (typeStatsData._id) {
+      // existing type stats
+      typeStatsRef.set("yearlyTotal", typeStatsData.yearlyTotal);
+      typeStatsRef.set("monthlyData", typeStatsData.monthlyData);
+      typeStatsRef.set("dailyData", typeStatsData.dailyData);
+      await typeStatsRef.save({ session });
+    } else {
+      // new type stats
+      const typeStatsRef = new ExpenseTypeStat(typeStatsData);
+      await typeStatsRef.save({ session });
+    }
+
+    // save userStats
+    if (userStatsData._id) {
+      // existing user stats
+      userStatsRef.set("yearlyTotal", userStatsData.yearlyTotal);
+      userStatsRef.set("monthlyData", userStatsData.monthlyData);
+      userStatsRef.set("dailyData", userStatsData.dailyData);
+      await userStatsRef.save({ session });
+    } else {
+      // new user stats
+      const userStatsRef = new ExpenseUserStat(userStatsData);
+      await userStatsRef.save({ session });
+    }
+
+    await session.commitTransaction();
+    session.endSession();
+
+    return { transaction: trans, error: undefined };
+  } catch (err) {
+    await session.abortTransaction();
+    session.endSession();
+
+    return { transaction: undefined, error: err.message };
   }
 };
 

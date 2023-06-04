@@ -6,6 +6,7 @@ import {
   InputLabel,
   MenuItem,
   Select,
+  Stack,
   Switch,
   TextField,
 } from "@mui/material";
@@ -18,19 +19,23 @@ import {
   DeleteOutlineOutlined,
   AttachMoneyOutlined,
   LocalOfferOutlined,
+  CalculateOutlined as ReCalcStatsIcon,
 } from "@mui/icons-material";
-
+import { DateTime } from "luxon";
 import {
   useAddExpenseTransactionMutation,
   useUpdateExpenseTransactionMutation,
   useDeleteExpenseTransactionMutation,
   useGetExpenseAccountsQuery,
+  useRecalculateExpenseStatsMutation,
 } from "state/api";
 import { DateTimePicker } from "@mui/x-date-pickers";
 
 const TransactionForm = ({ transactionData }) => {
   const [formData, setFormData] = React.useState(transactionData);
+  const [reStatsYear, setReStatsYear] = React.useState(DateTime.now().year);
 
+  const [recalculateStats] = useRecalculateExpenseStatsMutation();
   const [addTransaction] = useAddExpenseTransactionMutation();
   const [updateTransaction] = useUpdateExpenseTransactionMutation();
   const [deleteTransaction] = useDeleteExpenseTransactionMutation();
@@ -41,9 +46,30 @@ const TransactionForm = ({ transactionData }) => {
   const onInputChange = (e) =>
     setFormData({ ...formData, [e.target.name]: e.target.value });
 
-  // useEffect( () => {
-  //   console.log( transactionData )
-  // }, [ transactionData ] )
+  const handleReCalcStats = async () => {
+    const toastId = toast.loading("Recalculating Transaction Stats...", {
+      toastId: "transaction-stats-action",
+    });
+    try {
+      const payload = await recalculateStats({ year: reStatsYear }).unwrap();
+      // console.log( 'signup successful', payload )
+      toast.update(toastId, {
+        render: "Transaction Stats Recalculated",
+        type: "success",
+        isLoading: false,
+        autoClose: true,
+      });
+      return payload;
+    } catch (error) {
+      // console.error( 'signup failed', error );
+      toast.update(toastId, {
+        render: "Failed to calculate Transaction Stats",
+        type: "error",
+        isLoading: false,
+        autoClose: true,
+      });
+    }
+  };
 
   const handleDelete = async () => {
     if (!formData?._id) {
@@ -207,6 +233,7 @@ const TransactionForm = ({ transactionData }) => {
               value={formData.account}
               label="Bank Account"
               onChange={onInputChange}
+              required={true}
             >
               {bankAccountsLoading ? (
                 <MenuItem value={""}>{"Loading..."}</MenuItem>
@@ -250,12 +277,13 @@ const TransactionForm = ({ transactionData }) => {
             }}
           />
         </Grid>
+
         <Grid item xs={3} sm={2}>
           <IconButton
             type="submit"
             onSubmit={handleSubmit}
             color="info"
-            disabled={formData._id} // update is not yet possible, delete and add entry instead
+            // disabled={formData._id} // update is not yet possible, delete and add entry instead
           >
             <SendOutlined />
           </IconButton>
@@ -267,6 +295,41 @@ const TransactionForm = ({ transactionData }) => {
           >
             <DeleteOutlineOutlined />
           </IconButton>
+        </Grid>
+
+        <Grid item xs={12} sm={6} lg={4}>
+          <Stack direction={"row"} gap={2}>
+            <FormControl fullWidth size="small">
+              <InputLabel id="select-restat-year-label">
+                ReCalculate Stats
+              </InputLabel>
+              <Select
+                labelId="select-restat-year"
+                name="reStats"
+                id="select-restat-year"
+                value={reStatsYear}
+                label="Re-Stats"
+                onChange={(e) => setReStatsYear(e.target.value)}
+                required={true}
+              >
+                {Array.from({ length: 10 }, (_, i) => (
+                  <MenuItem
+                    key={DateTime.now().year + i}
+                    value={DateTime.now().year + i}
+                  >
+                    {DateTime.now().year + i}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+            <IconButton
+              type="button"
+              onClick={handleReCalcStats}
+              color="warning"
+            >
+              <ReCalcStatsIcon />
+            </IconButton>
+          </Stack>
         </Grid>
       </Grid>
     </Box>
