@@ -9,6 +9,7 @@ import React, { useEffect, useState } from "react";
 import FileFieldsGridForm from "./FileFieldsGridForm";
 import IgnoreFieldsGridForm from "./IgnoreFieldsGridForm";
 import TextAdjustFieldsGridForm from "./TextAdjustFieldsGridForm";
+import TagFieldsGridForm from "./TagFieldsGridForm";
 
 const CONFIG_INIT = {
   headerLines: 0,
@@ -16,6 +17,7 @@ const CONFIG_INIT = {
   trimQuotes: false,
   fileFields: [],
   ignoreOps: [],
+  tagOps: [],
 };
 const AccountConfigForm = ({ account, onConfigUpdate }) => {
   const [formData, setFormData] = useState({
@@ -84,6 +86,14 @@ const AccountConfigForm = ({ account, onConfigUpdate }) => {
             />
           }
           label="Trim Quotes"
+        />
+      </Grid>
+      <Grid item xs={12}>
+        <TagFieldsGridForm
+          fields={account?.config?.tagOps.map((f) => ({ ...f, id: f._id }))}
+          onConfigUpdated={({ rows }) =>
+            handleChange({ name: "tagOps", value: rows })
+          }
         />
       </Grid>
       <Grid item xs={12}>

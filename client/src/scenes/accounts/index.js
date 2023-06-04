@@ -28,6 +28,15 @@ const initFormData = {
         _id: uuidV4(),
       },
     ],
+    tagOps: [
+      {
+        name: "description",
+        comparision: COMPARISION_OPS_EQ,
+        value: "",
+        tags: ["test", "tested"],
+        _id: uuidV4(),
+      },
+    ],
     ignoreOps: [
       {
         name: "description",

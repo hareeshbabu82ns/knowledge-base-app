@@ -8,6 +8,7 @@ import Transaction from "../../models/Expenses/ExpenseTransaction.js";
 import Account from "../../models/Expenses/ExpenseAccount.js";
 import {
   convFieldWithConfig,
+  deriveExpenseTags,
   fillStatDates,
   genericIgnore,
   getClientDateTime,
@@ -20,6 +21,7 @@ import ExpenseTagStat from "../../models/Expenses/ExpenseTagStat.js";
 import ExpenseTypeStat from "../../models/Expenses/ExpenseTypeStat.js";
 import ExpenseUserStat from "../../models/Expenses/ExpenseUserStat.js";
 import ExpenseTransaction from "../../models/Expenses/ExpenseTransaction.js";
+import ExpenseAccount from "../../models/Expenses/ExpenseAccount.js";
 
 export const recalculateStatsForYear = async ({ year, user }) => {
   const tagStats = {};
@@ -29,6 +31,12 @@ export const recalculateStatsForYear = async ({ year, user }) => {
 
   const dateFrom = DateTime.fromObject({ year });
   const dateTo = dateFrom.endOf("year");
+
+  // fetch Account Configs for buffer
+  const accountConfigs = (await ExpenseAccount.find({})).map((a) => ({
+    ...a.toObject(),
+    _id: a._id,
+  }));
 
   // fetch initial set of transactions to process
   let trans = await ExpenseTransaction.find({
@@ -52,9 +60,28 @@ export const recalculateStatsForYear = async ({ year, user }) => {
       const tagStatFiltered = Object.entries(tagStats)
         .filter(([tag, tagStat]) => tags.includes(tag))
         .map(([tag, tagStat]) => ({ ...tagStat }));
+
+      const accountConfig = accountConfigs.find(
+        (a) => a._id === account
+      )?.config;
+
+      const derivedTags = accountConfig
+        ? deriveExpenseTags({
+            config: accountConfig,
+            obj: { amount, account, description, tags, type, date },
+          })
+        : tags;
+
       const { tagStatsData, typeStatsData, userStatsData } = prepareTransaction(
         {
-          transaction: { amount, account, description, tags, type, date },
+          transaction: {
+            amount,
+            account,
+            description,
+            tags: derivedTags,
+            type,
+            date,
+          },
           user,
           tagStats: tagStatFiltered,
           typeStats: typeStats[type],
@@ -761,7 +788,7 @@ export const updateAccount = async (req, res) => {
     const { id } = req.params;
 
     // fetch existing transaction
-    const oldAccount = await Account.findById(new mongoose.Types.ObjectId(id));
+    const oldAccount = await Account.findById(id);
     // console.log( oldAccount )
 
     if (!oldAccount) throw new Error(`No Account found with id ${id}`);
@@ -805,6 +832,7 @@ export const addAccount = async (req, res) => {
 
     try {
       const newAccount = new Account({
+        _id: Buffer.from(name).toString("base64"),
         userId: user._id,
         name,
         type,

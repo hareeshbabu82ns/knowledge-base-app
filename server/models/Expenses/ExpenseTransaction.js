@@ -8,7 +8,7 @@ const ExpenseTransactionSchema = new mongoose.Schema(
       required: true,
     },
     account: {
-      type: mongoose.Types.ObjectId,
+      type: String,
       ref: "ExpenseAccount",
       // type: String,
       required: true,

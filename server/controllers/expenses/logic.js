@@ -2,6 +2,19 @@ import { DateTime } from "luxon";
 import {
   EXPENSE_TYPE_EXPENSE,
   EXPENSE_TYPE_INCOME,
+  EXPENSE_FIELDS,
+  EXPENSE_FIELD_DATE,
+  EXPENSE_FIELD_AMOUNT,
+  EXPENSE_FIELD_NONE,
+  EXPENSE_FIELD_DESCRIPTION,
+  COMPARISION_OPS_EQ,
+  COMPARISION_OPS_NE,
+  COMPARISION_OPS_CONTAINS,
+  COMPARISION_OPS_STARTS_WITH,
+  EXPENSE_TYPE_COND_EXPENSE_IF_GT_0,
+  EXPENSE_TYPE_COND_INCOME_IF_GT_0,
+  EXPENSE_TYPE_COND_EXPENSE_IF_GT_0_EL_INCOME,
+  EXPENSE_TYPE_COND_INCOME_IF_GT_0_EL_EXPENSE,
 } from "../../models/Expenses/const.js";
 
 export const getClientDateTime = ({ date }) => {
@@ -58,13 +71,13 @@ const updateDailyData = (
 
 export const prepareTransaction = ({
   transaction: { amount, account, description, date, type, tags },
-  user: { _id },
+  user: { _id: userId },
   tagStats = [],
   typeStats,
   userStats,
 }) => {
   const transactionData = {
-    userId: _id,
+    userId,
     amount,
     account,
     description,
@@ -73,10 +86,10 @@ export const prepareTransaction = ({
     tags,
     dateZ: "",
   };
-  const tagData = tags.map((t) => ({ userId: _id, tag: t.trim() }));
+  const tagData = tags.map((t) => ({ userId, tag: t.trim() }));
   const tagStatsData = [...tagStats];
-  const typeStatsData = typeStats ? { ...typeStats } : { userId: _id, type };
-  const userStatsData = userStats ? { ...userStats } : { userId: _id };
+  const typeStatsData = typeStats ? { ...typeStats } : { userId, type };
+  const userStatsData = userStats ? { ...userStats } : { userId };
 
   const trClientDate = getClientDateTime({ date });
   transactionData.dateZ = trClientDate.toISO();
@@ -120,7 +133,7 @@ export const prepareTransaction = ({
   tagStatsData.push(
     ...tagStatsNew.map(({ tag }) => {
       return {
-        userId: _id,
+        userId,
         tag: tag,
         year: transactionYear,
         yearlyTotal: amountCalc,
@@ -281,7 +294,41 @@ export const prepareDBObject = ({ accountName, config, objToUpload }) => {
 
   // find expense type
   mdbObj["type"] = deriveExpenseType({ config, objToUpload, obj: mdbObj });
+
+  // find expense tags
+  mdbObj["tags"] = deriveExpenseTags({ config, obj: mdbObj });
+
   return mdbObj;
+};
+
+export const deriveExpenseTags = ({ config, obj }) => {
+  const tagArr = config.tagOps.reduce((acc, tagConfig, index) => {
+    if (tagConfig.name === "description") {
+      switch (tagConfig.comparision) {
+        case COMPARISION_OPS_EQ:
+          if (obj[tagConfig.name] === tagConfig.value)
+            acc.push(...tagConfig.tags);
+          break;
+        case COMPARISION_OPS_NE:
+          if (obj[tagConfig.name] !== tagConfig.value)
+            acc.push(...tagConfig.tags);
+          break;
+        case COMPARISION_OPS_CONTAINS:
+          if (obj[tagConfig.name].includes(tagConfig.value))
+            acc.push(...tagConfig.tags);
+          break;
+        case COMPARISION_OPS_STARTS_WITH:
+          if (obj[tagConfig.name].startsWith(tagConfig.value))
+            acc.push(...tagConfig.tags);
+          break;
+      }
+    }
+
+    return acc;
+  }, []);
+  tagArr.push(...obj?.tags);
+  const tagsSet = new Set(tagArr);
+  return [...tagsSet];
 };
 
 const deriveExpenseType = ({ config, objToUpload, obj }) => {

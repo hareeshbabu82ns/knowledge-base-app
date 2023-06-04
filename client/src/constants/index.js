@@ -69,6 +69,7 @@ export const BANK_ACCOUNTS_DEFAULT = [
     config: {
       headerLines: 0,
       separator: ",",
+      tagOps: [],
       ignoreOps: [
         {
           name: "description",
@@ -132,6 +133,7 @@ export const BANK_ACCOUNTS_DEFAULT = [
           replaceWith: "REMITLY CANADA",
         },
       ],
+      tagOps: [],
       ignoreOps: [
         {
           name: "description",
@@ -198,6 +200,7 @@ export const BANK_ACCOUNTS_DEFAULT = [
     config: {
       headerLines: 0,
       separator: ",",
+      tagOps: [],
       ignoreOps: [
         {
           name: "description",
@@ -259,6 +262,7 @@ export const BANK_ACCOUNTS_DEFAULT = [
     config: {
       headerLines: 0,
       separator: ",",
+      tagOps: [],
       ignoreOps: [
         {
           name: "description",
@@ -323,6 +327,7 @@ export const BANK_ACCOUNTS_DEFAULT = [
           replaceWith: "Memory Express",
         },
       ],
+      tagOps: [],
       ignoreOps: [
         {
           name: "description",
@@ -376,6 +381,7 @@ export const BANK_ACCOUNTS_DEFAULT = [
       headerLines: 1,
       separator: ",",
       trimQuotes: true,
+      tagOps: [],
       ignoreOps: [
         {
           name: "description",
@@ -449,6 +455,7 @@ export const BANK_ACCOUNTS_DEFAULT = [
       headerLines: 1,
       separator: ",",
       trimQuotes: true,
+      tagOps: [],
       ignoreOps: [
         {
           name: "description",
@@ -490,6 +497,7 @@ export const BANK_ACCOUNTS_DEFAULT = [
     config: {
       headerLines: 1,
       separator: ",",
+      tagOps: [],
       ignoreOps: [
         {
           name: "description",
@@ -592,6 +600,7 @@ export const BANK_ACCOUNTS_DEFAULT = [
     config: {
       headerLines: 1,
       separator: ",",
+      tagOps: [],
       ignoreOps: [
         {
           name: "description",
@@ -674,6 +683,7 @@ export const BANK_ACCOUNTS_DEFAULT = [
     config: {
       headerLines: 1,
       separator: ",",
+      tagOps: [],
       ignoreOps: [
         {
           name: "description",

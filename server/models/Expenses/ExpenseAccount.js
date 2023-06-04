@@ -58,6 +58,29 @@ const configSchema = new mongoose.Schema({
       },
     },
   ],
+  tagOps: [
+    {
+      name: {
+        type: String,
+        required: true,
+      },
+      comparision: {
+        type: String,
+        enum: COMPARISION_OPS,
+        required: true,
+        default: COMPARISION_OPS_EQ,
+      },
+      value: {
+        type: String,
+        required: false,
+        default: "",
+      },
+      tags: {
+        type: [String],
+        required: true,
+      },
+    },
+  ],
   fileFields: [
     {
       name: {
@@ -103,6 +126,10 @@ const configSchema = new mongoose.Schema({
 
 const ExpenseAccountSchema = new mongoose.Schema(
   {
+    _id: {
+      type: String,
+      required: true,
+    },
     userId: {
       type: String,
       required: true,
@@ -125,6 +152,7 @@ const ExpenseAccountSchema = new mongoose.Schema(
     },
   },
   {
+    _id: false,
     timestamps: true,
     collection: "expense_accounts",
   }
