@@ -334,9 +334,9 @@ const validateTransactionData = ({ amount, tags, type }) => {
     throw new Error("amount can not be empty");
   }
 
-  if (tags.length === 0) {
-    throw new Error("tags can not be empty");
-  }
+  // if (tags.length === 0) {
+  //   throw new Error("tags can not be empty");
+  // }
 
   if (!EXPENSE_TYPES.includes(type)) {
     throw new Error("expense type not valid");
@@ -696,7 +696,7 @@ const updateExpenseTransaction = async (
 };
 
 const addExpenseTransaction = async (
-  { amount, account, description, tags, type, date },
+  { amount, account, description, tags = [], type, date },
   user
 ) => {
   const isValid = validateTransactionData({
@@ -886,6 +886,7 @@ export const getTransactions = async (req, res) => {
         { description: { $regex: new RegExp(search, "i") } },
       ],
     })
+      .populate("account")
       .sort(sortFormatted)
       .skip(page * pageSize)
       .limit(pageSize);

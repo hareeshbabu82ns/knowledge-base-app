@@ -256,7 +256,8 @@ export const fillDates = ({ depth, dateFrom, dateTo }) => {
 export const prepareDBObject = ({ accountName, config, objToUpload }) => {
   const baseExpenseObj = {
     account: objToUpload.bankAccount,
-    tags: [accountName],
+    tags: [],
+    // tags: [accountName],
   };
 
   // fill expense model fields

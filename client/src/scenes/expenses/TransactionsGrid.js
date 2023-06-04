@@ -3,7 +3,7 @@ import { styled, Box, Typography, Stack, Chip } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import { DateTime } from "luxon";
 
-import { INTL_DATE_LONG_OPTIONS } from "constants";
+import { INTL_DATE_SHORT_OPTIONS } from "constants";
 import { useGetExpenseTransactionsQuery } from "state/api";
 import DataGridCustomToolbar from "components/DataGridCustomToolbar";
 import {
@@ -127,25 +127,33 @@ const columns = [
   },
   {
     field: "date",
-    headerName: "Transaction Date",
-    flex: 1,
+    headerName: "Date",
+    width: 120,
     renderCell: ({ value }) => (
       <Typography variant="h6">
-        {new Date(value).toLocaleString("en", INTL_DATE_LONG_OPTIONS)}
+        {new Date(value).toLocaleString("en", INTL_DATE_SHORT_OPTIONS)}
       </Typography>
     ),
   },
   {
     field: "description",
     headerName: "Description",
-    flex: 1,
+    flex: 2,
   },
   {
     field: "amount",
     headerName: "Amount",
-    flex: 1,
+    width: 100,
     renderCell: ({ value }) => (
       <Typography variant="h5">{Number(value).toFixed(2)}</Typography>
+    ),
+  },
+  {
+    field: "account",
+    headerName: "Account",
+    width: 120,
+    renderCell: ({ value }) => (
+      <Typography variant="h5">{value?.name || value}</Typography>
     ),
   },
   {

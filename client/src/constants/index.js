@@ -51,6 +51,11 @@ export const INTL_DATE_LONG_OPTIONS = {
   hour: "numeric",
   minute: "numeric",
 };
+export const INTL_DATE_SHORT_OPTIONS = {
+  month: "short",
+  day: "numeric",
+  year: "numeric",
+};
 
 export const ACCOUNT_CONFIG_FIELD_TYPES = [
   "string",

@@ -46,7 +46,13 @@ export const api = createApi({
           params: { year },
         };
       },
-      invalidatesTags: ["ExpenseTransactions", "ExpenseAccounts"],
+      invalidatesTags: [
+        "ExpenseTransactions",
+        "ExpenseAccounts",
+        "ExpenseUserStats",
+        "ExpenseTagStats",
+        "ExpenseTypeStats",
+      ],
     }),
 
     deleteExpenseAccount: build.mutation({

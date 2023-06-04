@@ -79,8 +79,12 @@ const Transactions = () => {
           <TransactionsGrid
             selectedTransaction={selectedTransaction}
             onRowSelected={(tr) => {
+              const trans = tr || initFormData;
               // console.log( tr )
-              setSelectedTransaction(tr || initFormData);
+              setSelectedTransaction({
+                ...trans,
+                account: trans.account?._id || trans.account,
+              });
             }}
           />
         </Grid>

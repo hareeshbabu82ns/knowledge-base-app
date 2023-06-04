@@ -24,7 +24,8 @@ const ExpenseTransactionSchema = new mongoose.Schema(
     tags: {
       type: [String],
       of: Number,
-      required: true,
+      required: false,
+      default: [],
     },
     type: {
       type: String,
