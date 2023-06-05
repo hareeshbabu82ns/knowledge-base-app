@@ -22,10 +22,12 @@ import ExpenseTypeStat from "../../models/Expenses/ExpenseTypeStat.js";
 import ExpenseUserStat from "../../models/Expenses/ExpenseUserStat.js";
 import ExpenseTransaction from "../../models/Expenses/ExpenseTransaction.js";
 import ExpenseAccount from "../../models/Expenses/ExpenseAccount.js";
+import ExpenseAccountStat from "../../models/Expenses/ExpenseAccountStat.js";
 
 export const recalculateStatsForYear = async ({ year, user }) => {
   const tagStats = {};
   const typeStats = {};
+  const accountStats = {};
   const userStats = {};
   const transactionUpdates = [];
   const batchSize = 150;
@@ -62,9 +64,8 @@ export const recalculateStatsForYear = async ({ year, user }) => {
         .filter(([tag, tagStat]) => tags.includes(tag))
         .map(([tag, tagStat]) => ({ ...tagStat }));
 
-      const accountConfig = accountConfigs.find(
-        (a) => a._id === account
-      )?.config;
+      const accountDB = accountConfigs.find((a) => a._id === account);
+      const accountConfig = accountDB?.config;
 
       const derivedTags = accountConfig
         ? deriveExpenseTags({
@@ -73,25 +74,33 @@ export const recalculateStatsForYear = async ({ year, user }) => {
           })
         : tags;
 
-      const { transactionData, tagStatsData, typeStatsData, userStatsData } =
-        prepareTransaction({
-          transaction: {
-            amount,
-            account,
-            description,
-            tags: derivedTags,
-            type,
-            date,
-          },
-          user,
-          tagStats: tagStatFiltered,
-          typeStats: typeStats[type],
-          userStats: userStats[year],
-        });
+      const {
+        transactionData,
+        tagStatsData,
+        accountStatsData,
+        typeStatsData,
+        userStatsData,
+      } = prepareTransaction({
+        transaction: {
+          amount,
+          account,
+          description,
+          tags: derivedTags,
+          type,
+          date,
+        },
+        user,
+        accountDB,
+        tagStats: tagStatFiltered,
+        accountStats: accountStats[account],
+        typeStats: typeStats[type],
+        userStats: userStats[year],
+      });
 
       if (transactionData.tags !== tags)
         transactionUpdates.push({ ...transactionData, _id: t._id });
       tagStatsData.forEach((t) => (tagStats[t.tag] = { ...t }));
+      accountStats[account] = { ...accountStatsData, _id: "t" };
       typeStats[type] = { ...typeStatsData, _id: "t" };
       userStats[year] = { ...userStatsData, _id: "t" };
     });
@@ -113,10 +122,16 @@ export const recalculateStatsForYear = async ({ year, user }) => {
     _id: undefined,
   }));
 
+  const accountStatsDB = Object.values(accountStats).map((t) => ({
+    ...t,
+    _id: undefined,
+  }));
+
   const typeStatsDB = Object.values(typeStats).map((t) => ({
     ...t,
     _id: undefined,
   }));
+
   const userStatsDB = Object.values(userStats).map((t) => ({
     ...t,
     _id: undefined,
@@ -125,6 +140,7 @@ export const recalculateStatsForYear = async ({ year, user }) => {
   return {
     transactionUpdates,
     tagStats: tagStatsDB,
+    accountStats: accountStatsDB,
     typeStats: typeStatsDB,
     userStats: userStatsDB,
   };
@@ -146,6 +162,7 @@ export const recalculateStatsForYear = async ({ year, user }) => {
 export const recalculateStats = async (req, res) => {
   const transactionUpdatesDB = [];
   const tagStatsDB = [];
+  const accountStatsDB = [];
   const typeStatsDB = [];
   const userStatsDB = [];
 
@@ -172,13 +189,19 @@ export const recalculateStats = async (req, res) => {
 
     // procees for each year
     for (let year = yearMin; year <= yearMax; year++) {
-      const { transactionUpdates, tagStats, typeStats, userStats } =
-        await recalculateStatsForYear({
-          year,
-          user,
-        });
+      const {
+        transactionUpdates,
+        tagStats,
+        accountStats,
+        typeStats,
+        userStats,
+      } = await recalculateStatsForYear({
+        year,
+        user,
+      });
       transactionUpdatesDB.push(...transactionUpdates);
       tagStatsDB.push(...tagStats);
+      accountStatsDB.push(...accountStats);
       typeStatsDB.push(...typeStats);
       userStatsDB.push(...userStats);
 
@@ -187,6 +210,7 @@ export const recalculateStats = async (req, res) => {
 
         // delete db entries for current year
         await ExpenseTagStat.deleteMany({ year }, { session });
+        await ExpenseAccountStat.deleteMany({ year }, { session });
         await ExpenseTypeStat.deleteMany({ year }, { session });
         await ExpenseUserStat.deleteMany({ year }, { session });
 
@@ -201,6 +225,7 @@ export const recalculateStats = async (req, res) => {
 
         // save new db entries for current year
         await ExpenseTagStat.create(tagStats, { session });
+        await ExpenseAccountStat.create(accountStats, { session });
         await ExpenseTypeStat.create(typeStats, { session });
         await ExpenseUserStat.create(userStats, { session });
 
@@ -224,108 +249,6 @@ export const recalculateStats = async (req, res) => {
     console.log(error);
     res.status(501).json({ message: error });
   }
-
-  // const tagStats = {};
-  // const typeStats = {};
-  // const userStats = {};
-
-  // try {
-  //   const { user } = req.auth;
-
-  //   // delete existing stats
-  //   await ExpenseTagStat.deleteMany({});
-  //   await ExpenseTypeStat.deleteMany({});
-  //   await ExpenseUserStat.deleteMany({});
-
-  //   // fetch initial set of transactions to process
-  //   let trans = await ExpenseTransaction.find().limit(150);
-  //   let len = trans.length;
-  //   let skip = 100;
-
-  //   // while (len > 0) {
-
-  //   trans.forEach((t) => {
-  //     const {
-  //       amount,
-  //       account,
-  //       description,
-  //       tags,
-  //       type,
-  //       dateZ: date,
-  //     } = t.toObject();
-
-  //     const trClientDate = getClientDateTime({ date });
-  //     const year = trClientDate.year;
-
-  //     // calculate stats
-  //     const {
-  //       transactionData,
-  //       tagData,
-  //       tagStatsData,
-  //       typeStatsData,
-  //       userStatsData,
-  //     } = prepareTransaction({
-  //       transaction: { amount, account, description, tags, type, date },
-  //       user,
-  //       tagStats: tagStats[year],
-  //       typeStats: typeStats[`${type}_${year}`],
-  //       userStats: userStats[year],
-  //     });
-  //     tagStats[year] = [...tagStatsData];
-  //     typeStats[`${type}_${year}`] = { ...typeStatsData, _id: "" };
-  //     userStats[year] = { ...userStatsData, _id: "" };
-  //   });
-
-  //   //   // fetch next set of transactions to process
-  //   //   trans = await ExpenseTransaction.find({}).skip(skip).limit(100);
-  //   //   len = trans.length;
-  //   //   skip = skip + len;
-  //   // }
-
-  //   // save stats to db
-  //   const tagStatsDB = [];
-  //   for (const tagYear of Object.keys(tagStats)) {
-  //     tagStats[tagYear].forEach((tagStat) =>
-  //       tagStatsDB.push({ ...tagStat, _id: undefined })
-  //     );
-  //   }
-  //   const typeStatsDB = Object.values(typeStats).map((t) => ({
-  //     ...t,
-  //     _id: undefined,
-  //   }));
-  //   const userStatsDB = Object.values(userStats).map((t) => ({
-  //     ...t,
-  //     _id: undefined,
-  //   }));
-
-  //   const session = await mongoose.startSession();
-
-  //   try {
-  //     session.startTransaction();
-
-  //     // await ExpenseTagStat.create(tagStatsDB, { session });
-  //     // await ExpenseTypeStat.create(typeStatsDB, { session });
-  //     await ExpenseUserStat.create(userStatsDB, { session });
-
-  //     await session.commitTransaction();
-  //     await session.endSession();
-  //   } catch (ex) {
-  //     console.log(ex);
-  //     await session.abortTransaction();
-  //     await session.endSession();
-  //     throw "Database update failed";
-  //   }
-
-  //   res.status(201).json({
-  //     message: "Stats Re-Calculated",
-  //     tagStats: tagStatsDB,
-  //     typeStats: typeStatsDB,
-  //     userStats: userStatsDB,
-  //   });
-  // } catch (error) {
-  //   console.log(error);
-  //   res.status(501).json({ message: error });
-  // }
 };
 
 // Transactions //
@@ -574,6 +497,19 @@ const updateExpenseTransaction = async (
     }
   }
 
+  const accountRef = await ExpenseAccount.findById(account);
+  if (!accountRef) {
+    throw "account not found";
+  }
+  const accountDB = { ...accountRef.toObject(), _id: accountRef._id };
+
+  const accountStatsRef = await ExpenseAccountStat.findOne({
+    userId: user._id,
+    account: accountDB.name,
+    year: transactionYear,
+  });
+  const accountStats = accountStatsRef ? accountStatsRef.toObject() : undefined;
+
   const typeStatsRef = await ExpenseTypeStat.findOne({
     userId,
     type: typeOld,
@@ -597,12 +533,15 @@ const updateExpenseTransaction = async (
   const {
     tagData: tagDataOld,
     tagStatsData: tagStatsDataOld,
+    accountStats: accountStatsDataOld,
     typeStatsData: typeStatsDataOld,
     userStatsData: userStatsDataOld,
   } = prepareTransaction({
     transaction: { ...oldTransaction, amount: amountOld * -1 },
     user,
+    accountDB,
     tagStats,
+    accountStats,
     typeStats,
     userStats,
   });
@@ -617,7 +556,10 @@ const updateExpenseTransaction = async (
   } = prepareTransaction({
     transaction: { amount, account, description, tags, type, date },
     user,
+    accountDB,
+    tagData: tagDataOld,
     tagStats: tagStatsDataOld,
+    accountStats: accountStatsDataOld,
     typeStats: typeStatsDataOld,
     userStats: userStatsDataOld,
   });
@@ -726,6 +668,19 @@ const addExpenseTransaction = async (
     }
   }
 
+  const accountRef = await ExpenseAccount.findById(account);
+  if (!accountRef) {
+    throw "account not found";
+  }
+  const accountDB = { ...accountRef.toObject(), _id: accountRef._id };
+
+  const accountStatsRef = await ExpenseAccountStat.findOne({
+    userId: user._id,
+    account: accountDB.name,
+    year: transactionYear,
+  });
+  const accountStats = accountStatsRef ? accountStatsRef.toObject() : undefined;
+
   const typeStatsRef = await ExpenseTypeStat.findOne({
     userId: user._id,
     type,
@@ -745,12 +700,15 @@ const addExpenseTransaction = async (
     transactionData,
     tagData,
     tagStatsData,
+    accountStatsData,
     typeStatsData,
     userStatsData,
   } = prepareTransaction({
     transaction: { amount, account, description, tags, type, date },
     user,
+    accountDB,
     tagStats,
+    accountStats,
     typeStats,
     userStats,
   });
@@ -787,6 +745,19 @@ const addExpenseTransaction = async (
         const exTagStats = new ExpenseTagStat(tagStatsItem, { session });
         await exTagStats.save({ session });
       }
+    }
+
+    // save accountStats
+    if (accountStatsData._id) {
+      // existing account stats
+      accountStatsRef.set("yearlyTotal", accountStatsData.yearlyTotal);
+      accountStatsRef.set("monthlyData", accountStatsData.monthlyData);
+      accountStatsRef.set("dailyData", accountStatsData.dailyData);
+      await accountStatsRef.save({ session });
+    } else {
+      // new account stats
+      const accountStatsRef = new ExpenseAccountStat(accountStatsData);
+      await accountStatsRef.save({ session });
     }
 
     // save typeStats

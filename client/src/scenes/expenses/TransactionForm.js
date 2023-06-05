@@ -316,10 +316,10 @@ const TransactionForm = ({ transactionData }) => {
               >
                 {Array.from({ length: 10 }, (_, i) => (
                   <MenuItem
-                    key={DateTime.now().year + i}
-                    value={DateTime.now().year + i}
+                    key={DateTime.now().year - i}
+                    value={DateTime.now().year - i}
                   >
-                    {DateTime.now().year + i}
+                    {DateTime.now().year - i}
                   </MenuItem>
                 ))}
               </Select>

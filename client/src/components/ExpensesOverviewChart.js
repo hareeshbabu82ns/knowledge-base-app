@@ -165,6 +165,8 @@ function ExpensesOverviewChart({
       yFormat=" >-.2f"
       curve="catmullRom"
       enableArea={isDashboard}
+      areaBlendMode="multiply"
+      areaOpacity={0.55}
       axisTop={null}
       axisRight={null}
       axisBottom={{
@@ -206,8 +208,9 @@ function ExpensesOverviewChart({
       activePointBorderWidth={3}
       pointBorderColor={{ from: "serieColor" }}
       pointLabelYOffset={-12}
-      colors={{ scheme: "spectral" }}
+      colors={{ scheme: "dark2" }}
       useMesh={true}
+      // enableSlices="x"
       legends={
         !isDashboard
           ? [

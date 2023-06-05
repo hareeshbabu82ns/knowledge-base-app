@@ -15,6 +15,7 @@ import {
   EXPENSE_TYPE_COND_INCOME_IF_GT_0,
   EXPENSE_TYPE_COND_EXPENSE_IF_GT_0_EL_INCOME,
   EXPENSE_TYPE_COND_INCOME_IF_GT_0_EL_EXPENSE,
+  COMPARISION_OPS_REGEX,
 } from "../../models/Expenses/const.js";
 
 export const getClientDateTime = ({ date }) => {
@@ -72,7 +73,9 @@ const updateDailyData = (
 export const prepareTransaction = ({
   transaction: { amount, account, description, date, type, tags },
   user: { _id: userId },
+  accountDB: { name: accountName },
   tagStats = [],
+  accountStats,
   typeStats,
   userStats,
 }) => {
@@ -89,6 +92,9 @@ export const prepareTransaction = ({
   const tagData = tags.map((t) => ({ userId, tag: t.trim() }));
   const tagStatsData = [...tagStats];
   const typeStatsData = typeStats ? { ...typeStats } : { userId, type };
+  const accountStatsData = accountStats
+    ? { ...accountStats }
+    : { userId, account: accountName };
   const userStatsData = userStats ? { ...userStats } : { userId };
 
   const trClientDate = getClientDateTime({ date });
@@ -107,17 +113,17 @@ export const prepareTransaction = ({
   if (tagStatsData.length > 0) {
     // update existing tagStats
     for (const tagStatsItem of tagStatsData) {
-      tagStatsItem.yearlyTotal += amountCalc;
+      tagStatsItem.yearlyTotal += amount;
 
       updateMonthlyData(tagStatsItem.monthlyData, {
         transactionMonth,
-        amountCalc,
+        amountCalc: amount,
       });
 
       updateDailyData(tagStatsItem.dailyData, {
         transactionMonth,
         transactionDay,
-        amountCalc,
+        amountCalc: amount,
       });
     }
   }
@@ -136,14 +142,42 @@ export const prepareTransaction = ({
         userId,
         tag: tag,
         year: transactionYear,
-        yearlyTotal: amountCalc,
-        monthlyData: [{ month: transactionMonth, total: amountCalc }],
+        yearlyTotal: amount,
+        monthlyData: [{ month: transactionMonth, total: amount }],
         dailyData: [
-          { month: transactionMonth, date: transactionDay, total: amountCalc },
+          { month: transactionMonth, date: transactionDay, total: amount },
         ],
       };
     })
   );
+
+  // Account Stats Logic
+  if (accountStatsData._id) {
+    // updating existing accountStats
+
+    accountStatsData.yearlyTotal += amountCalc;
+
+    updateMonthlyData(accountStatsData.monthlyData, {
+      transactionMonth,
+      amountCalc,
+    });
+
+    updateDailyData(accountStatsData.dailyData, {
+      transactionMonth,
+      transactionDay,
+      amountCalc,
+    });
+  } else {
+    // new accountStats
+    accountStatsData.year = transactionYear;
+    accountStatsData.yearlyTotal = amountCalc;
+    accountStatsData.monthlyData = [
+      { month: transactionMonth, total: amountCalc },
+    ];
+    accountStatsData.dailyData = [
+      { month: transactionMonth, date: transactionDay, total: amountCalc },
+    ];
+  }
 
   // Type Stats Logic
   if (typeStatsData._id) {
@@ -203,6 +237,7 @@ export const prepareTransaction = ({
     transactionData,
     tagData,
     tagStatsData,
+    accountStatsData,
     typeStatsData,
     userStatsData,
   };
@@ -322,6 +357,10 @@ export const deriveExpenseTags = ({ config, obj }) => {
           if (obj[tagConfig.name].startsWith(tagConfig.value))
             acc.push(...tagConfig.tags);
           break;
+        case COMPARISION_OPS_REGEX:
+          if (obj[tagConfig.name].match(new RegExp(tagConfig.value)))
+            acc.push(...tagConfig.tags);
+          break;
       }
     }
 
@@ -329,6 +368,11 @@ export const deriveExpenseTags = ({ config, obj }) => {
   }, []);
   tagArr.push(...obj?.tags);
   const tagsSet = new Set(tagArr);
+  if (tagsSet.size === 0) {
+    tagsSet.add(`Untagged_${obj.type}`);
+  } else if (tagsSet.size > 1) {
+    tagsSet.delete(`Untagged_${obj.type}`);
+  }
   return [...tagsSet];
 };
 
@@ -373,6 +417,9 @@ export const genericIgnore = ({ config, obj }) => {
           break;
         case COMPARISION_OPS_STARTS_WITH:
           if (obj[ignore.name].startsWith(ignore.value)) return true;
+          break;
+        case COMPARISION_OPS_REGEX:
+          if (obj[ignore.name].match(new RegExp(ignore.value))) return true;
           break;
       }
     }
