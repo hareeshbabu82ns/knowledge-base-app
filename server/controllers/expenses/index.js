@@ -1043,6 +1043,78 @@ export const getAccounts = async (req, res) => {
 };
 
 // Utils //
+export const uploadAccounts = async (req, res) => {
+  const { user } = req.auth;
+  // console.log(req.body);
+
+  // read json file
+  const fileContentsRaw = fs.readFileSync(`tmp/${req.body.file}`, "utf8");
+
+  const accountsJson = JSON.parse(fileContentsRaw.toString());
+
+  try {
+    const existingAccountsRef = await Account.find({}).exec();
+    const existingAccountsDB = existingAccountsRef?.map((a) => ({
+      ...a.toObject(),
+      _id: a._id,
+    }));
+
+    const dataToInsert = [];
+    const dataToUpdate = [];
+
+    for (const account of accountsJson) {
+      const existingAccount = existingAccountsDB.find(
+        (a) => a.name === account.name && a.userId === user._id.toString()
+      );
+
+      if (existingAccount) {
+        account["_id"] = existingAccount._id;
+        account["userId"] == user._id;
+        dataToUpdate.push(account);
+      } else {
+        account["_id"] = Buffer.from(account["name"]).toString("base64");
+        account["userId"] == user._id;
+        dataToInsert.push(account);
+      }
+    }
+
+    const session = await mongoose.startSession();
+
+    try {
+      session.startTransaction();
+
+      if (dataToInsert.length > 0)
+        await Account.insertMany(dataToInsert, { session });
+
+      for (const acc of dataToUpdate) {
+        await Account.findByIdAndUpdate(acc._id, { $set: acc }, { session });
+      }
+
+      await session.commitTransaction();
+      await session.endSession();
+    } catch (ex) {
+      console.log(ex);
+      await session.abortTransaction();
+      await session.endSession();
+      throw "Database update failed";
+    }
+  } catch (ex) {
+    console.log(ex);
+    console.log("convertion failed");
+    res.status(500).json({
+      message: "process failed",
+    });
+    return;
+  }
+
+  // delete file at the end
+  fs.rmSync(`tmp/${req.body.file}`);
+
+  res.status(201).json({
+    message: "file processed",
+  });
+};
+
 export const processUpload = async (req, res) => {
   const { user } = req.auth;
   // console.log(req.body);

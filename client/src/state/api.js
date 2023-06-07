@@ -126,7 +126,7 @@ export const api = createApi({
         "ExpenseUserStats",
       ],
     }),
-    transactionsUpload: build.mutation({
+    fileUpload: build.mutation({
       query: (data) => ({
         url: `api/expenses/upload`,
         method: "POST",
@@ -146,6 +146,20 @@ export const api = createApi({
         body: { file, bankConfig, bankAccount },
       }),
       invalidatesTags: [
+        "ExpenseTransactions",
+        "ExpenseTypeStats",
+        "ExpenseTagStats",
+        "ExpenseUserStats",
+      ],
+    }),
+    uploadAccounts: build.mutation({
+      query: ({ file }) => ({
+        url: `api/expenses/uploadAccounts`,
+        method: "POST",
+        body: { file },
+      }),
+      invalidatesTags: [
+        "ExpenseAccounts",
         "ExpenseTransactions",
         "ExpenseTypeStats",
         "ExpenseTagStats",
@@ -283,8 +297,9 @@ export const {
   useUserSigninMutation,
   useUserSignupMutation,
   useUserGoogleSigninMutation,
-  useTransactionsUploadMutation,
+  useFileUploadMutation,
   useProcessUploadMutation,
+  useUploadAccountsMutation,
   useRecalculateExpenseStatsMutation,
   useGetExpenseAccountsQuery,
   useAddExpenseAccountMutation,

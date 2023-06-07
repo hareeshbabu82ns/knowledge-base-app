@@ -10,6 +10,7 @@ import {
   getSelectedBackgroundColor,
   getSelectedHoverBackgroundColor,
 } from "themes/utils";
+import { toast } from "react-toastify";
 
 const StyledDataGrid = styled(DataGrid)(({ theme }) => ({
   "& .MuiDataGrid-root": {
@@ -141,6 +142,41 @@ const AccountsGrid = ({ onRowSelected, selectedAccount }) => {
     search,
   });
 
+  const handleOnExport = async () => {
+    // prepare file for upload
+
+    const toastId = toast.loading(`Exporting Accounts...`, {
+      toastId: `accounts-export-action`,
+    });
+
+    try {
+      const blob = new Blob([JSON.stringify(data.accounts, null, "\t")], {
+        type: "text/plain",
+      });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", "ExpenseAccounts.json");
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      toast.update(toastId, {
+        render: `Accounts Exported`,
+        type: "success",
+        isLoading: false,
+        autoClose: true,
+      });
+    } catch (e) {
+      toast.update(toastId, {
+        render: `Accounts Export failed`,
+        type: "error",
+        isLoading: false,
+        autoClose: true,
+      });
+    }
+  };
+
   return (
     <Box mt="40px" height="75vh" width="100%">
       <StyledDataGrid
@@ -194,7 +230,13 @@ const AccountsGrid = ({ onRowSelected, selectedAccount }) => {
         rowSelectionModel={rowSelectionModel}
         slots={{ toolbar: DataGridCustomToolbar }}
         slotProps={{
-          toolbar: { search, setSearch, searchInput, setSearchInput },
+          toolbar: {
+            search,
+            setSearch,
+            searchInput,
+            setSearchInput,
+            onExport: data?.accounts && !isLoading ? handleOnExport : undefined,
+          },
         }}
         getRowClassName={(params) => `status-theme--${params.row.type}`}
       />

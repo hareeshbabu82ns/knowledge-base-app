@@ -13,27 +13,33 @@ import {
   SendOutlined,
   DeleteOutlineOutlined,
   AttachMoneyOutlined,
-  ListAltOutlined as DefaultAccountIcon,
 } from "@mui/icons-material";
 
 import {
   useAddExpenseAccountMutation,
   useDeleteExpenseAccountMutation,
+  useUploadAccountsMutation,
 } from "state/api";
-import { ACCOUNT_TYPES, BANK_ACCOUNTS_DEFAULT } from "constants";
+import { ACCOUNT_TYPES } from "constants";
+import FileUploader from "components/FileUploader";
 
 const AccountForm = ({ accountData, updateAccount }) => {
   const [formData, setFormData] = React.useState(accountData);
 
   const [addAccount] = useAddExpenseAccountMutation();
   const [deleteAccount] = useDeleteExpenseAccountMutation();
+  const [accountsUpload] = useUploadAccountsMutation();
 
   const onInputChange = (e) =>
     setFormData({ ...formData, [e.target.name]: e.target.value });
 
-  // useEffect( () => {
-  //   console.log( accountData )
-  // }, [ accountData ] )
+  const handleAccoutsUpload = async (data) => {
+    const file = data.filename;
+    const { message } = await accountsUpload({
+      file,
+    }).unwrap();
+    console.log(message);
+  };
 
   const handleDelete = async () => {
     if (!formData?._id) {
@@ -47,7 +53,6 @@ const AccountForm = ({ accountData, updateAccount }) => {
     });
     try {
       const payload = await deleteAccount(formData?._id).unwrap();
-      // console.log( 'signup successful', payload )
       toast.update(toastId, {
         render: "Account Deleted",
         type: "success",
@@ -57,34 +62,8 @@ const AccountForm = ({ accountData, updateAccount }) => {
       setFormData(accountData);
       return payload;
     } catch (error) {
-      // console.error( 'signup failed', error );
       toast.update(toastId, {
         render: "Account failed",
-        type: "error",
-        isLoading: false,
-        autoClose: true,
-      });
-    }
-  };
-
-  const handleCreateDefaultAccounts = async () => {
-    const toastId = toast.loading("Creating Default Accounts...", {
-      toastId: "account-def-action",
-    });
-    try {
-      for (const defAccount of BANK_ACCOUNTS_DEFAULT) {
-        await addAccount({ ...defAccount }).unwrap();
-      }
-      toast.update(toastId, {
-        render: "Default Accounts created",
-        type: "success",
-        isLoading: false,
-        autoClose: true,
-      });
-    } catch (error) {
-      // console.error( 'signup failed', error );
-      toast.update(toastId, {
-        render: "Default Accounts creating failed",
         type: "error",
         isLoading: false,
         autoClose: true,
@@ -108,7 +87,6 @@ const AccountForm = ({ accountData, updateAccount }) => {
       const payload = formData?._id
         ? await updateAccount({ id: formData?._id, ...postData })
         : await addAccount(postData).unwrap();
-      // console.log( 'signup successful', payload )
       toast.update(toastId, {
         render: "Account Saved",
         type: "success",
@@ -118,7 +96,6 @@ const AccountForm = ({ accountData, updateAccount }) => {
       setFormData(accountData);
       return payload;
     } catch (error) {
-      // console.error( 'signup failed', error );
       toast.update(toastId, {
         render: "Account failed",
         type: "error",
@@ -199,13 +176,15 @@ const AccountForm = ({ accountData, updateAccount }) => {
           >
             <DeleteOutlineOutlined />
           </IconButton>
-          <IconButton
-            type="button"
-            onClick={handleCreateDefaultAccounts}
-            color="success"
-          >
-            <DefaultAccountIcon />
-          </IconButton>
+        </Grid>
+
+        <Grid item xs={12} sm={6}>
+          <FileUploader
+            uploadingItem="Account Config"
+            prompt="Upload Account Config..."
+            accept=".json"
+            onFileUpload={(data) => handleAccoutsUpload(data)}
+          />
         </Grid>
       </Grid>
     </Box>

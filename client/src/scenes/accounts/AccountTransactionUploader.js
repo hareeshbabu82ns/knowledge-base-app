@@ -16,8 +16,8 @@ import { INTL_DATE_LONG_OPTIONS } from "constants";
 import React, { useEffect, useState } from "react";
 import {
   useProcessUploadMutation,
-  useTransactionsUploadMutation,
   useGetExpenseAccountsQuery,
+  useFileUploadMutation,
 } from "state/api";
 
 const AccountTransactionUploader = ({ account }) => {
@@ -34,7 +34,7 @@ const AccountTransactionUploader = ({ account }) => {
   const { data: bankAccounts, isLoading: bankAccountsLoading } =
     useGetExpenseAccountsQuery({});
 
-  const [uploadTransactions] = useTransactionsUploadMutation();
+  const [uploadTransactions] = useFileUploadMutation();
   const [processUpload] = useProcessUploadMutation();
 
   const onFileSelected = (event) => {
