@@ -1,6 +1,5 @@
 import {
   Box,
-  Button,
   Chip,
   FormControl,
   Grid,
@@ -10,18 +9,16 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
-import { toast } from "react-toastify";
 import { DataGrid } from "@mui/x-data-grid";
 import { INTL_DATE_LONG_OPTIONS } from "constants";
 import React, { useEffect, useState } from "react";
 import {
-  useProcessUploadMutation,
+  useUploadTransactionsMutation,
   useGetExpenseAccountsQuery,
-  useFileUploadMutation,
 } from "state/api";
+import FileUploader from "components/FileUploader";
 
 const AccountTransactionUploader = ({ account }) => {
-  const [selectedFile, setSelectedFile] = useState("");
   const [bankAccount, setBankAccount] = useState("");
   const [config, setConfig] = useState(null);
   const [dataToUpload, setDataToUpload] = useState(null);
@@ -34,76 +31,39 @@ const AccountTransactionUploader = ({ account }) => {
   const { data: bankAccounts, isLoading: bankAccountsLoading } =
     useGetExpenseAccountsQuery({});
 
-  const [uploadTransactions] = useFileUploadMutation();
-  const [processUpload] = useProcessUploadMutation();
-
-  const onFileSelected = (event) => {
-    // console.log(event.target.files[0]);
-    setSelectedFile(event.target.files[0]);
-  };
+  const [uploadTransactions] = useUploadTransactionsMutation();
 
   const onBankAccountSelected = (event) => {
     setBankAccount(event.target.value);
   };
 
-  const onUpload = async () => {
-    // prepare file for upload
-    const data = new FormData();
-    data.append("file", selectedFile);
+  const onUpload = async (data) => {
+    const { filename: file } = data;
+    const {
+      message,
+      data: resData,
+      dataMdb: resDataMdb,
+      config,
+    } = await uploadTransactions({
+      file,
+      bankAccount,
+    }).unwrap();
+    // console.log(message, resData, config, resDataMdb);
 
-    const toastId = toast.loading("Uploading Transactions...", {
-      toastId: "trans-upl-action",
-    });
-
-    try {
-      // send file to server
-      const res = await uploadTransactions(data).unwrap();
-      // receive two parameter endpoint url ,form data
-      // console.log(res);
-      const file = res.filename;
-
-      const {
-        message,
-        data: resData,
-        dataMdb: resDataMdb,
-        config,
-      } = await processUpload({
-        file,
-        bankAccount,
-      }).unwrap();
-      console.log(message, resData, config, resDataMdb);
-      if (config || resData) {
-        setConfig(config);
-        setDataToUpload(resData);
-        setDataMdb(resDataMdb);
-      } else {
-        setConfig(null);
-        setDataToUpload(null);
-        setDataMdb(null);
-      }
-
-      toast.update(toastId, {
-        render: "Transactions Uploaded",
-        type: "success",
-        isLoading: false,
-        autoClose: true,
-      });
-    } catch (e) {
-      toast.update(toastId, {
-        render: "Upload failed",
-        type: "error",
-        isLoading: false,
-        autoClose: true,
-      });
+    if (config || resData) {
+      setConfig(config);
+      setDataToUpload(resData);
+      setDataMdb(resDataMdb);
+    } else {
+      setConfig(null);
+      setDataToUpload(null);
+      setDataMdb(null);
     }
   };
 
   return (
     <Box sx={{ px: 4 }}>
       <Grid container spacing={2}>
-        <Grid item xs={12}>
-          <input type="file" name="file" onChange={onFileSelected} />
-        </Grid>
         <Grid item xs={4}>
           <FormControl fullWidth size="small">
             <InputLabel id="select-bank-account-label">Bank Account</InputLabel>
@@ -124,10 +84,13 @@ const AccountTransactionUploader = ({ account }) => {
             </Select>
           </FormControl>
         </Grid>
-        <Grid item xs={4}>
-          <Button variant="contained" onClick={onUpload}>
-            Upload
-          </Button>
+        <Grid item xs={8}>
+          <FileUploader
+            uploadingItem="Transactions"
+            prompt="Upload Transactions..."
+            accept=".csv"
+            onFileUpload={onUpload}
+          />
         </Grid>
 
         <Grid item xs={12}>

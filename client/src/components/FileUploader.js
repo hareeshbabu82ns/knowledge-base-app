@@ -71,35 +71,6 @@ const FileUploader = ({
         <UploadFileOutlined />
       </Button>
     </ButtonGroup>
-
-    // <div>
-    //   <input
-    //     type="file"
-    //     accept=".json"
-    //     onChange={handleFileChange}
-    //     style={{ display: "none" }}
-    //     ref={inputRef}
-    //   />
-    //   <Typography variant="caption" gutterBottom>
-    //     {selectedFile}
-    //   </Typography>
-    //   <Button
-    //     variant="contained"
-    //     color="primary"
-    //     startIcon={<Icon>attachment</Icon>}
-    //     onClick={() => inputRef.current?.click()}
-    //   >
-    //     Choose File
-    //   </Button>
-    //   <Button
-    //     variant="contained"
-    //     color="primary"
-    //     startIcon={<Icon>cloud_upload</Icon>}
-    //     onClick={handleUpload}
-    //   >
-    //     Upload
-    //   </Button>
-    // </div>
   );
 };
 

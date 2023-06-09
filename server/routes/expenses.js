@@ -9,7 +9,7 @@ import {
   getUserStats,
   getTypeStats,
   getTagStats,
-  processUpload,
+  uploadTransactions,
   getAccounts,
   addAccount,
   updateAccount,
@@ -23,7 +23,6 @@ import { uploadFile } from "../controllers/utils.js";
 const router = express.Router();
 
 router.post("/upload", auth, uploadFile);
-router.post("/processUpload", auth, processUpload);
 
 router.get("/accounts", auth, getAccounts);
 router.post("/accounts", auth, addAccount);
@@ -35,6 +34,7 @@ router.get("/transactions", auth, getTransactions);
 router.post("/transactions", auth, addTransaction);
 router.patch("/transactions/:id", auth, updateTransaction);
 router.delete("/transactions/:id", auth, deleteTransaction);
+router.post("/uploadTransactions", auth, uploadTransactions);
 
 router.get("/tags", auth, getTags);
 

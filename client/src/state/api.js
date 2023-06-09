@@ -36,7 +36,7 @@ export const api = createApi({
     "Admins",
     "Performance",
     "Dashboard",
-    "Tags",
+    "ExpenseTags",
   ],
   endpoints: (build) => ({
     recalculateExpenseStats: build.mutation({
@@ -53,6 +53,7 @@ export const api = createApi({
         "ExpenseUserStats",
         "ExpenseTagStats",
         "ExpenseTypeStats",
+        "ExpenseTags",
       ],
     }),
 
@@ -90,7 +91,7 @@ export const api = createApi({
         method: "GET",
         params: { search },
       }),
-      providesTags: ["Tags"],
+      providesTags: ["ExpenseTags"],
     }),
 
     getExpenseAccounts: build.query({
@@ -134,6 +135,7 @@ export const api = createApi({
         "ExpenseTypeStats",
         "ExpenseTagStats",
         "ExpenseUserStats",
+        "ExpenseTags",
       ],
     }),
     fileUpload: build.mutation({
@@ -149,9 +151,9 @@ export const api = createApi({
         "ExpenseUserStats",
       ],
     }),
-    processUpload: build.mutation({
+    uploadTransactions: build.mutation({
       query: ({ file, bankConfig, bankAccount }) => ({
-        url: `api/expenses/processUpload`,
+        url: `api/expenses/uploadTransactions`,
         method: "POST",
         body: { file, bankConfig, bankAccount },
       }),
@@ -160,6 +162,7 @@ export const api = createApi({
         "ExpenseTypeStats",
         "ExpenseTagStats",
         "ExpenseUserStats",
+        "ExpenseTags",
       ],
     }),
     uploadAccounts: build.mutation({
@@ -309,7 +312,7 @@ export const {
   useUserSignupMutation,
   useUserGoogleSigninMutation,
   useFileUploadMutation,
-  useProcessUploadMutation,
+  useUploadTransactionsMutation,
   useUploadAccountsMutation,
   useRecalculateExpenseStatsMutation,
   useGetExpenseAccountsQuery,

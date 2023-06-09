@@ -1171,7 +1171,7 @@ export const uploadAccounts = async (req, res) => {
   });
 };
 
-export const processUpload = async (req, res) => {
+export const uploadTransactions = async (req, res) => {
   const { user } = req.auth;
   // console.log(req.body);
 
