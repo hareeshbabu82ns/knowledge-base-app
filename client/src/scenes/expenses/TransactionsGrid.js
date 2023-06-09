@@ -144,17 +144,22 @@ const columns = [
     field: "amount",
     headerName: "Amount",
     width: 100,
-    renderCell: ({ value }) => (
-      <Typography variant="h5">{Number(value).toFixed(2)}</Typography>
+    renderCell: ({ value, row }) => (
+      <Typography
+        variant="h5"
+        color={row.type === "Expense" ? "chocolate" : "inherit"}
+      >
+        {Number(value).toFixed(2)}
+      </Typography>
     ),
   },
   {
     field: "account",
     headerName: "Account",
     width: 120,
-    renderCell: ({ value }) => (
-      <Typography variant="h5">{value?.name || value}</Typography>
-    ),
+    valueGetter: ({ value }) => {
+      return value?.name || value;
+    },
   },
   {
     field: "tags",
@@ -250,7 +255,7 @@ const TransactionsGrid = ({ onRowSelected, selectedTransaction }) => {
         slotProps={{
           toolbar: { search, setSearch, searchInput, setSearchInput },
         }}
-        getRowClassName={(params) => `status-theme--${params.row.type}`}
+        // getRowClassName={(params) => `status-theme--${params.row.type}`}
       />
     </Box>
   );

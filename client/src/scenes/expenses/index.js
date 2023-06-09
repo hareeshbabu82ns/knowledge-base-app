@@ -1,6 +1,6 @@
 import { Box, Typography, useTheme } from "@mui/material";
 import React, { useState } from "react";
-import { DateTime } from "luxon";
+import { DateTime, Duration } from "luxon";
 import Header from "components/Header";
 
 import TransactionForm from "./TransactionForm";
@@ -34,7 +34,9 @@ const Transactions = () => {
   const [selectedTransaction, setSelectedTransaction] =
     React.useState(initFormData);
   const [startDate, setStartDate] = useState(DateTime.now().startOf("year"));
-  const [endDate, setEndDate] = useState(DateTime.now().endOf("year"));
+  const [endDate, setEndDate] = useState(
+    DateTime.now().minus({ month: 1 }).endOf("month")
+  );
   const isDark = theme.palette.mode === "dark";
 
   return (

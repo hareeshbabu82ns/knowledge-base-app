@@ -36,6 +36,7 @@ export const api = createApi({
     "Admins",
     "Performance",
     "Dashboard",
+    "Tags",
   ],
   endpoints: (build) => ({
     recalculateExpenseStats: build.mutation({
@@ -81,6 +82,15 @@ export const api = createApi({
         };
       },
       invalidatesTags: ["ExpenseAccounts"],
+    }),
+
+    getTags: build.query({
+      query: ({ search }) => ({
+        url: `api/expenses/tags`,
+        method: "GET",
+        params: { search },
+      }),
+      providesTags: ["Tags"],
     }),
 
     getExpenseAccounts: build.query({
@@ -207,10 +217,10 @@ export const api = createApi({
       providesTags: ["ExpenseUserStats"],
     }),
     getExpenseTagStats: build.query({
-      query: ({ depth, tag, dateFrom, dateTo }) => ({
+      query: ({ depth, dateFrom, tags, dateTo }) => ({
         url: `api/expenses/tagStats`,
         method: "GET",
-        params: { depth, tag, dateFrom, dateTo, fillTimeline: "X" },
+        params: { depth, dateFrom, dateTo, tags, fillTimeline: "X" },
       }),
       providesTags: ["ExpenseTagStats"],
     }),
@@ -293,6 +303,7 @@ export const api = createApi({
 });
 
 export const {
+  useGetTagsQuery,
   useGetUserQuery,
   useUserSigninMutation,
   useUserSignupMutation,

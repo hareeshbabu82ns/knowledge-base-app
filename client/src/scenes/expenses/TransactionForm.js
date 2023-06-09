@@ -30,6 +30,7 @@ import {
   useRecalculateExpenseStatsMutation,
 } from "state/api";
 import { DateTimePicker } from "@mui/x-date-pickers";
+import ExpenseTagsSelect from "components/ExpenseTagsSelect";
 
 const TransactionForm = ({ transactionData }) => {
   const [formData, setFormData] = React.useState(transactionData);
@@ -109,10 +110,13 @@ const TransactionForm = ({ transactionData }) => {
     const postData = {
       amount: Number(formData.amount),
       type: formData.type,
-      tags:
-        formData.tags.trim().length > 0
-          ? formData.tags.split(",").map((t) => t.trim())
-          : [],
+      tags: Array.isArray(formData.tags)
+        ? formData.tags
+        : formData.tags.split(",")?.map((t) => t.trim()),
+      // tags:
+      //   formData.tags.trim().length > 0
+      //     ? formData.tags.split(",").map((t) => t.trim())
+      //     : [],
       date: formData.date,
       account: formData.account,
       description: formData.description,
@@ -206,8 +210,21 @@ const TransactionForm = ({ transactionData }) => {
             ))}
           </Select> */}
         </Grid>
-        <Grid item xs={12} sm={6} lg={3}>
-          <TextField
+        <Grid item xs={12} sm={6}>
+          <ExpenseTagsSelect
+            size="small"
+            freeSolo
+            value={formData.tags}
+            onChange={(value) =>
+              onInputChange({
+                target: {
+                  name: "tags",
+                  value: Array.isArray(value) ? value.join(",") : value,
+                },
+              })
+            }
+          />
+          {/* <TextField
             name="tags"
             fullWidth
             id="tags"
@@ -223,7 +240,7 @@ const TransactionForm = ({ transactionData }) => {
                 </InputAdornment>
               ),
             }}
-          />
+          /> */}
         </Grid>
         <Grid item xs={6}>
           <FormControl fullWidth size="small">

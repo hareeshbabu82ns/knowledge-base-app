@@ -14,11 +14,13 @@ function ExpensesOverviewChart({
   view,
   startDate,
   endDate,
+  selectedTags,
 }) {
   const theme = useTheme();
   const isDark = theme.palette.isDark;
   const { data: dataTags, isLoading: isLoadingTags } =
     useGetExpenseTagStatsQuery({
+      tags: selectedTags,
       depth: "monthly",
       dateFrom: startDate.toISO(),
       dateTo: endDate.toISO(),

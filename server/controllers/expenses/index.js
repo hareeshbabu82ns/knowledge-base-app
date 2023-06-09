@@ -185,8 +185,6 @@ export const recalculateStats = async (req, res) => {
       ? Number(year)
       : Number(transMax.get("dateZ").split("-")[0]);
 
-    const session = await mongoose.startSession();
-
     // procees for each year
     for (let year = yearMin; year <= yearMax; year++) {
       const {
@@ -204,6 +202,8 @@ export const recalculateStats = async (req, res) => {
       accountStatsDB.push(...accountStats);
       typeStatsDB.push(...typeStats);
       userStatsDB.push(...userStats);
+
+      const session = await mongoose.startSession();
 
       try {
         session.startTransaction();
@@ -277,7 +277,7 @@ export const deleteTransaction = async (req, res) => {
     // fetch existing transaction
     const oldTransaction = await Transaction.findById(
       new mongoose.Types.ObjectId(id)
-    );
+    ).populate(["account"]);
     // console.log( oldTransaction )
 
     if (!oldTransaction) throw new Error(`No Transaction found with id ${id}`);
@@ -285,7 +285,13 @@ export const deleteTransaction = async (req, res) => {
     if (oldTransaction.userId !== user.id)
       throw new Error(`Transaction is not from same user`);
 
-    const { amount, tags, type, date: jsDate } = oldTransaction.toObject();
+    const {
+      amount,
+      tags,
+      type,
+      date: jsDate,
+      account,
+    } = oldTransaction.toObject();
 
     const date = jsDate.toISOString();
 
@@ -321,21 +327,32 @@ export const deleteTransaction = async (req, res) => {
       userId: user._id,
       year: transactionYear,
     });
-
     const userStats = userStatsRef ? userStatsRef.toObject() : undefined;
 
-    const { tagStatsData, typeStatsData, userStatsData } = prepareTransaction({
-      transaction: {
-        amount: amount * -1, // do a reverse posting
-        tags,
-        type,
-        date,
-      },
-      user,
-      tagStats,
-      typeStats,
-      userStats,
+    const accountStatsRef = await ExpenseAccountStat.findOne({
+      userId: user._id,
+      account: account.name,
+      year: transactionYear,
     });
+    const accountStats = accountStatsRef
+      ? accountStatsRef.toObject()
+      : undefined;
+
+    const { tagStatsData, typeStatsData, userStatsData, accountStatsData } =
+      prepareTransaction({
+        transaction: {
+          amount: amount * -1, // do a reverse posting
+          tags,
+          type,
+          date,
+        },
+        user,
+        accountDB: account,
+        tagStats,
+        typeStats,
+        userStats,
+        accountStats,
+      });
 
     const session = await mongoose.startSession();
 
@@ -384,6 +401,19 @@ export const deleteTransaction = async (req, res) => {
         // new user stats
         const userStatsRef = new ExpenseUserStat(userStatsData);
         await userStatsRef.save({ session });
+      }
+
+      // save accountStats
+      if (accountStatsData._id) {
+        // existing account stats
+        accountStatsRef.set("yearlyTotal", accountStatsData.yearlyTotal);
+        accountStatsRef.set("monthlyData", accountStatsData.monthlyData);
+        accountStatsRef.set("dailyData", accountStatsData.dailyData);
+        await accountStatsRef.save({ session });
+      } else {
+        // new account stats
+        const accountStatsRef = new ExpenseAccountStat(accountStatsData);
+        await accountStatsRef.save({ session });
       }
 
       await session.commitTransaction();
@@ -1042,6 +1072,32 @@ export const getAccounts = async (req, res) => {
   }
 };
 
+// Tags
+export const getTags = async (req, res) => {
+  try {
+    const { user } = req.auth;
+
+    // sort should look like : { "field": "userId", "sort": "desc" }
+    const { search = "" } = req.query;
+
+    const tags = await ExpenseTag.find({
+      userId: user._id,
+      $or: [{ tag: { $regex: new RegExp(search, "i") } }],
+    }).sort({ tag: 1 });
+
+    const total = await ExpenseTag.countDocuments({
+      userId: user._id,
+      $or: [{ tag: { $regex: new RegExp(search, "i") } }],
+    });
+
+    const tagsSet = new Set(tags.map((v) => v.get("tag")));
+
+    res.status(200).json({ tags: [...tagsSet], total });
+  } catch (err) {
+    res.status(404).json({ message: err.message });
+  }
+};
+
 // Utils //
 export const uploadAccounts = async (req, res) => {
   const { user } = req.auth;
@@ -1498,10 +1554,10 @@ export const getTagStats = async (req, res) => {
 
     // dates in ISO format
     const {
-      tag,
       dateFrom,
       dateTo,
       depth = "yearly",
+      tags = "",
       fillTimeline = "",
     } = req.query;
 
@@ -1523,8 +1579,10 @@ export const getTagStats = async (req, res) => {
       userId: user._id,
       year: { $gte: transactionYearFrom, $lte: transactionYearTo },
     };
-    if (tag) {
-      query["tag"] = tag;
+
+    if (tags.trim().length > 0) {
+      const tagsArr = tags?.split(",");
+      query["tag"] = tagsArr?.length > 0 ? { $in: tagsArr } : tags;
     }
 
     const projection = {};

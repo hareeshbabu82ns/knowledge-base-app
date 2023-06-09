@@ -13,9 +13,11 @@ import Header from "components/Header";
 import ExpensesOverviewChart from "components/ExpensesOverviewChart";
 import { Stack } from "@mui/system";
 import { DateTime } from "luxon";
+import ExpenseTagsSelect from "components/ExpenseTagsSelect";
 
 function ExpenseStatsChart({ hideHeading = false }) {
-  const [view, setView] = useState("types");
+  const [selectedTags, setSelectedTags] = useState([]);
+  const [view, setView] = useState("tags");
   const [startDate, setStartDate] = useState(DateTime.now().startOf("year"));
   const [endDate, setEndDate] = useState(
     DateTime.now().minus({ month: 1 }).endOf("month")
@@ -42,6 +44,9 @@ function ExpenseStatsChart({ hideHeading = false }) {
             </Select>
           </FormControl>
           <Stack direction="row" gap={2} alignItems="center">
+            <FormControl sx={{ width: 300 }}>
+              <ExpenseTagsSelect onChange={setSelectedTags} />
+            </FormControl>
             <FormControl>
               <DatePicker
                 value={startDate}
@@ -72,6 +77,7 @@ function ExpenseStatsChart({ hideHeading = false }) {
           view={view}
           startDate={startDate}
           endDate={endDate}
+          selectedTags={selectedTags}
         />
       </Box>
     </Box>
