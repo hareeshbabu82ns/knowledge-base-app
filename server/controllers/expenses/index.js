@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import { DateTime } from "luxon";
 import fs from "fs";
+import os from "os";
 
 import { ACCOUNT_TYPES, EXPENSE_TYPES } from "../../models/Expenses/const.js";
 
@@ -1103,8 +1104,10 @@ export const uploadAccounts = async (req, res) => {
   const { user } = req.auth;
   // console.log(req.body);
 
+  const tmpDir = os.tmpdir();
+
   // read json file
-  const fileContentsRaw = fs.readFileSync(`tmp/${req.body.file}`, "utf8");
+  const fileContentsRaw = fs.readFileSync(`${tmpDir}/${req.body.file}`, "utf8");
 
   const accountsJson = JSON.parse(fileContentsRaw.toString());
 
@@ -1164,7 +1167,7 @@ export const uploadAccounts = async (req, res) => {
   }
 
   // delete file at the end
-  fs.rmSync(`tmp/${req.body.file}`);
+  fs.rmSync(`${tmpDir}/${req.body.file}`);
 
   res.status(201).json({
     message: "file processed",
@@ -1174,6 +1177,8 @@ export const uploadAccounts = async (req, res) => {
 export const uploadTransactions = async (req, res) => {
   const { user } = req.auth;
   // console.log(req.body);
+
+  const tmpDir = os.tmpdir();
 
   // check if bank config exists
   const accountDB = await Account.findById(req.body.bankAccount);
@@ -1185,7 +1190,7 @@ export const uploadTransactions = async (req, res) => {
   const config = accountDB.get("config").toJSON();
 
   // read csv file
-  const fileContentsRaw = fs.readFileSync(`tmp/${req.body.file}`, "utf8");
+  const fileContentsRaw = fs.readFileSync(`${tmpDir}/${req.body.file}`, "utf8");
 
   const fileContents = fileContentsRaw.toString().split(`\n`);
 
@@ -1282,7 +1287,7 @@ export const uploadTransactions = async (req, res) => {
   console.log(dataMdb.length, dataMdb[dataMdb.length - 1]);
 
   // delete file at the end
-  fs.rmSync(`tmp/${req.body.file}`);
+  fs.rmSync(`${tmpDir}/${req.body.file}`);
 
   res.status(201).json({
     message: "file processed",
