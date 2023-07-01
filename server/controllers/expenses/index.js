@@ -1112,10 +1112,11 @@ export const uploadAccounts = async (req, res) => {
   const accountsJson = JSON.parse(fileContentsRaw.toString());
 
   try {
-    const existingAccountsRef = await Account.find({}).exec();
+    const existingAccountsRef = await Account.find({ userId: user._id }).exec();
     const existingAccountsDB = existingAccountsRef?.map((a) => ({
       ...a.toObject(),
       _id: a._id,
+      userId: user._id,
     }));
 
     const dataToInsert = [];
@@ -1127,13 +1128,17 @@ export const uploadAccounts = async (req, res) => {
       );
 
       if (existingAccount) {
-        account["_id"] = existingAccount._id;
-        account["userId"] == user._id;
-        dataToUpdate.push(account);
+        dataToUpdate.push({
+          ...account,
+          _id: existingAccount._id,
+          userId: user._id,
+        });
       } else {
-        account["_id"] = Buffer.from(account["name"]).toString("base64");
-        account["userId"] == user._id;
-        dataToInsert.push(account);
+        dataToInsert.push({
+          ...account,
+          _id: Buffer.from(account["name"]).toString("base64"),
+          userId: user._id,
+        });
       }
     }
 
