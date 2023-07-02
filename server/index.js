@@ -1,43 +1,64 @@
-const path = require( "path" );
-const express = require( "express" );
-const cors = require( 'cors' )
-const fs = require( 'fs' );
-const fileUpload = require( 'express-fileupload' );
+import express from "express";
+import bodyParser from "body-parser";
+import mongoose from "mongoose";
+import cors from "cors";
+import dotenv from "dotenv";
+import helmet from "helmet";
+import morgan from "morgan";
+// const {readdirSync} = require('fs')
 
-const PORT = process.env.PORT || 3001;
+import clientRoutes from "./routes/client.js";
+import generalRoutes from "./routes/general.js";
+import managementRoutes from "./routes/management.js";
+import salesRoutes from "./routes/sales.js";
+import userRoutes from "./routes/user.js";
+import expenseRoutes from "./routes/expenses.js";
+import { pushInitData } from "./data/utils.js";
 
+/* CONFIGURATION */
+dotenv.config();
 const app = express();
 
-app.use( cors() )
+app.use(express.json());
+app.use(helmet());
+app.use(helmet.crossOriginResourcePolicy({ policy: "cross-origin" }));
+app.use(morgan("common"));
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(cors());
 
-app.use(
-  fileUpload( {
-    useTempFiles: true,
-    safeFileNames: true,
-    preserveExtension: true,
-    tempFileDir: `${__dirname}/public/files/temp`
-  } )
-);
+/* ROUTES */
 
-app.use( express.json() );
+// readdirSync('./routes').map((route) => app.use('/api/v1', require('./routes/' + route)))
 
-// Have Node serve the files for our built React app
-app.use( express.static( path.resolve( __dirname, '../client/build' ) ) );
+app.use("/api/client", clientRoutes);
+app.use("/api/general", generalRoutes);
+app.use("/api/management", managementRoutes);
+app.use("/api/sales", salesRoutes);
+app.use("/api/user", userRoutes);
+app.use("/api/expenses", expenseRoutes);
 
-// serve files
-app.use( '/uploads', express.static( __dirname + '/public' ) );
+/* MONGOOSE SETUP */
 
+const PORT = process.env.PORT || 9000;
+mongoose
+  .connect(process.env.MONGO_URL, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
+  .then(() => {
+    app.listen(PORT, () =>
+      console.log(`Server started at http://localhost/${PORT}`)
+    );
+    /* Sample Data */
+    pushInitData();
+  })
+  .catch((err) => console.log("mongodb connection failed...\n", err));
 
-// Handle GET requests to /api route
-app.get( "/api", ( req, res ) => {
-  res.json( { message: "Hello from server!" } );
-} );
+// serve UI
+app.use(express.static(path.join(__dirname, "../", "client", "build")));
 
-// All other GET requests not handled before will return our React app
-app.get( '*', ( req, res ) => {
-  res.sendFile( path.resolve( __dirname, '../client/build', 'index.html' ) );
-} );
-
-app.listen( PORT, () => {
-  console.log( `Server listening on ${PORT}` );
-} );
+// Handles any requests that don't match the ones above
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "../", "client", "build", "index.html"));
+});

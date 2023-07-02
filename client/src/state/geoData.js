@@ -1,4 +1,4 @@
-export const geoFeatures = {
+export const geoData = {
   type: "FeatureCollection",
   features: [
     {
