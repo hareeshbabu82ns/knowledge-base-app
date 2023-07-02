@@ -54,3 +54,11 @@ mongoose
     pushInitData();
   })
   .catch((err) => console.log("mongodb connection failed...\n", err));
+
+// serve UI
+app.use(express.static(path.join(__dirname, "../", "client", "build")));
+
+// Handles any requests that don't match the ones above
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "../", "client", "build", "index.html"));
+});

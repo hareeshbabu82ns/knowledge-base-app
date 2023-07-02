@@ -1,0 +1,14 @@
+ssh_user: "{{ vault_ssh_user }}"
+
+server_domain: "{{vault_server_domain}}"
+docker_fdqn: "docker.{{vault_server_domain}}"
+
+git_tag: "latest"
+
+secret_key: "{{vault_secret_key}}"
+
+mongodb_host: "docker-ct.local.io"
+mongodb_port: "{{vault_mongodb_port}}"
+mongodb_db: "{{vault_mongodb_db}}"
+mongodb_user: "{{vault_mongodb_user}}"
+mongodb_pwd: "{{vault_mongodb_pwd}}"
