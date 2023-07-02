@@ -5,6 +5,8 @@ import cors from "cors";
 import dotenv from "dotenv";
 import helmet from "helmet";
 import morgan from "morgan";
+import path from "path";
+import { fileURLToPath } from "url";
 // const {readdirSync} = require('fs')
 
 import clientRoutes from "./routes/client.js";
@@ -14,6 +16,11 @@ import salesRoutes from "./routes/sales.js";
 import userRoutes from "./routes/user.js";
 import expenseRoutes from "./routes/expenses.js";
 import { pushInitData } from "./data/utils.js";
+
+const __filename = fileURLToPath(import.meta.url);
+
+const __dirname = path.dirname(__filename);
+console.log(__dirname);
 
 /* CONFIGURATION */
 dotenv.config();
