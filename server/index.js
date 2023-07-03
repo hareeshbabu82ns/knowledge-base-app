@@ -3,7 +3,7 @@ import bodyParser from "body-parser";
 import mongoose from "mongoose";
 import cors from "cors";
 import dotenv from "dotenv";
-import helmet from "helmet";
+// import helmet from "helmet";
 import morgan from "morgan";
 import path from "path";
 import { fileURLToPath } from "url";
@@ -27,17 +27,17 @@ dotenv.config();
 const app = express();
 
 app.use(express.json());
-app.use(
-  helmet({
-    contentSecurityPolicy: {
-      useDefaults: true,
-      directives: {
-        "script-src": ["'self'", "https://accounts.google.com/gsi/client"],
-      },
-    },
-  })
-);
-app.use(helmet.crossOriginResourcePolicy({ policy: "cross-origin" }));
+// app.use(
+//   helmet({
+//     contentSecurityPolicy: {
+//       useDefaults: true,
+//       directives: {
+//         "script-src": ["'self'", "https://accounts.google.com/gsi/client"],
+//       },
+//     },
+//   })
+// );
+// app.use(helmet.crossOriginResourcePolicy({ policy: "cross-origin" }));
 app.use(morgan("common"));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -76,5 +76,7 @@ app.use(express.static(path.join(__dirname, "../", "client", "build")));
 
 // Handles any requests that don't match the ones above
 app.get("*", (req, res) => {
-  res.sendFile(path.join(__dirname, "../", "client", "build", "index.html"));
+  res.sendFile("index.html", {
+    root: path.join(__dirname, "../", "client", "build"),
+  });
 });
