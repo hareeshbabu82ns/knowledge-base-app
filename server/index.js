@@ -20,14 +20,23 @@ import { pushInitData } from "./data/utils.js";
 const __filename = fileURLToPath(import.meta.url);
 
 const __dirname = path.dirname(__filename);
-console.log(__dirname);
+// console.log(__dirname);
 
 /* CONFIGURATION */
 dotenv.config();
 const app = express();
 
 app.use(express.json());
-app.use(helmet());
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      useDefaults: true,
+      directives: {
+        "script-src": ["'self'", "https://accounts.google.com/gsi/client"],
+      },
+    },
+  })
+);
 app.use(helmet.crossOriginResourcePolicy({ policy: "cross-origin" }));
 app.use(morgan("common"));
 app.use(bodyParser.json());
@@ -55,7 +64,7 @@ mongoose
   })
   .then(() => {
     app.listen(PORT, () =>
-      console.log(`Server started at http://localhost/${PORT}`)
+      console.log(`Server started at http://localhost:${PORT}`)
     );
     /* Sample Data */
     pushInitData();
