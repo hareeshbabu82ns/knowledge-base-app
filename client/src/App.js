@@ -34,7 +34,7 @@ function App() {
         baseColor: themeState.baseColor,
         secondaryColor: themeState.secondaryColor,
         tertiaryColor: themeState.tertiaryColor,
-        fontFamily: "Inter, sans-serif",
+        fontFamily: "'Plus Jakarta Sans', sans-serif",
       }),
     [themeState]
   );
