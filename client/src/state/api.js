@@ -3,7 +3,7 @@ import { DateTime } from 'luxon';
 import { createApi, fetchBaseQuery, retry } from '@reduxjs/toolkit/query/react';
 
 const baseQuery = fetchBaseQuery({
-  baseUrl: process.env.REACT_APP_BASE_URL,
+  baseUrl: process.env.REACT_APP_BASE_URL || '/',
   prepareHeaders: (headers, { getState }) => {
     const token = getState().global?.token;
     if (token) {
@@ -232,7 +232,7 @@ export const api = createApi({
     }),
     userGoogleSignin: build.mutation({
       query: ({ accessToken, expiresIn }) => ({
-        url: `api/user/googleSignin`,
+        url: `/api/user/googleSignin`,
         method: 'POST',
         body: { accessToken, expiresIn },
       }),
