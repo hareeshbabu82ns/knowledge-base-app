@@ -1,13 +1,13 @@
-import { DateTime } from "luxon";
+import { DateTime } from 'luxon';
 
-import { createApi, fetchBaseQuery, retry } from "@reduxjs/toolkit/query/react";
+import { createApi, fetchBaseQuery, retry } from '@reduxjs/toolkit/query/react';
 
 const baseQuery = fetchBaseQuery({
   baseUrl: process.env.REACT_APP_BASE_URL,
   prepareHeaders: (headers, { getState }) => {
     const token = getState().global?.token;
     if (token) {
-      headers.set("Authorization", `Bearer ${token}`);
+      headers.set('Authorization', `Bearer ${token}`);
     }
     return headers;
   },
@@ -17,166 +17,157 @@ const baseQueryWithRetry = retry(baseQuery, { maxRetries: 2 });
 
 export const api = createApi({
   baseQuery: baseQueryWithRetry,
-  reducerPath: "adminApi",
+  reducerPath: 'adminApi',
   tagTypes: [
-    "User",
-    "Signin",
-    "Signup",
-    "GoogleSignin",
-    "ExpenseTransactionsUpload",
-    "ExpenseTransactions",
-    "ExpenseUserStats",
-    "ExpenseTagStats",
-    "ExpenseTypeStats",
-    "Products",
-    "Customers",
-    "Transactions",
-    "Geography",
-    "Sales",
-    "Admins",
-    "Performance",
-    "Dashboard",
-    "ExpenseTags",
+    'User',
+    'Signin',
+    'Signup',
+    'GoogleSignin',
+    'ExpenseTransactionsUpload',
+    'ExpenseTransactions',
+    'ExpenseUserStats',
+    'ExpenseTagStats',
+    'ExpenseTypeStats',
+    'Products',
+    'Customers',
+    'Transactions',
+    'Geography',
+    'Sales',
+    'Admins',
+    'Performance',
+    'Dashboard',
+    'ExpenseTags',
   ],
   endpoints: (build) => ({
     recalculateExpenseStats: build.mutation({
       query: ({ year }) => {
         return {
           url: `api/expenses/recalculateStats`,
-          method: "POST",
+          method: 'POST',
           params: { year },
         };
       },
       invalidatesTags: [
-        "ExpenseTransactions",
-        "ExpenseAccounts",
-        "ExpenseUserStats",
-        "ExpenseTagStats",
-        "ExpenseTypeStats",
-        "ExpenseTags",
+        'ExpenseTransactions',
+        'ExpenseAccounts',
+        'ExpenseUserStats',
+        'ExpenseTagStats',
+        'ExpenseTypeStats',
+        'ExpenseTags',
       ],
     }),
 
     deleteExpenseAccount: build.mutation({
       query: (id) => ({
         url: `api/expenses/accounts/${id}`,
-        method: "DELETE",
+        method: 'DELETE',
       }),
-      invalidatesTags: ["ExpenseAccounts"],
+      invalidatesTags: ['ExpenseAccounts'],
     }),
 
     updateExpenseAccount: build.mutation({
       query: ({ id, name, description, type, config }) => ({
         url: `api/expenses/accounts/${id}`,
-        method: "PATCH",
+        method: 'PATCH',
         body: { name, description, type, config },
       }),
-      invalidatesTags: ["ExpenseAccounts"],
+      invalidatesTags: ['ExpenseAccounts'],
     }),
 
     addExpenseAccount: build.mutation({
       query: ({ id, name, description, type, config }) => {
         return {
           url: `api/expenses/accounts`,
-          method: "POST",
+          method: 'POST',
           body: { name, description, type, config },
         };
       },
-      invalidatesTags: ["ExpenseAccounts"],
+      invalidatesTags: ['ExpenseAccounts'],
     }),
 
     getTags: build.query({
       query: ({ search }) => ({
         url: `api/expenses/tags`,
-        method: "GET",
+        method: 'GET',
         params: { search },
       }),
-      providesTags: ["ExpenseTags"],
+      providesTags: ['ExpenseTags'],
     }),
 
     getExpenseAccounts: build.query({
       query: ({ page, pageSize, sort, search }) => ({
         url: `api/expenses/accounts`,
-        method: "GET",
+        method: 'GET',
         params: { page, pageSize, sort, search },
       }),
-      providesTags: ["ExpenseAccounts"],
+      providesTags: ['ExpenseAccounts'],
     }),
 
     deleteExpenseTransaction: build.mutation({
       query: (id) => ({
         url: `api/expenses/transactions/${id}`,
-        method: "DELETE",
+        method: 'DELETE',
       }),
       invalidatesTags: [
-        "ExpenseTransactions",
-        "ExpenseTypeStats",
-        "ExpenseTagStats",
-        "ExpenseUserStats",
+        'ExpenseTransactions',
+        'ExpenseTypeStats',
+        'ExpenseTagStats',
+        'ExpenseUserStats',
       ],
     }),
     updateExpenseTransaction: build.mutation({
-      query: ({
-        id,
-        amount,
-        account,
-        description,
-        tags,
-        type,
-        date,
-        timeZone,
-      }) => ({
+      query: ({ id, amount, account, description, tags, type, date, timeZone }) => ({
         url: `api/expenses/transactions/${id}`,
-        method: "PATCH",
+        method: 'PATCH',
         body: { amount, account, description, tags, type, date, timeZone },
       }),
       invalidatesTags: [
-        "ExpenseTransactions",
-        "ExpenseTypeStats",
-        "ExpenseTagStats",
-        "ExpenseUserStats",
-        "ExpenseTags",
+        'ExpenseTransactions',
+        'ExpenseTypeStats',
+        'ExpenseTagStats',
+        'ExpenseUserStats',
+        'ExpenseTags',
       ],
     }),
     fileUpload: build.mutation({
       query: (data) => ({
         url: `api/expenses/upload`,
-        method: "POST",
+        method: 'POST',
         body: data,
       }),
       invalidatesTags: [
-        "ExpenseTransactions",
-        "ExpenseTypeStats",
-        "ExpenseTagStats",
-        "ExpenseUserStats",
+        'ExpenseTransactions',
+        'ExpenseTypeStats',
+        'ExpenseTagStats',
+        'ExpenseUserStats',
       ],
     }),
     uploadTransactions: build.mutation({
       query: ({ file, bankConfig, bankAccount }) => ({
         url: `api/expenses/uploadTransactions`,
-        method: "POST",
+        method: 'POST',
         body: { file, bankConfig, bankAccount },
       }),
       invalidatesTags: [
-        "ExpenseTransactions",
-        "ExpenseTypeStats",
-        "ExpenseTagStats",
-        "ExpenseUserStats",
-        "ExpenseTags",
+        'ExpenseTransactions',
+        'ExpenseTypeStats',
+        'ExpenseTagStats',
+        'ExpenseUserStats',
+        'ExpenseTags',
       ],
     }),
     uploadAccounts: build.mutation({
       query: ({ file }) => ({
         url: `api/expenses/uploadAccounts`,
-        method: "POST",
+        method: 'POST',
         body: { file },
       }),
       invalidatesTags: [
-        "ExpenseAccounts",
-        "ExpenseTransactions",
-        "ExpenseTypeStats",
-        "ExpenseTagStats",
-        "ExpenseUserStats",
+        'ExpenseAccounts',
+        'ExpenseTransactions',
+        'ExpenseTypeStats',
+        'ExpenseTagStats',
+        'ExpenseUserStats',
       ],
     }),
     addExpenseTransaction: build.mutation({
@@ -184,7 +175,7 @@ export const api = createApi({
         const localTimeZone = timeZone || DateTime.now().zoneName;
         return {
           url: `api/expenses/transactions`,
-          method: "POST",
+          method: 'POST',
           body: {
             amount,
             account,
@@ -197,110 +188,110 @@ export const api = createApi({
         };
       },
       invalidatesTags: [
-        "ExpenseTransactions",
-        "ExpenseTypeStats",
-        "ExpenseTagStats",
-        "ExpenseUserStats",
+        'ExpenseTransactions',
+        'ExpenseTypeStats',
+        'ExpenseTagStats',
+        'ExpenseUserStats',
       ],
     }),
     getExpenseTransactions: build.query({
       query: ({ page, pageSize, sort, search }) => ({
         url: `api/expenses/transactions`,
-        method: "GET",
+        method: 'GET',
         params: { page, pageSize, sort, search },
       }),
-      providesTags: ["ExpenseTransactions"],
+      providesTags: ['ExpenseTransactions'],
     }),
     getExpenseUserStats: build.query({
       query: ({ depth, dateFrom, dateTo }) => ({
         url: `api/expenses/userStats`,
-        method: "GET",
-        params: { depth, dateFrom, dateTo, fillTimeline: "X" },
+        method: 'GET',
+        params: { depth, dateFrom, dateTo, fillTimeline: 'X' },
       }),
-      providesTags: ["ExpenseUserStats"],
+      providesTags: ['ExpenseUserStats'],
     }),
     getExpenseTagStats: build.query({
       query: ({ depth, dateFrom, tags, dateTo }) => ({
         url: `api/expenses/tagStats`,
-        method: "GET",
-        params: { depth, dateFrom, dateTo, tags, fillTimeline: "X" },
+        method: 'GET',
+        params: { depth, dateFrom, dateTo, tags, fillTimeline: 'X' },
       }),
-      providesTags: ["ExpenseTagStats"],
+      providesTags: ['ExpenseTagStats'],
     }),
     getExpenseTypeStats: build.query({
       query: ({ depth, type, dateFrom, dateTo }) => ({
         url: `api/expenses/typeStats`,
-        method: "GET",
-        params: { depth, type, dateFrom, dateTo, fillTimeline: "X" },
+        method: 'GET',
+        params: { depth, type, dateFrom, dateTo, fillTimeline: 'X' },
       }),
-      providesTags: ["ExpenseTypeStats"],
+      providesTags: ['ExpenseTypeStats'],
     }),
     getUser: build.query({
       query: (id) => `api/general/user/${id}`,
-      providesTags: ["User"],
+      providesTags: ['User'],
     }),
     userGoogleSignin: build.mutation({
       query: ({ accessToken, expiresIn }) => ({
         url: `api/user/googleSignin`,
-        method: "POST",
+        method: 'POST',
         body: { accessToken, expiresIn },
       }),
-      providesTags: ["GoogleSignin"],
-      invalidatesTags: ["User"],
+      providesTags: ['GoogleSignin'],
+      invalidatesTags: ['User'],
     }),
     userSignin: build.mutation({
       query: ({ email, password }) => ({
         url: `api/user/signin`,
-        method: "POST",
+        method: 'POST',
         body: { email, password },
       }),
-      providesTags: ["Signin"],
-      invalidatesTags: ["User"],
+      providesTags: ['Signin'],
+      invalidatesTags: ['User'],
     }),
     userSignup: build.mutation({
       query: ({ firstName, lastName, email, password }) => ({
         url: `api/user/signup`,
-        method: "POST",
+        method: 'POST',
         body: { firstName, lastName, email, password },
       }),
-      providesTags: ["Signup"],
-      invalidatesTags: ["User"],
+      providesTags: ['Signup'],
+      invalidatesTags: ['User'],
     }),
     getProducts: build.query({
       query: () => `api/client/products`,
-      providesTags: ["Products"],
+      providesTags: ['Products'],
     }),
     getCustomers: build.query({
       query: () => `api/client/customers`,
-      providesTags: ["Customers"],
+      providesTags: ['Customers'],
     }),
     getGeography: build.query({
       query: () => `api/client/geography`,
-      providesTags: ["Geography"],
+      providesTags: ['Geography'],
     }),
     getSales: build.query({
       query: () => `api/sales/sales`,
-      providesTags: ["Sales"],
+      providesTags: ['Sales'],
     }),
     getTransactions: build.query({
       query: ({ page, pageSize, sort, search }) => ({
         url: `api/client/transactions`,
-        method: "GET",
+        method: 'GET',
         params: { page, pageSize, sort, search },
       }),
-      providesTags: ["Transactions"],
+      providesTags: ['Transactions'],
     }),
     getAdmins: build.query({
       query: () => `api/management/admins`,
-      providesTags: ["Admins"],
+      providesTags: ['Admins'],
     }),
     getUserPerformance: build.query({
       query: (id) => `api/management/performance/${id}`,
-      providesTags: ["Performance"],
+      providesTags: ['Performance'],
     }),
     getDashboard: build.query({
-      query: () => "api/general/dashboard",
-      providesTags: ["Dashboard"],
+      query: () => 'api/general/dashboard',
+      providesTags: ['Dashboard'],
     }),
   }),
 });

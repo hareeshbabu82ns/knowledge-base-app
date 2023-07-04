@@ -1,5 +1,5 @@
-import { createSlice } from "@reduxjs/toolkit";
-import { loadUserLocal } from "scenes/user/utils";
+import { createSlice } from '@reduxjs/toolkit';
+import { loadUserLocal } from 'scenes/user/utils';
 
 const { user, token } = loadUserLocal();
 
@@ -11,12 +11,13 @@ const initialState = {
 };
 
 export const globalSlice = createSlice({
-  name: "global",
+  name: 'global',
   initialState,
   reducers: {
     setUser: (state, { payload }) => {
       state.user = payload?.user;
-      state.userId = payload?.user?._id ? payload?.user._id : "";
+      state.userId = payload?.user?._id || '';
+      state.token = payload?.token || '';
     },
   },
 });

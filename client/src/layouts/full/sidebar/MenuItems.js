@@ -2,13 +2,16 @@
 //   IconAperture, IconCopy, IconLayoutDashboard, IconLogin, IconMoodHappy, IconTypography, IconUserPlus
 // } from '@tabler/icons';
 import {
-  Menu as IconAperture,
-  Menu as IconCopy,
-  Menu as IconLayoutDashboard,
-  Menu as IconLogin,
-  Menu as IconMoodHappy,
-  Menu as IconTypography,
-  Menu as IconUserPlus,
+  TypeSpecimenOutlined as IconAperture,
+  PagesOutlined as IconPage,
+  CopyAllOutlined as IconCopy,
+  HomeOutlined as DashboardIcon,
+  IcecreamOutlined as IconMoodHappy,
+  CurrencyRupeeOutlined as TransactionsIcon,
+  AccountBalanceWalletOutlined as AccountsIcon,
+  PointOfSaleOutlined as OverviewIcon,
+  AdminPanelSettingsOutlined as AdminIcon,
+  ColorLensOutlined as ThemeIcon,
 } from '@mui/icons-material';
 
 import { uniqueId } from 'lodash';
@@ -18,13 +21,56 @@ const Menuitems = [
     navlabel: true,
     subheader: 'Home',
   },
-
   {
     id: uniqueId(),
     title: 'Dashboard',
-    icon: IconLayoutDashboard,
+    icon: DashboardIcon,
     href: '/dashboard',
   },
+
+  ///////// Expenses ///////////
+  {
+    navlabel: true,
+    subheader: 'Expenses',
+  },
+  {
+    id: uniqueId(),
+    title: 'Transactions',
+    icon: TransactionsIcon,
+    href: '/expenses/transactions',
+  },
+  {
+    id: uniqueId(),
+    title: 'Accounts',
+    icon: AccountsIcon,
+    href: '/expenses/accounts',
+  },
+  {
+    id: uniqueId(),
+    title: 'Overview',
+    icon: OverviewIcon,
+    href: '/expenses/overview',
+  },
+
+  ///////// Admin ///////////
+  {
+    navlabel: true,
+    subheader: 'Admin',
+  },
+  {
+    id: uniqueId(),
+    title: 'Settings',
+    icon: AdminIcon,
+    href: '/admin/settings',
+  },
+  {
+    id: uniqueId(),
+    title: 'Theme',
+    icon: ThemeIcon,
+    href: '/admin/theme',
+  },
+
+  ///////// Utilities ///////////
   {
     navlabel: true,
     subheader: 'Utilities',
@@ -32,7 +78,7 @@ const Menuitems = [
   {
     id: uniqueId(),
     title: 'Typography',
-    icon: IconTypography,
+    icon: IconAperture,
     href: '/ui/typography',
   },
   {
@@ -41,22 +87,8 @@ const Menuitems = [
     icon: IconCopy,
     href: '/ui/shadow',
   },
-  {
-    navlabel: true,
-    subheader: 'Auth',
-  },
-  {
-    id: uniqueId(),
-    title: 'Login',
-    icon: IconLogin,
-    href: '/auth/login',
-  },
-  {
-    id: uniqueId(),
-    title: 'Register',
-    icon: IconUserPlus,
-    href: '/auth/register',
-  },
+
+  ///////// Extra ///////////
   {
     navlabel: true,
     subheader: 'Extra',
@@ -70,7 +102,7 @@ const Menuitems = [
   {
     id: uniqueId(),
     title: 'Sample Page',
-    icon: IconAperture,
+    icon: IconPage,
     href: '/sample-page',
   },
 ];

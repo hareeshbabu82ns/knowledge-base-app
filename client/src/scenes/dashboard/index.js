@@ -1,69 +1,19 @@
-import React, { useState } from "react";
-import FlexBetween from "components/FlexBetween";
-import Header from "components/Header";
-import {
-  DownloadOutlined,
-  Email,
-  PointOfSale,
-  PersonAdd,
-  Traffic,
-} from "@mui/icons-material";
-import {
-  Box,
-  Button,
-  Typography,
-  useTheme,
-  useMediaQuery,
-  Stack,
-} from "@mui/material";
-import { DataGrid } from "@mui/x-data-grid";
-// import BreakdownChart from "components/BreakdownChart";
-import OverviewChart from "components/OverviewChart";
-import { useGetDashboardQuery } from "state/api";
-import StatBox from "components/StatBox";
-// import UserTypeStatsChart from "components/UserTypeStatsChart";
-import ExpensesOverviewChart from "components/ExpensesOverviewChart";
-import { DateTime } from "luxon";
+import React, { useState } from 'react';
+import FlexBetween from 'components/FlexBetween';
+import Header from 'components/Header';
+import { DownloadOutlined, Email, PointOfSale, PersonAdd, Traffic } from '@mui/icons-material';
+import { Box, Button, useTheme, useMediaQuery, Stack } from '@mui/material';
+import StatBox from 'components/StatBox';
+import { DateTime } from 'luxon';
+import ExpensesOverviewChart from 'components/ExpensesOverviewChart';
 
 const Dashboard = () => {
   const theme = useTheme();
 
-  const [startDate] = useState(DateTime.now().startOf("month"));
-  const [endDate] = useState(DateTime.now().endOf("month"));
+  const [startDate] = useState(DateTime.now().startOf('year'));
+  const [endDate] = useState(DateTime.now().minus({ month: 1 }).endOf('month'));
 
-  const isNonMediumScreens = useMediaQuery("(min-width: 1200px)");
-  const { data, isLoading } = useGetDashboardQuery();
-
-  const columns = [
-    {
-      field: "_id",
-      headerName: "ID",
-      flex: 1,
-    },
-    {
-      field: "userId",
-      headerName: "User ID",
-      flex: 1,
-    },
-    {
-      field: "createdAt",
-      headerName: "CreatedAt",
-      flex: 1,
-    },
-    {
-      field: "products",
-      headerName: "# of Products",
-      flex: 0.5,
-      sortable: false,
-      renderCell: (params) => params.value.length,
-    },
-    {
-      field: "cost",
-      headerName: "Cost",
-      flex: 1,
-      renderCell: (params) => `$${Number(params.value).toFixed(2)}`,
-    },
-  ];
+  const isNonMediumScreens = useMediaQuery('(min-width: 1200px)');
 
   return (
     <Box m="1.5rem 2.5rem">
@@ -73,14 +23,14 @@ const Dashboard = () => {
         <Stack direction="row" columnGap={2} alignItems="center">
           <Button
             sx={{
-              fontSize: "14px",
-              fontWeight: "bold",
-              padding: "10px 20px",
+              fontSize: '14px',
+              fontWeight: 'bold',
+              padding: '10px 20px',
             }}
             color="primary"
             variant="contained"
           >
-            <DownloadOutlined sx={{ mr: "10px" }} />
+            <DownloadOutlined sx={{ mr: '10px' }} />
             Download Reports
           </Button>
         </Stack>
@@ -93,127 +43,92 @@ const Dashboard = () => {
         gridAutoRows="160px"
         gap="20px"
         sx={{
-          "& > div": { gridColumn: isNonMediumScreens ? undefined : "span 12" },
+          '& > div': { gridColumn: isNonMediumScreens ? undefined : 'span 12' },
         }}
       >
         {/* ROW 1 */}
+
         <StatBox
           title="Total Customers"
-          value={data && data.totalCustomers}
+          value={333}
           increase="+14%"
           description="Since last month"
           icon={
             <Email
               sx={{
                 color: theme.palette.text.onTileSecondary,
-                fontSize: "26px",
+                fontSize: '26px',
               }}
             />
           }
         />
         <StatBox
           title="Sales Today"
-          value={data && data.todayStats.totalSales}
+          value={443}
           increase="+21%"
           description="Since last month"
           icon={
             <PointOfSale
               sx={{
                 color: theme.palette.text.onTileSecondary,
-                fontSize: "26px",
+                fontSize: '26px',
               }}
             />
           }
         />
-        <Box
-          gridColumn="span 8"
-          gridRow="span 2"
-          backgroundColor={theme.palette.background.tile}
-          p="1rem"
-          borderRadius="0.55rem"
-        >
-          <OverviewChart view="sales" isDashboard={true} />
-        </Box>
         <StatBox
           title="Monthly Sales"
-          value={data && data.thisMonthStats.totalSales}
+          value={2344}
           increase="+5%"
           description="Since last month"
           icon={
             <PersonAdd
               sx={{
                 color: theme.palette.text.onTileSecondary,
-                fontSize: "26px",
+                fontSize: '26px',
               }}
             />
           }
         />
         <StatBox
           title="Yearly Sales"
-          value={data && data.yearlySalesTotal}
+          value={1352}
           increase="+43%"
           description="Since last month"
           icon={
             <Traffic
               sx={{
                 color: theme.palette.text.onTileSecondary,
-                fontSize: "26px",
+                fontSize: '26px',
               }}
             />
           }
         />
 
         {/* ROW 2 */}
+
         <Box
-          gridColumn="span 8"
-          gridRow="span 3"
-          sx={{
-            "& .MuiDataGrid-root": {
-              border: "none",
-              borderRadius: "5rem",
-            },
-            "& .MuiDataGrid-cell": {
-              borderBottom: "none",
-            },
-            "& .MuiDataGrid-columnHeaders": {
-              backgroundColor: theme.palette.background.tile,
-              color: theme.palette.text.onTileSecondary,
-              borderBottom: "none",
-            },
-            "& .MuiDataGrid-virtualScroller": {
-              backgroundColor: theme.palette.background.paper,
-            },
-            "& .MuiDataGrid-footerContainer": {
-              backgroundColor: theme.palette.background.tile,
-              color: theme.palette.text.onTileSecondary,
-              borderTop: "none",
-            },
-            "& .MuiDataGrid-toolbarContainer .MuiButton-text": {
-              color: `${theme.palette.text.onTileSecondary} !important`,
-            },
-          }}
-        >
-          <DataGrid
-            loading={isLoading || !data}
-            getRowId={(row) => row._id}
-            rows={(data && data.transactions) || []}
-            columns={columns}
-          />
-        </Box>
-        <Box
-          gridColumn="span 4"
-          gridRow="span 3"
+          height="40vh"
+          mt={2}
+          borderRadius={2}
+          padding={1}
           backgroundColor={theme.palette.background.tile}
-          p="1.5rem"
-          borderRadius="0.55rem"
+          gridColumn="span 6"
+          gridRow="span 3"
         >
-          <Typography variant="h6">Expenses by Type</Typography>
-          <ExpensesOverviewChart
-            view="types"
-            startDate={startDate}
-            endDate={endDate}
-            isDashboard={true}
-          />
+          <ExpensesOverviewChart view="types" startDate={startDate} endDate={endDate} />
+        </Box>
+
+        <Box
+          height="40vh"
+          mt={2}
+          borderRadius={2}
+          padding={1}
+          backgroundColor={theme.palette.background.tile}
+          gridColumn="span 6"
+          gridRow="span 3"
+        >
+          <ExpensesOverviewChart view="tags" startDate={startDate} endDate={endDate} />
         </Box>
       </Box>
     </Box>

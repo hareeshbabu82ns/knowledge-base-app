@@ -1,13 +1,36 @@
 import React from 'react';
-import { Box, AppBar, Toolbar, styled, Stack, IconButton, Badge, Button } from '@mui/material';
+import {
+  Box,
+  AppBar,
+  Toolbar,
+  styled,
+  Stack,
+  IconButton,
+  Badge,
+  Button,
+  useTheme,
+} from '@mui/material';
 import PropTypes from 'prop-types';
 
 // components
 import Profile from './Profile.js';
 // import { IconBellRinging, IconMenu } from '@tabler/icons';
-import { RingVolumeOutlined as IconBellRinging, Menu as IconMenu } from '@mui/icons-material';
+import {
+  DarkModeOutlined,
+  RingVolumeOutlined as IconBellRinging,
+  Menu as IconMenu,
+  LightModeOutlined,
+} from '@mui/icons-material';
+import { useDispatch } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
+import SettingsDrawerButton from 'components/SettingsDrawerButton.js';
+import { setMode } from 'state/themeSlice.js';
 
 const Header = (props) => {
+  const dispatch = useDispatch();
+  const theme = useTheme();
+  const navigate = useNavigate();
+
   // const lgUp = useMediaQuery((theme) => theme.breakpoints.up('lg'));
   // const lgDown = useMediaQuery((theme) => theme.breakpoints.down('lg'));
 
@@ -60,14 +83,15 @@ const Header = (props) => {
         </IconButton>
         <Box flexGrow={1} />
         <Stack spacing={1} direction="row" alignItems="center">
-          <Button
-            variant="contained"
-            color="primary"
-            target="_blank"
-            href="https://adminmart.com/product/modernize-react-mui-dashboard-template/"
-          >
-            Upgrade to Pro
-          </Button>
+          <IconButton onClick={() => dispatch(setMode())}>
+            {theme.palette.isDark ? (
+              <DarkModeOutlined sx={{ fontSize: '25px' }} />
+            ) : (
+              <LightModeOutlined sx={{ fontSize: '25px' }} />
+            )}
+          </IconButton>
+
+          <SettingsDrawerButton />
           <Profile />
         </Stack>
       </ToolbarStyled>

@@ -1,6 +1,7 @@
 import React, { lazy } from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, Outlet } from 'react-router-dom';
 import Loadable from 'layouts/full/shared/loadable/Loadable';
+import { ProtectedRoute } from 'components/ProtectedRoute';
 
 /* ***Layouts**** */
 const FullLayout = Loadable(lazy(() => import('layouts/full/FullLayout')));
@@ -8,14 +9,21 @@ const BlankLayout = Loadable(lazy(() => import('layouts/blank/BlankLayout')));
 
 /* ****Pages***** */
 const Dashboard = Loadable(lazy(() => import('scenes/dashboard')));
-// const Dashboard = Loadable(lazy(() => import('views/dashboard/Dashboard')));
+const Expenses = Loadable(lazy(() => import('scenes/expenses')));
+const AccountsPage = Loadable(lazy(() => import('scenes/accounts')));
+const ExpenseStats = Loadable(lazy(() => import('scenes/dashboard/ExpenseStats')));
+
+const Admin = Loadable(lazy(() => import('scenes/admin')));
+const ThemePage = Loadable(lazy(() => import('themes/ThemePage')));
+
 const SamplePage = Loadable(lazy(() => import('views/sample-page/SamplePage')));
 const Icons = Loadable(lazy(() => import('views/icons/Icons')));
 const TypographyPage = Loadable(lazy(() => import('views/utilities/TypographyPage')));
 const Shadow = Loadable(lazy(() => import('views/utilities/Shadow')));
+
 const Error = Loadable(lazy(() => import('views/authentication/Error')));
-const Register = Loadable(lazy(() => import('views/authentication/Register')));
-const Login = Loadable(lazy(() => import('views/authentication/Login')));
+const Register = Loadable(lazy(() => import('scenes/user/Signup')));
+const Login = Loadable(lazy(() => import('scenes/user/Login')));
 
 /*
 import Dashboard from "scenes/dashboard";
@@ -67,10 +75,33 @@ import AccountsPage from "scenes/accounts";
 const Router = [
   {
     path: '/',
-    element: <FullLayout />,
+    element: (
+      <ProtectedRoute>
+        <FullLayout />
+      </ProtectedRoute>
+    ),
     children: [
       { path: '/', element: <Navigate to="/dashboard" /> },
       { path: '/dashboard', exact: true, element: <Dashboard /> },
+      {
+        path: '/expenses',
+        element: <Outlet />,
+        children: [
+          { path: '', element: <Navigate to="transactions" /> },
+          { path: 'transactions', exact: true, element: <Expenses /> },
+          { path: 'accounts', exact: true, element: <AccountsPage /> },
+          { path: 'overview', exact: true, element: <ExpenseStats /> },
+        ],
+      },
+      {
+        path: '/admin',
+        element: <Outlet />,
+        children: [
+          { path: '', element: <Navigate to="settings" /> },
+          { path: 'settings', exact: true, element: <Admin /> },
+          { path: 'theme', exact: true, element: <ThemePage /> },
+        ],
+      },
       { path: '/sample-page', exact: true, element: <SamplePage /> },
       { path: '/icons', exact: true, element: <Icons /> },
       { path: '/ui/typography', exact: true, element: <TypographyPage /> },

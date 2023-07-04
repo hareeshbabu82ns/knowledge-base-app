@@ -1,18 +1,17 @@
-import { Link } from "react-router-dom";
-import { ReactComponent as LogoDark } from "assets/images/logos/dark-logo.svg";
-import { styled } from "@mui/material";
+import { Link } from 'react-router-dom';
+import { Typography, styled } from '@mui/material';
 
 const LinkStyled = styled(Link)(() => ({
-  height: "70px",
-  width: "180px",
-  overflow: "hidden",
-  display: "block",
+  paddingTop: 15,
+  height: '70px',
+  overflow: 'hidden',
+  display: 'block',
 }));
 
 const Logo = () => {
   return (
     <LinkStyled to="/">
-      <LogoDark height={70} />
+      <Typography variant="h4">KnowledgeBase</Typography>
     </LinkStyled>
   );
 };
