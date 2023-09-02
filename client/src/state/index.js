@@ -8,6 +8,8 @@ const initialState = {
   userId: user?._id,
   user,
   token,
+  header: null,
+  subHeader: null,
 };
 
 export const globalSlice = createSlice({
@@ -19,9 +21,16 @@ export const globalSlice = createSlice({
       state.userId = payload?.user?._id || '';
       state.token = payload?.token || '';
     },
+    setHeader: (state, { payload }) => {
+      state.header = payload?.header;
+      state.subHeader = payload?.subHeader;
+    },
   },
 });
 
-export const { setUser } = globalSlice.actions;
+export const { setUser, setHeader } = globalSlice.actions;
+
+export const headerSelector = (state) => state.global.header;
+export const subHeaderSelector = (state) => state.global.subHeader;
 
 export default globalSlice.reducer;

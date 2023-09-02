@@ -1,5 +1,5 @@
-import React from "react";
-import { Box, Typography, useTheme } from "@mui/material";
+import React from 'react';
+import { Box, Typography, useTheme } from '@mui/material';
 
 function Header({ title, subtitle }) {
   const theme = useTheme();
@@ -10,11 +10,11 @@ function Header({ title, subtitle }) {
         variant="h2"
         color={theme.palette.text.onDefaultSecondary}
         fontWeight="bold"
-        sx={{ mb: "5px" }}
+        sx={{ mb: '5px' }}
       >
         {title}
       </Typography>
-      <Typography variant="h5" color={theme.palette.text.onDefaultTertiary}>
+      <Typography variant="caption" color={theme.palette.text.onDefaultTertiary}>
         {subtitle}
       </Typography>
     </Box>

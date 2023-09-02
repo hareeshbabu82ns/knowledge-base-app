@@ -6,98 +6,89 @@ import {
   InputLabel,
   MenuItem,
   Select,
-  Stack,
   Switch,
   TextField,
-} from "@mui/material";
-import { Box } from "@mui/system";
-import { EXPENSE_TYPES } from "constants";
-import React from "react";
-import { toast } from "react-toastify";
-import {
-  SendOutlined,
-  DeleteOutlineOutlined,
-  AttachMoneyOutlined,
-  LocalOfferOutlined,
-  CalculateOutlined as ReCalcStatsIcon,
-} from "@mui/icons-material";
-import { DateTime } from "luxon";
+} from '@mui/material';
+import { Box } from '@mui/system';
+import { EXPENSE_TYPES } from 'constants';
+import React, { useEffect } from 'react';
+import { toast } from 'react-toastify';
+import { SendOutlined, DeleteOutlineOutlined, AttachMoneyOutlined } from '@mui/icons-material';
+import { DateTime } from 'luxon';
 import {
   useAddExpenseTransactionMutation,
   useUpdateExpenseTransactionMutation,
   useDeleteExpenseTransactionMutation,
   useGetExpenseAccountsQuery,
-  useRecalculateExpenseStatsMutation,
-} from "state/api";
-import { DateTimePicker } from "@mui/x-date-pickers";
-import ExpenseTagsSelect from "components/ExpenseTagsSelect";
+  useGetTransactionQuery,
+} from 'state/api';
+import { DateTimePicker } from '@mui/x-date-pickers';
+import ExpenseTagsSelect from 'components/ExpenseTagsSelect';
+import { useNavigate, useParams } from 'react-router-dom';
+import { LoadingProgress } from 'components/LoadingProgress';
 
-const TransactionForm = ({ transactionData }) => {
-  const [formData, setFormData] = React.useState(transactionData);
-  const [reStatsYear, setReStatsYear] = React.useState(DateTime.now().year);
+const initFormData = {
+  amount: 0,
+  type: EXPENSE_TYPES[0],
+  tags: '',
+  date: DateTime.now(),
+  account: '',
+  description: '',
+};
 
-  const [recalculateStats] = useRecalculateExpenseStatsMutation();
+const TransactionForm = () => {
+  const { id } = useParams();
+  const navigate = useNavigate();
+
+  const {
+    data: transactionData,
+    isFetching,
+    isLoading,
+  } = useGetTransactionQuery(id, { skip: id === 'new' });
+
+  const [formData, setFormData] = React.useState(null);
+
   const [addTransaction] = useAddExpenseTransactionMutation();
   const [updateTransaction] = useUpdateExpenseTransactionMutation();
   const [deleteTransaction] = useDeleteExpenseTransactionMutation();
 
-  const { data: bankAccounts, isLoading: bankAccountsLoading } =
-    useGetExpenseAccountsQuery({});
+  const { data: bankAccounts, isLoading: bankAccountsLoading } = useGetExpenseAccountsQuery({});
 
-  const onInputChange = (e) =>
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+  useEffect(() => {
+    if (id === 'new') setFormData({ ...initFormData });
+    if (transactionData)
+      setFormData({ ...transactionData, date: DateTime.fromISO(transactionData.date) });
+  }, [transactionData, id]);
 
-  const handleReCalcStats = async () => {
-    const toastId = toast.loading("Recalculating Transaction Stats...", {
-      toastId: "transaction-stats-action",
-    });
-    try {
-      const payload = await recalculateStats({ year: reStatsYear }).unwrap();
-      // console.log( 'signup successful', payload )
-      toast.update(toastId, {
-        render: "Transaction Stats Recalculated",
-        type: "success",
-        isLoading: false,
-        autoClose: true,
-      });
-      return payload;
-    } catch (error) {
-      // console.error( 'signup failed', error );
-      toast.update(toastId, {
-        render: "Failed to calculate Transaction Stats",
-        type: "error",
-        isLoading: false,
-        autoClose: true,
-      });
-    }
-  };
+  const onInputChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
 
   const handleDelete = async () => {
     if (!formData?._id) {
       console.log(formData);
-      toast.info("Select Transaction to delete first", { autoClose: true });
+      toast.info('Select Transaction to delete first', { autoClose: true });
       return;
     }
 
-    const toastId = toast.loading("Deleting Transaction...", {
-      toastId: "transaction-del-action",
+    const toastId = toast.loading('Deleting Transaction...', {
+      toastId: 'transaction-del-action',
     });
     try {
       const payload = await deleteTransaction(formData?._id).unwrap();
       // console.log( 'signup successful', payload )
       toast.update(toastId, {
-        render: "Transaction Deleted",
-        type: "success",
+        render: 'Transaction Deleted',
+        type: 'success',
         isLoading: false,
         autoClose: true,
       });
-      setFormData(transactionData);
+      // setFormData(transactionData);
+      navigate(-1);
       return payload;
     } catch (error) {
       // console.error( 'signup failed', error );
       toast.update(toastId, {
-        render: "Transaction failed",
-        type: "error",
+        render: 'Transaction failed',
+        type: 'error',
         isLoading: false,
         autoClose: true,
       });
@@ -109,10 +100,10 @@ const TransactionForm = ({ transactionData }) => {
 
     const postData = {
       amount: Number(formData.amount),
-      type: formData.type,
+      type: formData?.type,
       tags: Array.isArray(formData.tags)
         ? formData.tags
-        : formData.tags.split(",")?.map((t) => t.trim()),
+        : formData.tags.split(',')?.map((t) => t.trim()),
       // tags:
       //   formData.tags.trim().length > 0
       //     ? formData.tags.split(",").map((t) => t.trim())
@@ -123,12 +114,12 @@ const TransactionForm = ({ transactionData }) => {
       // dateUTC: formData.date.toUTCString(),
     };
 
-    console.log("selected date: ", formData.date);
-    console.log("utc date: ", formData.date.toISO());
-    console.log("form local date: ", postData.date);
+    // console.log('selected date: ', formData.date);
+    // console.log('utc date: ', formData.date.toISO());
+    // console.log('form local date: ', postData.date);
 
-    const toastId = toast.loading("Saving Transaction...", {
-      toastId: "transaction-add-action",
+    const toastId = toast.loading('Saving Transaction...', {
+      toastId: 'transaction-add-action',
     });
     try {
       const payload = formData?._id
@@ -136,23 +127,26 @@ const TransactionForm = ({ transactionData }) => {
         : await addTransaction(postData).unwrap();
       // console.log( 'signup successful', payload )
       toast.update(toastId, {
-        render: "Transaction Saved",
-        type: "success",
+        render: 'Transaction Saved',
+        type: 'success',
         isLoading: false,
         autoClose: true,
       });
-      setFormData(transactionData);
+      // setFormData(transactionData);
+      navigate(`/expenses/transactions/${payload.id}`, { replace: true });
       return payload;
     } catch (error) {
       // console.error( 'signup failed', error );
       toast.update(toastId, {
-        render: "Transaction failed",
-        type: "error",
+        render: 'Transaction failed',
+        type: 'error',
         isLoading: false,
         autoClose: true,
       });
     }
   };
+
+  if (!formData || isLoading || isFetching) return <LoadingProgress />;
 
   return (
     <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 2 }}>
@@ -183,11 +177,11 @@ const TransactionForm = ({ transactionData }) => {
             id="type"
             name="type"
             label="Type"
-            checked={formData.type === EXPENSE_TYPES[0]}
+            checked={formData?.type === EXPENSE_TYPES[0]}
             onChange={(e) =>
               onInputChange({
                 target: {
-                  name: "type",
+                  name: 'type',
                   value: e.target.checked ? EXPENSE_TYPES[0] : EXPENSE_TYPES[1],
                 },
               })
@@ -218,8 +212,8 @@ const TransactionForm = ({ transactionData }) => {
             onChange={(value) =>
               onInputChange({
                 target: {
-                  name: "tags",
-                  value: Array.isArray(value) ? value.join(",") : value,
+                  name: 'tags',
+                  value: Array.isArray(value) ? value.join(',') : value,
                 },
               })
             }
@@ -255,10 +249,12 @@ const TransactionForm = ({ transactionData }) => {
               required={true}
             >
               {bankAccountsLoading ? (
-                <MenuItem value={""}>{"Loading..."}</MenuItem>
+                <MenuItem value={''}>{'Loading...'}</MenuItem>
               ) : (
                 bankAccounts?.accounts?.map((c) => (
-                  <MenuItem value={c._id}>{c.name}</MenuItem>
+                  <MenuItem key={c._id} value={c._id}>
+                    {c.name}
+                  </MenuItem>
                 ))
               )}
             </Select>
@@ -283,13 +279,11 @@ const TransactionForm = ({ transactionData }) => {
             id="date"
             format="LLL dd yyyy hh:mm a"
             label="Transaction Date"
-            value={formData.date}
-            onChange={(date) =>
-              onInputChange({ target: { name: "date", value: date } })
-            }
+            value={formData?.date}
+            onChange={(date) => onInputChange({ target: { name: 'date', value: date } })}
             slotProps={{
               field: {
-                size: "small",
+                size: 'small',
                 fullWidth: true,
                 required: true,
               },
@@ -306,49 +300,9 @@ const TransactionForm = ({ transactionData }) => {
           >
             <SendOutlined />
           </IconButton>
-          <IconButton
-            type="button"
-            onClick={handleDelete}
-            color="warning"
-            disabled={!formData._id}
-          >
+          <IconButton type="button" onClick={handleDelete} color="warning" disabled={!formData._id}>
             <DeleteOutlineOutlined />
           </IconButton>
-        </Grid>
-
-        <Grid item xs={12} sm={6} lg={4}>
-          <Stack direction={"row"} gap={2}>
-            <FormControl fullWidth size="small">
-              <InputLabel id="select-restat-year-label">
-                ReCalculate Stats
-              </InputLabel>
-              <Select
-                labelId="select-restat-year"
-                name="reStats"
-                id="select-restat-year"
-                value={reStatsYear}
-                label="Re-Stats"
-                onChange={(e) => setReStatsYear(e.target.value)}
-                required={true}
-              >
-                {Array.from({ length: 10 }, (_, i) => (
-                  <MenuItem
-                    key={DateTime.now().year - i}
-                    value={DateTime.now().year - i}
-                  >
-                    {DateTime.now().year - i}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-            <IconButton
-              type="button"
-              onClick={handleReCalcStats}
-              color="warning"
-            >
-              <ReCalcStatsIcon />
-            </IconButton>
-          </Stack>
         </Grid>
       </Grid>
     </Box>

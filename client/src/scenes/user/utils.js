@@ -6,9 +6,9 @@ export const isTokenExpired = (token) => {
   // console.log(`isTokenExpired, ${token}`);
   try {
     const jwtDecoded = jwt(token);
-    console.log(`token time: ${jwtDecoded.exp * 1000}`);
+    // console.log(`token time: ${jwtDecoded.exp * 1000}`);
     const nowTime = new Date().getTime();
-    console.log(`now time: ${nowTime}`);
+    // console.log(`now time: ${nowTime}`);
     return jwtDecoded.exp * 1000 < nowTime;
   } catch (ex) {
     console.log(ex);

@@ -1,18 +1,20 @@
-import { Link } from 'react-router-dom';
-import { Typography, styled } from '@mui/material';
-
-const LinkStyled = styled(Link)(() => ({
-  paddingTop: 15,
-  height: '70px',
-  overflow: 'hidden',
-  display: 'block',
-}));
+import { Box, Stack, Typography, useTheme } from '@mui/material';
+import logo from 'assets/images/logos/logo.svg';
+import { AppBarStyled, ToolbarStyled } from 'layouts/full/header/Header';
 
 const Logo = () => {
+  const theme = useTheme();
   return (
-    <LinkStyled to="/">
-      <Typography variant="h4">KnowledgeBase</Typography>
-    </LinkStyled>
+    <AppBarStyled position="sticky" color="default" elevation={0}>
+      <ToolbarStyled sx={{ alignItems: 'center' }} disableGutters>
+        <Stack direction={'row'} gap={2}>
+          <img src={logo} alt="Logo" />
+          <Typography variant="h4" color={theme.palette.tertiary.main}>
+            KnowledgeBase
+          </Typography>
+        </Stack>
+      </ToolbarStyled>
+    </AppBarStyled>
   );
 };
 

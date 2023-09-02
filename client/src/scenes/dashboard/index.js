@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import FlexBetween from 'components/FlexBetween';
-import Header from 'components/Header';
 import { DownloadOutlined, Email, PointOfSale, PersonAdd, Traffic } from '@mui/icons-material';
 import { Box, Button, useTheme, useMediaQuery, Stack } from '@mui/material';
 import StatBox from 'components/StatBox';
 import { DateTime } from 'luxon';
 import ExpensesOverviewChart from 'components/ExpensesOverviewChart';
+import PageContainer from 'components/container/PageContainer';
 
 const Dashboard = () => {
   const theme = useTheme();
@@ -16,9 +16,9 @@ const Dashboard = () => {
   const isNonMediumScreens = useMediaQuery('(min-width: 1200px)');
 
   return (
-    <Box m="1.5rem 2.5rem">
+    <PageContainer title="Dashboard" description="Welcome to your dashboard">
       <FlexBetween>
-        <Header title="DASHBOARD" subtitle="Welcome to your dashboard" />
+        <Box />
 
         <Stack direction="row" columnGap={2} alignItems="center">
           <Button
@@ -131,7 +131,7 @@ const Dashboard = () => {
           <ExpensesOverviewChart view="tags" startDate={startDate} endDate={endDate} />
         </Box>
       </Box>
-    </Box>
+    </PageContainer>
   );
 };
 

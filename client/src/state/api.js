@@ -281,6 +281,13 @@ export const api = createApi({
       }),
       providesTags: ['Transactions'],
     }),
+    getTransaction: build.query({
+      query: (id) => ({
+        url: `api/expenses/transactions/${id}`,
+        method: 'GET',
+      }),
+      providesTags: ['Transaction'],
+    }),
     getAdmins: build.query({
       query: () => `api/management/admins`,
       providesTags: ['Admins'],
@@ -320,6 +327,7 @@ export const {
   useGetProductsQuery,
   useGetCustomersQuery,
   useGetTransactionsQuery,
+  useGetTransactionQuery,
   useGetGeographyQuery,
   useGetSalesQuery,
   useGetAdminsQuery,

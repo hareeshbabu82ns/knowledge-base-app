@@ -2,6 +2,8 @@ import React, { lazy } from 'react';
 import { Navigate, Outlet } from 'react-router-dom';
 import Loadable from 'layouts/full/shared/loadable/Loadable';
 import { ProtectedRoute } from 'components/ProtectedRoute';
+import TransactionForm from 'scenes/expenses/TransactionForm';
+import TransactionsGrid from 'scenes/expenses/TransactionsGrid';
 
 /* ***Layouts**** */
 const FullLayout = Loadable(lazy(() => import('layouts/full/FullLayout')));
@@ -88,7 +90,14 @@ const Router = [
         element: <Outlet />,
         children: [
           { path: '', element: <Navigate to="transactions" /> },
-          { path: 'transactions', exact: true, element: <Expenses /> },
+          {
+            path: 'transactions',
+            element: <Expenses />,
+            children: [
+              { path: '', exact: true, element: <TransactionsGrid /> },
+              { path: ':id', element: <TransactionForm /> },
+            ],
+          },
           { path: 'accounts', exact: true, element: <AccountsPage /> },
           { path: 'overview', exact: true, element: <ExpenseStats /> },
         ],

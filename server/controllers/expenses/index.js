@@ -861,6 +861,21 @@ export const addTransaction = async (req, res) => {
   }
 };
 
+export const getTransaction = async (req, res) => {
+  try {
+    const { user } = req.auth;
+    const { id } = req.params;
+
+    const transaction = await Transaction.findOne({
+      userId: user._id,
+      _id: id,
+    });
+    res.status(200).json({ ...transaction.toJSON() });
+  } catch (err) {
+    res.status(404).json({ message: err.message });
+  }
+};
+
 export const getTransactions = async (req, res) => {
   try {
     const { user } = req.auth;
