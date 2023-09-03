@@ -3,7 +3,15 @@ import PropTypes from 'prop-types';
 
 export const LoadingProgress = ({ sx }) => {
   return (
-    <Box display="flex" justifyContent="center" alignItems="center" minHeight="100vh" sx={sx}>
+    <Box
+      display="flex"
+      justifyContent="center"
+      alignContent="center"
+      alignItems="center"
+      minHeight="100vh"
+      width="100%"
+      sx={sx}
+    >
       <CircularProgress variant="indeterminate" />
     </Box>
   );

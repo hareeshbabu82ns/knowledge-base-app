@@ -115,10 +115,10 @@ const columns = [
     field: 'date',
     headerName: 'Date',
     width: 120,
+    type: 'date',
+    valueGetter: ({ value }) => new Date(value),
     renderCell: ({ value }) => (
-      <Typography variant="h6">
-        {new Date(value).toLocaleString('en', INTL_DATE_SHORT_OPTIONS)}
-      </Typography>
+      <Typography variant="h6">{value.toLocaleString('en', INTL_DATE_SHORT_OPTIONS)}</Typography>
     ),
   },
   {
@@ -130,6 +130,7 @@ const columns = [
     field: 'amount',
     headerName: 'Amount',
     width: 100,
+    type: 'number',
     renderCell: ({ value, row }) => (
       <Typography variant="h5" color={row.type === 'Expense' ? 'chocolate' : 'inherit'}>
         {Number(value).toFixed(2)}

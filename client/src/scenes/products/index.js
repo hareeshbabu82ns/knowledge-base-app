@@ -9,12 +9,13 @@ import {
   Typography,
   useMediaQuery,
   useTheme,
-} from "@mui/material";
-import React, { useState } from "react";
+} from '@mui/material';
+import React, { useState } from 'react';
 
-import { useGetProductsQuery } from "state/api";
+import { useGetProductsQuery } from 'state/api';
 
-import Header from "components/Header";
+import Header from 'components/Header';
+import { LoadingProgress } from 'components/LoadingProgress';
 
 const Product = ({ product }) => {
   const theme = useTheme();
@@ -24,34 +25,26 @@ const Product = ({ product }) => {
   return (
     <Card
       sx={{
-        backgroundImage: "none",
+        backgroundImage: 'none',
         bgcolor: theme.palette.background.alt,
-        borderRadius: "0.55rem",
+        borderRadius: '0.55rem',
       }}
     >
       <CardContent>
-        <Typography
-          sx={{ fontSize: 14 }}
-          color={theme.palette.secondary[700]}
-          gutterBottom
-        >
+        <Typography sx={{ fontSize: 14 }} color={theme.palette.secondary[700]} gutterBottom>
           {product.category}
         </Typography>
         <Typography variant="h5" component="div">
           {product.name}
         </Typography>
-        <Typography sx={{ md: "1.5rem" }} color={theme.palette.secondary[400]}>
+        <Typography sx={{ md: '1.5rem' }} color={theme.palette.secondary[400]}>
           $ {Number(product.price).toFixed(2)}
         </Typography>
         <Rating value={product.rating} readOnly />
         <Typography variant="body2">{product.description}</Typography>
       </CardContent>
       <CardActions>
-        <Button
-          variant="primary"
-          size="small"
-          onClick={() => setIsExpanded(!isExpanded)}
-        >
+        <Button variant="primary" size="small" onClick={() => setIsExpanded(!isExpanded)}>
           See More
         </Button>
       </CardActions>
@@ -66,12 +59,8 @@ const Product = ({ product }) => {
         <CardContent>
           <Typography>id: {product._id}</Typography>
           <Typography>Supply: {product.supply}</Typography>
-          <Typography>
-            Yearly Sales: {product.stats.yearlySalesTotal}
-          </Typography>
-          <Typography>
-            Yearly Units Sold: {product.stats.yearlyTotalSoldUnits}
-          </Typography>
+          <Typography>Yearly Sales: {product.stats.yearlySalesTotal}</Typography>
+          <Typography>Yearly Units Sold: {product.stats.yearlyTotalSoldUnits}</Typography>
         </CardContent>
       </Collapse>
     </Card>
@@ -80,7 +69,7 @@ const Product = ({ product }) => {
 
 const Products = () => {
   const { data, isLoading } = useGetProductsQuery();
-  const isNonMobile = useMediaQuery("(min-width: 1000px)");
+  const isNonMobile = useMediaQuery('(min-width: 1000px)');
 
   return (
     <Box m="1.5rem 2.5rem">
@@ -94,7 +83,7 @@ const Products = () => {
           rowGap="20px"
           columnGap="1.33%"
           sx={{
-            "& > div": { gridColumn: isNonMobile ? undefined : "span 4" },
+            '& > div': { gridColumn: isNonMobile ? undefined : 'span 4' },
           }}
         >
           {data.map((p) => (
@@ -102,7 +91,7 @@ const Products = () => {
           ))}
         </Box>
       ) : (
-        <>Loading...</>
+        <LoadingProgress />
       )}
     </Box>
   );

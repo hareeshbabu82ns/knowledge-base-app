@@ -1,10 +1,11 @@
-import { Box, useTheme } from "@mui/material";
-import React from "react";
+import { Box, useTheme } from '@mui/material';
+import React from 'react';
 
-import { useGetGeographyQuery } from "state/api";
-import Header from "components/Header";
-import { geoData } from "state/geoData";
-import { ResponsiveChoropleth } from "@nivo/geo";
+import { useGetGeographyQuery } from 'state/api';
+import Header from 'components/Header';
+import { geoData } from 'state/geoData';
+import { ResponsiveChoropleth } from '@nivo/geo';
+import { LoadingProgress } from 'components/LoadingProgress';
 
 function Geography() {
   const theme = useTheme();
@@ -68,21 +69,21 @@ function Geography() {
             borderColor="#ffffff"
             legends={[
               {
-                anchor: "bottom-right",
-                direction: "column",
+                anchor: 'bottom-right',
+                direction: 'column',
                 justify: true,
                 translateX: 0,
                 translateY: -125,
                 itemsSpacing: 0,
                 itemWidth: 94,
                 itemHeight: 18,
-                itemDirection: "left-to-right",
+                itemDirection: 'left-to-right',
                 itemTextColor: theme.palette.secondary[700],
                 itemOpacity: 0.85,
                 symbolSize: 18,
                 effects: [
                   {
-                    on: "hover",
+                    on: 'hover',
                     style: {
                       itemTextColor: theme.palette.background.alt,
                       itemOpacity: 1,
@@ -93,7 +94,7 @@ function Geography() {
             ]}
           />
         ) : (
-          <>Loading...</>
+          <LoadingProgress />
         )}
       </Box>
     </Box>

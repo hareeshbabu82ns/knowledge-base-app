@@ -1,32 +1,29 @@
-import * as React from "react";
-import Box from "@mui/material/Box";
-import Button from "@mui/material/Button";
-import AddIcon from "@mui/icons-material/Add";
-import EditIcon from "@mui/icons-material/Edit";
-import DeleteIcon from "@mui/icons-material/DeleteOutlined";
-import SaveIcon from "@mui/icons-material/Save";
-import CancelIcon from "@mui/icons-material/Close";
+import * as React from 'react';
+import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
+import AddIcon from '@mui/icons-material/Add';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/DeleteOutlined';
+import SaveIcon from '@mui/icons-material/Save';
+import CancelIcon from '@mui/icons-material/Close';
 import {
   GridRowModes,
   DataGrid,
   GridToolbarContainer,
   GridActionsCellItem,
   useGridApiContext,
-} from "@mui/x-data-grid";
-import { v4 as uuidV4 } from "uuid";
-import { MenuItem, Select, Typography, Stack, Chip } from "@mui/material";
-import {
-  COMPARISION_OPS_EQ,
-  EXPENSE_IGNORE_FIELDS,
-  COMPARISION_OPS,
-} from "constants";
+  GridToolbarQuickFilter,
+} from '@mui/x-data-grid';
+import { v4 as uuidV4 } from 'uuid';
+import { MenuItem, Select, Typography, Stack, Chip } from '@mui/material';
+import { COMPARISION_OPS_EQ, EXPENSE_IGNORE_FIELDS, COMPARISION_OPS } from 'constants';
 
 const initialRows = [
   {
     id: uuidV4(),
-    name: "description",
+    name: 'description',
     comparision: COMPARISION_OPS_EQ,
-    value: "",
+    value: '',
     tags: [],
   },
 ];
@@ -40,16 +37,16 @@ function EditToolbar(props) {
       ...oldRows,
       {
         id,
-        name: "",
+        name: '',
         comparision: COMPARISION_OPS_EQ,
-        value: "",
+        value: '',
         tags: [],
         isNew: true,
       },
     ]);
     setRowModesModel((oldModel) => ({
       ...oldModel,
-      [id]: { mode: GridRowModes.Edit, fieldToFocus: "name" },
+      [id]: { mode: GridRowModes.Edit, fieldToFocus: 'name' },
     }));
   };
 
@@ -61,6 +58,8 @@ function EditToolbar(props) {
       <Button color="primary" startIcon={<AddIcon />} onClick={handleClick}>
         Add Tag
       </Button>
+      <Box flexGrow={1} />
+      <GridToolbarQuickFilter />
     </GridToolbarContainer>
   );
 }
@@ -165,12 +164,10 @@ export default function TagFieldsGridForm({ fields, onConfigUpdated }) {
   const processRowUpdate = (newRow) => {
     const updatedRow = {
       ...newRow,
-      tags: newRow.tags.split(","),
+      tags: newRow.tags.split(','),
       isNew: false,
     };
-    const finalRows = rows.map((row) =>
-      row.id === newRow.id ? updatedRow : row
-    );
+    const finalRows = rows.map((row) => (row.id === newRow.id ? updatedRow : row));
     setRows(finalRows);
     if (onConfigUpdated) onConfigUpdated({ rows: finalRows });
     return updatedRow;
@@ -182,33 +179,29 @@ export default function TagFieldsGridForm({ fields, onConfigUpdated }) {
 
   const columns = [
     {
-      field: "name",
-      headerName: "Name",
+      field: 'name',
+      headerName: 'Name',
       width: 180,
       editable: true,
-      renderEditCell: (props) => (
-        <ExpenseTagFieldSelectEditInputCell {...props} />
-      ),
+      renderEditCell: (props) => <ExpenseTagFieldSelectEditInputCell {...props} />,
     },
     {
-      field: "comparision",
-      headerName: "Comparision",
+      field: 'comparision',
+      headerName: 'Comparision',
       editable: true,
       sortable: false,
-      renderEditCell: (props) => (
-        <TagFieldComparisionSelectEditInputCell {...props} />
-      ),
+      renderEditCell: (props) => <TagFieldComparisionSelectEditInputCell {...props} />,
     },
     {
-      field: "value",
-      headerName: "Value",
+      field: 'value',
+      headerName: 'Value',
       flex: 1,
       editable: true,
       sortable: false,
     },
     {
-      field: "tags",
-      headerName: "Tags",
+      field: 'tags',
+      headerName: 'Tags',
       flex: 1,
       editable: true,
       sortable: false,
@@ -227,21 +220,17 @@ export default function TagFieldsGridForm({ fields, onConfigUpdated }) {
       },
     },
     {
-      field: "actions",
-      type: "actions",
-      headerName: "Actions",
+      field: 'actions',
+      type: 'actions',
+      headerName: 'Actions',
       width: 100,
-      cellClassName: "actions",
+      cellClassName: 'actions',
       getActions: ({ id }) => {
         const isInEditMode = rowModesModel[id]?.mode === GridRowModes.Edit;
 
         if (isInEditMode) {
           return [
-            <GridActionsCellItem
-              icon={<SaveIcon />}
-              label="Save"
-              onClick={handleSaveClick(id)}
-            />,
+            <GridActionsCellItem icon={<SaveIcon />} label="Save" onClick={handleSaveClick(id)} />,
             <GridActionsCellItem
               icon={<CancelIcon />}
               label="Cancel"
@@ -275,12 +264,12 @@ export default function TagFieldsGridForm({ fields, onConfigUpdated }) {
     <Box
       sx={{
         height: 500,
-        width: "100%",
-        "& .actions": {
-          color: "text.secondary",
+        width: '100%',
+        '& .actions': {
+          color: 'text.secondary',
         },
-        "& .textPrimary": {
-          color: "text.primary",
+        '& .textPrimary': {
+          color: 'text.primary',
         },
       }}
     >

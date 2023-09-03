@@ -1,8 +1,9 @@
-import React, { useMemo } from "react";
-import { ResponsiveLine } from "@nivo/line";
-import { useTheme } from "@mui/material";
+import React, { useMemo } from 'react';
+import { ResponsiveLine } from '@nivo/line';
+import { useTheme } from '@mui/material';
 
-import { useGetSalesQuery } from "state/api";
+import { useGetSalesQuery } from 'state/api';
+import { LoadingProgress } from './LoadingProgress';
 
 function OverviewChart({ isDashboard = false, view }) {
   const theme = useTheme();
@@ -13,12 +14,12 @@ function OverviewChart({ isDashboard = false, view }) {
     const { monthlyData } = data;
 
     const totalSalesLine = {
-      id: "totalSales",
+      id: 'totalSales',
       color: theme.palette.secondary.main,
       data: [],
     };
     const totalUnitsLine = {
-      id: "totalUnits",
+      id: 'totalUnits',
       color: theme.palette.secondary[600],
       data: [],
     };
@@ -28,26 +29,20 @@ function OverviewChart({ isDashboard = false, view }) {
         const curSales = acc.sales + totalSales;
         const curUnits = acc.units + totalUnits;
 
-        totalSalesLine.data = [
-          ...totalSalesLine.data,
-          { x: month, y: curSales },
-        ];
-        totalUnitsLine.data = [
-          ...totalUnitsLine.data,
-          { x: month, y: curUnits },
-        ];
+        totalSalesLine.data = [...totalSalesLine.data, { x: month, y: curSales }];
+        totalUnitsLine.data = [...totalUnitsLine.data, { x: month, y: curUnits }];
         return { sales: curSales, units: curUnits };
       },
-      { sales: 0, units: 0 }
+      { sales: 0, units: 0 },
     );
     return [[totalSalesLine], [totalUnitsLine]];
   }, [data, theme]);
 
-  if (!data || isLoading) return <>Loading...</>;
+  if (!data || isLoading) return <LoadingProgress />;
 
   return (
     <ResponsiveLine
-      data={view === "sales" ? totalSalesLine : totalUnitsLine}
+      data={view === 'sales' ? totalSalesLine : totalUnitsLine}
       theme={{
         axis: {
           domain: {
@@ -82,11 +77,11 @@ function OverviewChart({ isDashboard = false, view }) {
         },
       }}
       margin={{ top: 20, right: 50, bottom: 50, left: 70 }}
-      xScale={{ type: "point" }}
+      xScale={{ type: 'point' }}
       yScale={{
-        type: "linear",
-        min: "auto",
-        max: "auto",
+        type: 'linear',
+        min: 'auto',
+        max: 'auto',
         stacked: false,
         reverse: false,
       }}
@@ -100,56 +95,54 @@ function OverviewChart({ isDashboard = false, view }) {
           if (isDashboard) return v.slice(0, 3);
           return v;
         },
-        orient: "bottom",
+        orient: 'bottom',
         tickSize: 5,
         tickPadding: 5,
         tickRotation: 0,
-        legend: isDashboard ? "" : "Month",
+        legend: isDashboard ? '' : 'Month',
         legendOffset: 36,
-        legendPosition: "middle",
+        legendPosition: 'middle',
       }}
       axisLeft={{
-        orient: "left",
+        orient: 'left',
         tickValues: 5,
         tickSize: 5,
         tickPadding: 5,
         tickRotation: 0,
-        legend: isDashboard
-          ? ""
-          : `Total ${view === "sales" ? "Revenue" : "Units"} for Year`,
+        legend: isDashboard ? '' : `Total ${view === 'sales' ? 'Revenue' : 'Units'} for Year`,
         legendOffset: -60,
-        legendPosition: "middle",
+        legendPosition: 'middle',
       }}
       enableGridX={false}
       enableGridY={false}
       pointSize={10}
-      pointColor={{ theme: "background" }}
+      pointColor={{ theme: 'background' }}
       pointBorderWidth={2}
-      pointBorderColor={{ from: "serieColor" }}
+      pointBorderColor={{ from: 'serieColor' }}
       pointLabelYOffset={-12}
       useMesh={true}
       legends={
         !isDashboard
           ? [
               {
-                anchor: "bottom-right",
-                direction: "column",
+                anchor: 'bottom-right',
+                direction: 'column',
                 justify: false,
                 translateX: 30,
                 translateY: -40,
                 itemsSpacing: 0,
-                itemDirection: "left-to-right",
+                itemDirection: 'left-to-right',
                 itemWidth: 80,
                 itemHeight: 20,
                 itemOpacity: 0.75,
                 symbolSize: 12,
-                symbolShape: "circle",
-                symbolBorderColor: "rgba(0, 0, 0, .5)",
+                symbolShape: 'circle',
+                symbolBorderColor: 'rgba(0, 0, 0, .5)',
                 effects: [
                   {
-                    on: "hover",
+                    on: 'hover',
                     style: {
-                      itemBackground: "rgba(0, 0, 0, .03)",
+                      itemBackground: 'rgba(0, 0, 0, .03)',
                       itemOpacity: 1,
                     },
                   },

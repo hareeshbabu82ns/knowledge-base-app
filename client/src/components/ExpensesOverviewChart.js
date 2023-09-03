@@ -1,42 +1,34 @@
-import React, { useMemo } from "react";
-import { ResponsiveLine } from "@nivo/line";
-import { Box, Stack, useTheme } from "@mui/material";
+import React, { useMemo } from 'react';
+import { ResponsiveLine } from '@nivo/line';
+import { Box, Stack, useTheme } from '@mui/material';
 
 import {
   useGetExpenseTagStatsQuery,
   useGetExpenseTypeStatsQuery,
   useGetExpenseUserStatsQuery,
-} from "state/api";
-import { DateTime } from "luxon";
+} from 'state/api';
+import { DateTime } from 'luxon';
+import { LoadingProgress } from './LoadingProgress';
 
-function ExpensesOverviewChart({
-  isDashboard = false,
-  view,
-  startDate,
-  endDate,
-  selectedTags,
-}) {
+function ExpensesOverviewChart({ isDashboard = false, view, startDate, endDate, selectedTags }) {
   const theme = useTheme();
   const isDark = theme.palette.isDark;
-  const { data: dataTags, isLoading: isLoadingTags } =
-    useGetExpenseTagStatsQuery({
-      tags: selectedTags,
-      depth: "monthly",
-      dateFrom: startDate.toISO(),
-      dateTo: endDate.toISO(),
-    });
-  const { data: dataTypes, isLoading: isLoadingTypes } =
-    useGetExpenseTypeStatsQuery({
-      depth: "monthly",
-      dateFrom: startDate.toISO(),
-      dateTo: endDate.toISO(),
-    });
-  const { data: dataUser, isLoading: isLoadingUser } =
-    useGetExpenseUserStatsQuery({
-      depth: "monthly",
-      dateFrom: startDate.toISO(),
-      dateTo: endDate.toISO(),
-    });
+  const { data: dataTags, isLoading: isLoadingTags } = useGetExpenseTagStatsQuery({
+    tags: selectedTags,
+    depth: 'monthly',
+    dateFrom: startDate.toISO(),
+    dateTo: endDate.toISO(),
+  });
+  const { data: dataTypes, isLoading: isLoadingTypes } = useGetExpenseTypeStatsQuery({
+    depth: 'monthly',
+    dateFrom: startDate.toISO(),
+    dateTo: endDate.toISO(),
+  });
+  const { data: dataUser, isLoading: isLoadingUser } = useGetExpenseUserStatsQuery({
+    depth: 'monthly',
+    dateFrom: startDate.toISO(),
+    dateTo: endDate.toISO(),
+  });
 
   const [totalTags, totalTypes, totalUser] = useMemo(() => {
     const totalTags = dataTags
@@ -45,10 +37,10 @@ function ExpensesOverviewChart({
             const dt = DateTime.local(year, month, 1);
             return {
               tag,
-              monthYear: dt.toFormat("LLL yy"),
+              monthYear: dt.toFormat('LLL yy'),
               year,
               month,
-              x: dt.toFormat("LLL yy"),
+              x: dt.toFormat('LLL yy'),
               total,
               y: total,
             };
@@ -70,10 +62,10 @@ function ExpensesOverviewChart({
             const dt = DateTime.local(year, month, 1);
             return {
               type,
-              monthYear: dt.toFormat("LLL yy"),
+              monthYear: dt.toFormat('LLL yy'),
               year,
               month,
-              x: dt.toFormat("LLL yy"),
+              x: dt.toFormat('LLL yy'),
               total,
               y: total,
             };
@@ -92,15 +84,15 @@ function ExpensesOverviewChart({
     const totalUser = dataUser
       ? [
           {
-            id: "tally",
+            id: 'tally',
             color: theme.palette.secondary[600],
             data: dataUser.stats?.map(({ year, month, total }) => {
               const dt = DateTime.local(year, month, 1);
               return {
-                monthYear: dt.toFormat("LLL yy"),
+                monthYear: dt.toFormat('LLL yy'),
                 year,
                 month,
-                x: dt.toFormat("LLL yy"),
+                x: dt.toFormat('LLL yy'),
                 total,
                 y: total,
               };
@@ -112,13 +104,11 @@ function ExpensesOverviewChart({
     return [totalTags, totalTypes, totalUser];
   }, [dataTags, dataTypes, dataUser, theme]);
 
-  if (!dataTags || isLoadingTags) return <>Loading...</>;
+  if (!dataTags || isLoadingTags) return <LoadingProgress />;
 
   return (
     <ResponsiveLine
-      data={
-        view === "tags" ? totalTags : view === "types" ? totalTypes : totalUser
-      }
+      data={view === 'tags' ? totalTags : view === 'types' ? totalTypes : totalUser}
       tooltip={({ point }) => {
         return <CustomToolTip point={point} />;
       }}
@@ -156,11 +146,11 @@ function ExpensesOverviewChart({
         },
       }}
       margin={{ top: 20, right: 50, bottom: 50, left: 70 }}
-      xScale={{ type: "point" }}
+      xScale={{ type: 'point' }}
       yScale={{
-        type: "linear",
-        min: "auto",
-        max: "auto",
+        type: 'linear',
+        min: 'auto',
+        max: 'auto',
         stacked: false,
         reverse: false,
       }}
@@ -176,25 +166,23 @@ function ExpensesOverviewChart({
           if (isDashboard) return v.slice(0, 3);
           return v;
         },
-        orient: "bottom",
+        orient: 'bottom',
         tickSize: 5,
         tickPadding: 5,
         tickRotation: 0,
-        legend: isDashboard ? "" : "Monthly Total",
+        legend: isDashboard ? '' : 'Monthly Total',
         legendOffset: 36,
-        legendPosition: "middle",
+        legendPosition: 'middle',
       }}
       axisLeft={{
-        orient: "left",
+        orient: 'left',
         tickValues: 5,
         tickSize: 5,
         tickPadding: 5,
         tickRotation: 0,
-        legend: isDashboard
-          ? ""
-          : `Amount by ${view === "tags" ? "Tag" : "Type"}`,
+        legend: isDashboard ? '' : `Amount by ${view === 'tags' ? 'Tag' : 'Type'}`,
         legendOffset: -60,
-        legendPosition: "middle",
+        legendPosition: 'middle',
       }}
       enableGridX={false}
       enableGridY={false}
@@ -205,36 +193,36 @@ function ExpensesOverviewChart({
       pointSize={10}
       activePointSize={16}
       inactivePointSize={0}
-      pointColor={{ theme: "background" }}
+      pointColor={{ theme: 'background' }}
       pointBorderWidth={3}
       activePointBorderWidth={3}
-      pointBorderColor={{ from: "serieColor" }}
+      pointBorderColor={{ from: 'serieColor' }}
       pointLabelYOffset={-12}
-      colors={{ scheme: "dark2" }}
+      colors={{ scheme: 'dark2' }}
       useMesh={true}
       // enableSlices="x"
       legends={
         !isDashboard
           ? [
               {
-                anchor: "bottom-right",
-                direction: "column",
+                anchor: 'bottom-right',
+                direction: 'column',
                 justify: false,
                 translateX: 30,
                 translateY: -40,
                 itemsSpacing: 0,
-                itemDirection: "left-to-right",
+                itemDirection: 'left-to-right',
                 itemWidth: 80,
                 itemHeight: 20,
                 itemOpacity: 0.75,
                 symbolSize: 12,
-                symbolShape: "circle",
-                symbolBorderColor: "rgba(0, 0, 0, .5)",
+                symbolShape: 'circle',
+                symbolBorderColor: 'rgba(0, 0, 0, .5)',
                 effects: [
                   {
-                    on: "hover",
+                    on: 'hover',
                     style: {
-                      itemBackground: "rgba(0, 0, 0, .03)",
+                      itemBackground: 'rgba(0, 0, 0, .03)',
                       itemOpacity: 1,
                     },
                   },
@@ -251,18 +239,14 @@ const CustomToolTip = ({ point }) => {
   const theme = useTheme();
   // console.log(point);
   return (
-    <Box
-      color={theme.palette.getContrastText(point.borderColor)}
-      bgcolor={point.borderColor}
-      p={1}
-    >
+    <Box color={theme.palette.getContrastText(point.borderColor)} bgcolor={point.borderColor} p={1}>
       <Stack>
         <div>
           {point.data?.type
             ? `Type: ${point.data?.type}`
             : point.data?.tag
             ? `Tag: ${point.data?.tag}`
-            : ""}
+            : ''}
         </div>
         <div>Date: {point.data?.xFormatted}</div>
         <div>Total: {point.data?.yFormatted}</div>
