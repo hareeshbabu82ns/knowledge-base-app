@@ -943,7 +943,7 @@ export const deleteAccount = async (req, res) => {
     const { id } = req.params;
 
     // fetch existing transaction
-    const oldAccount = await Account.findById(new mongoose.Types.ObjectId(id));
+    const oldAccount = await Account.findById(id);
     // console.log( oldAccount )
 
     if (!oldAccount) throw new Error(`No Account found with id ${id}`);
@@ -1126,6 +1126,32 @@ export const uploadAccounts = async (req, res) => {
 
   const accountsJson = JSON.parse(fileContentsRaw.toString());
 
+  // cleanup _ids
+  const accounts = accountsJson.map(
+    ({ config, createdAt, updatedAt, ...restAccount }) => {
+      const {
+        _id,
+        textToAdjust,
+        ignoreOps,
+        tagOps,
+        fileFields,
+        ...restConfig
+      } = config;
+      restConfig.textToAdjust = textToAdjust.map(({ _id, ...rest }) => ({
+        ...rest,
+      }));
+      restConfig.ignoreOps = ignoreOps.map(({ _id, ...rest }) => ({ ...rest }));
+      restConfig.tagOps = tagOps.map(({ _id, ...rest }) => ({ ...rest }));
+      restConfig.fileFields = fileFields.map(({ _id, ...rest }) => ({
+        ...rest,
+      }));
+      return {
+        ...restAccount,
+        config: { ...restConfig },
+      };
+    }
+  );
+
   try {
     const existingAccountsRef = await Account.find({ userId: user._id }).exec();
     const existingAccountsDB = existingAccountsRef?.map((a) => ({
@@ -1137,9 +1163,9 @@ export const uploadAccounts = async (req, res) => {
     const dataToInsert = [];
     const dataToUpdate = [];
 
-    for (const account of accountsJson) {
+    for (const account of accounts) {
       const existingAccount = existingAccountsDB.find(
-        (a) => a.name === account.name && a.userId === user._id.toString()
+        (a) => a.name === account.name && a.userId === user._id
       );
 
       if (existingAccount) {
@@ -1303,8 +1329,8 @@ export const uploadTransactions = async (req, res) => {
   }
   // dataMdbUploaded.push(...dataMdb);
 
-  console.log(dataToUpload.length, dataToUpload[dataToUpload.length - 1]);
-  console.log(dataMdb.length, dataMdb[dataMdb.length - 1]);
+  // console.log(dataToUpload.length, dataToUpload[dataToUpload.length - 1]);
+  // console.log(dataMdb.length, dataMdb[dataMdb.length - 1]);
 
   // delete file at the end
   fs.rmSync(`${tmpDir}/${req.body.file}`);
