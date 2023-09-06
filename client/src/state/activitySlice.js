@@ -1,4 +1,6 @@
+import { DateTime } from 'luxon';
 import { api } from './api';
+import { getCurrentDate } from 'utils';
 
 export const activityApiSlice = api.injectEndpoints({
   endpoints: (builder) => ({
@@ -28,6 +30,7 @@ export const activityApiSlice = api.injectEndpoints({
             description,
             isExclusive,
             isRunning,
+            clientDate: getCurrentDate(),
           },
         };
       },
@@ -37,7 +40,12 @@ export const activityApiSlice = api.injectEndpoints({
       query: ({ id, data: { description, isExclusive, isRunning } }) => ({
         url: `api/activity/activities/${id}`,
         method: 'PATCH',
-        body: { description, isExclusive, isRunning },
+        body: {
+          description,
+          isExclusive,
+          isRunning,
+          clientDate: DateTime.now().toFormat('yyyyMMddHHmmss'),
+        },
       }),
       invalidatesTags: (_, __, arg) => ['Activities', { type: 'Activity', id: arg.id }],
     }),

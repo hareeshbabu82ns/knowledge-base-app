@@ -20,6 +20,15 @@ const ActivitySchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    runtime: {
+      type: Number,
+      default: 0,
+    },
+    startedAt: {
+      // date as yyyymmddhhmmss
+      type: String,
+      default: "",
+    },
   },
   {
     timestamps: true,

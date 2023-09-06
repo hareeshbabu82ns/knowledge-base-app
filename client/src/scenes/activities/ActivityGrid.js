@@ -18,6 +18,9 @@ import SaveIcon from '@mui/icons-material/Save';
 import CancelIcon from '@mui/icons-material/Close';
 import ActivityGridToolbar from './ActivityGridToolbar';
 import { useNavigate } from 'react-router-dom';
+import { Duration } from 'luxon';
+import TimerWidget from 'components/TimerWidget';
+import { diffInSeconds } from 'utils';
 
 const ActivityGrid = () => {
   const [rowModesModel, setRowModesModel] = useState({});
@@ -129,6 +132,18 @@ const ActivityGrid = () => {
       headerName: 'Description',
       flex: 2,
       editable: true,
+    },
+    {
+      field: 'runtime',
+      headerName: 'Runtime',
+      width: 100,
+      editable: false,
+      // valueGetter: ({ value }) => formatDuration({ seconds: value }),
+      renderCell: ({ value, row }) => {
+        // console.log(value, row.startedAt);
+        const diff = value + (row?.isRunning ? diffInSeconds({ dateStart: row.startedAt }) : 0);
+        return <TimerWidget running={row.isRunning} runtime={diff} />;
+      },
     },
     {
       field: 'actions',

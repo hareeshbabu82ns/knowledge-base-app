@@ -1,5 +1,8 @@
 import mongoose from "mongoose";
+import { DateTime } from "luxon";
+
 import Activity from "../../models/Activities/Activity.js";
+import ActivityTrack from "../../models/Activities/ActivityTrack.js";
 
 const validateActivity = ({ description, isExclusive, isRunning }) => {
   if (description.length === 0) {
@@ -118,7 +121,7 @@ export const updateActivity = async (req, res) => {
   try {
     const { user } = req.auth;
 
-    const { description, isExclusive, isRunning } = req.body;
+    const { description, isExclusive, isRunning, clientDate } = req.body;
 
     const { id } = req.params;
 
@@ -136,13 +139,14 @@ export const updateActivity = async (req, res) => {
     const newActivity = {
       description,
       isExclusive,
-      isRunning,
+      isRunning: isRunning === undefined ? oldActivity.isRunning : isRunning,
     };
 
     await updateActivityRecord(
       {
         ...oldActivity.toObject(),
         _id: oldActivity._id,
+        clientDate,
       },
       newActivity,
       user
@@ -161,11 +165,20 @@ const updateActivityRecord = async (oldActivity, newActivity, user) => {
     description: descriptionOld,
     isExclusive: isExclusiveOld,
     isRunning: isRunningOld,
+    startedAt,
+    clientDate,
   } = oldActivity;
 
-  const { description, isExclusive, isRunning } = newActivity;
+  const {
+    description,
+    isExclusive = isExclusiveOld,
+    isRunning = isRunningOld,
+  } = newActivity;
 
-  const { _id: userId } = user;
+  if (isRunning) {
+    //starting, update last started at date into activity
+    newActivity["startedAt"] = clientDate;
+  }
 
   // const isValid = validateActivity({
   //   description,
@@ -177,20 +190,24 @@ const updateActivityRecord = async (oldActivity, newActivity, user) => {
   try {
     session.startTransaction();
     // update Activity entry
+    // console.log(newActivity);
     const activity = await Activity.updateOne({ _id }, newActivity, {
       session,
     });
 
-    // update run state of other activities
-    await updateActivityRunState(
-      {
-        _id,
-        isExclusive: newActivity?.isExclusive || isExclusiveOld,
-        isRunning: newActivity?.isRunning || isRunningOld,
-      },
-      user,
-      session
-    );
+    if (isRunning !== isRunningOld) {
+      // update run state of other activities
+      await updateActivityRunState(
+        {
+          _id,
+          isExclusive,
+          isRunning,
+          clientDate,
+        },
+        user,
+        session
+      );
+    }
 
     await session.commitTransaction();
     session.endSession();
@@ -205,10 +222,14 @@ const updateActivityRecord = async (oldActivity, newActivity, user) => {
 };
 
 const updateActivityRunState = async (
-  { _id, isExclusive, isRunning },
+  { _id, isExclusive, isRunning, clientDate },
   user,
   session
 ) => {
+  const track = await updateActivityTrackRunState(
+    { activityId: _id, userId: user._id, isRunning, clientDate },
+    session
+  );
   if (!isRunning) return; //stopping, no further action needed
   if (!isExclusive) return; // no need to update others
   // console.log(isExclusive, isRunning);
@@ -224,6 +245,65 @@ const updateActivityRunState = async (
     // console.log(runningActivity, id);
     runningActivity.isRunning = false;
     await runningActivity.save({ session });
+    await updateActivityTrackRunState(
+      {
+        activityId: runningActivity._id,
+        userId: user._id,
+        isRunning: false,
+        clientDate,
+      },
+      session
+    );
+  }
+};
+
+const updateActivityTrackRunState = async (
+  { activityId, userId, isRunning, clientDate },
+  session
+) => {
+  if (!isRunning) {
+    // stopping the activity
+
+    // find and add end date
+    const track = await ActivityTrack.findOne({
+      activityId,
+      userId,
+      dateEnd: "",
+    });
+    // console.log("stopping track:", track._id);
+    if (track) {
+      track.dateEnd = clientDate;
+      // calculate diff
+      const dateStart = DateTime.fromFormat(track.dateStart, "yyyyMMddHHmmss");
+      const dateEnd = DateTime.fromFormat(track.dateEnd, "yyyyMMddHHmmss");
+      track.runtime = dateEnd.diff(dateStart, "seconds").seconds;
+      // console.log(track.runtime);
+      await track.save(session);
+    }
+
+    // find all tracks of the activity and update total runtime
+    const tracks = await ActivityTrack.find({
+      activityId,
+      userId,
+    });
+    const runtime = tracks.reduce(
+      (runtime, track) => runtime + track.runtime,
+      0
+    );
+    // console.log("activity total runtime:", runtime);
+    await Activity.findByIdAndUpdate(activityId, { runtime }, { session });
+
+    return track;
+  } else {
+    // starting the activity
+    const tracks = await ActivityTrack.create(
+      [{ activityId, userId, dateStart: clientDate, dateEnd: "" }],
+      {
+        session,
+      }
+    );
+    // console.log("starting new track:", tracks[0]._id);
+    return tracks[0];
   }
 };
 
