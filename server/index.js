@@ -9,6 +9,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 // const {readdirSync} = require('fs')
 
+import activityRoutes from "./routes/activities.js";
 import clientRoutes from "./routes/client.js";
 import generalRoutes from "./routes/general.js";
 import managementRoutes from "./routes/management.js";
@@ -47,6 +48,7 @@ app.use(cors());
 
 // readdirSync('./routes').map((route) => app.use('/api/v1', require('./routes/' + route)))
 
+app.use("/api/activity", activityRoutes);
 app.use("/api/client", clientRoutes);
 app.use("/api/general", generalRoutes);
 app.use("/api/management", managementRoutes);

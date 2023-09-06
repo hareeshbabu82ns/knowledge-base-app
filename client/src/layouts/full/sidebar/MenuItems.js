@@ -12,6 +12,7 @@ import {
   PointOfSaleOutlined as OverviewIcon,
   AdminPanelSettingsOutlined as AdminIcon,
   ColorLensOutlined as ThemeIcon,
+  LocalActivityOutlined as ActivitiesIcon,
 } from '@mui/icons-material';
 
 import { uniqueId } from 'lodash';
@@ -50,6 +51,18 @@ const Menuitems = [
     title: 'Overview',
     icon: OverviewIcon,
     href: '/expenses/overview',
+  },
+
+  ///////// Activities ///////////
+  {
+    navlabel: true,
+    subheader: 'Activities',
+  },
+  {
+    id: uniqueId(),
+    title: 'Activities',
+    icon: ActivitiesIcon,
+    href: '/activities',
   },
 
   ///////// Admin ///////////

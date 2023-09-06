@@ -26,6 +26,7 @@ import { DateTimePicker } from '@mui/x-date-pickers';
 import ExpenseTagsSelect from 'components/ExpenseTagsSelect';
 import { useNavigate, useParams } from 'react-router-dom';
 import { LoadingProgress } from 'components/LoadingProgress';
+import Panel from 'components/Panel';
 
 const initFormData = {
   amount: 0,
@@ -149,46 +150,51 @@ const TransactionForm = () => {
   if (!formData || isLoading || isFetching) return <LoadingProgress />;
 
   return (
-    <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 2 }}>
-      <Grid container spacing={2}>
-        <Grid item xs={12} sm={6} lg={3}>
-          <TextField
-            name="amount"
-            required
-            fullWidth
-            id="amount"
-            label="Amount"
-            autoFocus
-            value={formData.amount}
-            onChange={onInputChange}
-            type="number"
-            size="small"
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <AttachMoneyOutlined />
-                </InputAdornment>
-              ),
-            }}
-          />
-        </Grid>
-        <Grid item xs={12} sm={6} lg={1}>
-          <Switch
-            id="type"
-            name="type"
-            label="Type"
-            checked={formData?.type === EXPENSE_TYPES[0]}
-            onChange={(e) =>
-              onInputChange({
-                target: {
-                  name: 'type',
-                  value: e.target.checked ? EXPENSE_TYPES[0] : EXPENSE_TYPES[1],
-                },
-              })
-            }
-            size="small"
-          />
-          {/* <Select
+    <Panel
+      title={`Transaction: ${id}`}
+      loading={!formData || isLoading || isFetching}
+      showHistoryBack
+    >
+      <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 2 }}>
+        <Grid container spacing={2}>
+          <Grid item xs={12} sm={6} lg={3}>
+            <TextField
+              name="amount"
+              required
+              fullWidth
+              id="amount"
+              label="Amount"
+              autoFocus
+              value={formData.amount}
+              onChange={onInputChange}
+              type="number"
+              size="small"
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <AttachMoneyOutlined />
+                  </InputAdornment>
+                ),
+              }}
+            />
+          </Grid>
+          <Grid item xs={12} sm={6} lg={1}>
+            <Switch
+              id="type"
+              name="type"
+              label="Type"
+              checked={formData?.type === EXPENSE_TYPES[0]}
+              onChange={(e) =>
+                onInputChange({
+                  target: {
+                    name: 'type',
+                    value: e.target.checked ? EXPENSE_TYPES[0] : EXPENSE_TYPES[1],
+                  },
+                })
+              }
+              size="small"
+            />
+            {/* <Select
             id="type"
             name="type"
             label="Type"
@@ -203,22 +209,22 @@ const TransactionForm = () => {
               </MenuItem>
             ))}
           </Select> */}
-        </Grid>
-        <Grid item xs={12} sm={6}>
-          <ExpenseTagsSelect
-            size="small"
-            freeSolo
-            value={formData.tags}
-            onChange={(value) =>
-              onInputChange({
-                target: {
-                  name: 'tags',
-                  value: Array.isArray(value) ? value.join(',') : value,
-                },
-              })
-            }
-          />
-          {/* <TextField
+          </Grid>
+          <Grid item xs={12} sm={6}>
+            <ExpenseTagsSelect
+              size="small"
+              freeSolo
+              value={formData.tags}
+              onChange={(value) =>
+                onInputChange({
+                  target: {
+                    name: 'tags',
+                    value: Array.isArray(value) ? value.join(',') : value,
+                  },
+                })
+              }
+            />
+            {/* <TextField
             name="tags"
             fullWidth
             id="tags"
@@ -235,77 +241,83 @@ const TransactionForm = () => {
               ),
             }}
           /> */}
-        </Grid>
-        <Grid item xs={6}>
-          <FormControl fullWidth size="small">
-            <InputLabel id="select-bank-account-label">Bank Account</InputLabel>
-            <Select
-              labelId="select-bank-account"
-              name="account"
-              id="select-bank-account"
-              value={formData.account}
-              label="Bank Account"
+          </Grid>
+          <Grid item xs={6}>
+            <FormControl fullWidth size="small">
+              <InputLabel id="select-bank-account-label">Bank Account</InputLabel>
+              <Select
+                labelId="select-bank-account"
+                name="account"
+                id="select-bank-account"
+                value={formData.account}
+                label="Bank Account"
+                onChange={onInputChange}
+                required={true}
+              >
+                {bankAccountsLoading ? (
+                  <MenuItem value={''}>{'Loading...'}</MenuItem>
+                ) : (
+                  bankAccounts?.accounts?.map((c) => (
+                    <MenuItem key={c._id} value={c._id}>
+                      {c.name}
+                    </MenuItem>
+                  ))
+                )}
+              </Select>
+            </FormControl>
+          </Grid>
+          <Grid item xs={6}>
+            <TextField
+              name="description"
+              required
+              fullWidth
+              id="description"
+              label="Description"
+              value={formData.description}
               onChange={onInputChange}
-              required={true}
-            >
-              {bankAccountsLoading ? (
-                <MenuItem value={''}>{'Loading...'}</MenuItem>
-              ) : (
-                bankAccounts?.accounts?.map((c) => (
-                  <MenuItem key={c._id} value={c._id}>
-                    {c.name}
-                  </MenuItem>
-                ))
-              )}
-            </Select>
-          </FormControl>
-        </Grid>
-        <Grid item xs={6}>
-          <TextField
-            name="description"
-            required
-            fullWidth
-            id="description"
-            label="Description"
-            value={formData.description}
-            onChange={onInputChange}
-            type="text"
-            size="small"
-          />
-        </Grid>
-        <Grid item xs={9} sm={4} lg={3}>
-          <DateTimePicker
-            name="date"
-            id="date"
-            format="LLL dd yyyy hh:mm a"
-            label="Transaction Date"
-            value={formData?.date}
-            onChange={(date) => onInputChange({ target: { name: 'date', value: date } })}
-            slotProps={{
-              field: {
-                size: 'small',
-                fullWidth: true,
-                required: true,
-              },
-            }}
-          />
-        </Grid>
+              type="text"
+              size="small"
+            />
+          </Grid>
+          <Grid item xs={9} sm={4} lg={3}>
+            <DateTimePicker
+              name="date"
+              id="date"
+              format="LLL dd yyyy hh:mm a"
+              label="Transaction Date"
+              value={formData?.date}
+              onChange={(date) => onInputChange({ target: { name: 'date', value: date } })}
+              slotProps={{
+                field: {
+                  size: 'small',
+                  fullWidth: true,
+                  required: true,
+                },
+              }}
+            />
+          </Grid>
 
-        <Grid item xs={3} sm={2}>
-          <IconButton
-            type="submit"
-            onSubmit={handleSubmit}
-            color="info"
-            // disabled={formData._id} // update is not yet possible, delete and add entry instead
-          >
-            <SendOutlined />
-          </IconButton>
-          <IconButton type="button" onClick={handleDelete} color="warning" disabled={!formData._id}>
-            <DeleteOutlineOutlined />
-          </IconButton>
+          <Grid item xs={3} sm={2}>
+            <IconButton
+              type="submit"
+              onSubmit={handleSubmit}
+              color="info"
+              // disabled={formData._id} // update is not yet possible, delete and add entry instead
+            >
+              <SendOutlined />
+            </IconButton>
+            <IconButton
+              type="button"
+              onClick={handleDelete}
+              color="warning"
+              disabled={!formData._id}
+            >
+              <DeleteOutlineOutlined />
+            </IconButton>
+          </Grid>
         </Grid>
-      </Grid>
-    </Box>
+      </Box>
+    </Panel>
   );
 };
 
