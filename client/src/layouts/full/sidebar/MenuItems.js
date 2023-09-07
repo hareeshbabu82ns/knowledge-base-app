@@ -13,6 +13,7 @@ import {
   AdminPanelSettingsOutlined as AdminIcon,
   ColorLensOutlined as ThemeIcon,
   LocalActivityOutlined as ActivitiesIcon,
+  AirplaneTicketOutlined as IncidentsIcon,
 } from '@mui/icons-material';
 
 import { uniqueId } from 'lodash';
@@ -63,6 +64,12 @@ const Menuitems = [
     title: 'Activities',
     icon: ActivitiesIcon,
     href: '/activities',
+  },
+  {
+    id: uniqueId(),
+    title: 'Incidents',
+    icon: IncidentsIcon,
+    href: '/incidents',
   },
 
   ///////// Admin ///////////

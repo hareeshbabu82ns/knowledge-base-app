@@ -6,6 +6,8 @@ import TransactionForm from 'scenes/expenses/TransactionForm';
 import TransactionsGrid from 'scenes/expenses/TransactionsGrid';
 import ActivityGrid from 'scenes/activities/ActivityGrid';
 import ActivityForm from 'scenes/activities/ActivityForm';
+import IncidentGrid from 'scenes/incidents/IncidentGrid';
+import IncidentForm from 'scenes/incidents/IncidentForm';
 
 /* ***Layouts**** */
 const FullLayout = Loadable(lazy(() => import('layouts/full/FullLayout')));
@@ -17,6 +19,7 @@ const Expenses = Loadable(lazy(() => import('scenes/expenses')));
 const AccountsPage = Loadable(lazy(() => import('scenes/accounts')));
 const ExpenseStats = Loadable(lazy(() => import('scenes/dashboard/ExpenseStats')));
 const Activities = Loadable(lazy(() => import('scenes/activities')));
+const Incidents = Loadable(lazy(() => import('scenes/incidents')));
 
 const Admin = Loadable(lazy(() => import('scenes/admin')));
 const ThemePage = Loadable(lazy(() => import('themes/ThemePage')));
@@ -94,6 +97,14 @@ const Router = [
         children: [
           { path: '', exact: true, element: <ActivityGrid /> },
           { path: ':id', element: <ActivityForm /> },
+        ],
+      },
+      {
+        path: '/incidents',
+        element: <Incidents />,
+        children: [
+          { path: '', exact: true, element: <IncidentGrid /> },
+          { path: ':id', element: <IncidentForm /> },
         ],
       },
       {
