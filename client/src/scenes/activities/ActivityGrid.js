@@ -7,7 +7,7 @@ import {
   useGetActivitiesQuery,
   useUpdateActivityMutation,
 } from 'state/activitySlice';
-import { Checkbox } from '@mui/material';
+import { Checkbox, debounce } from '@mui/material';
 
 import StartIcon from '@mui/icons-material/PlayArrowOutlined';
 import StopIcon from '@mui/icons-material/StopOutlined';
@@ -18,11 +18,11 @@ import SaveIcon from '@mui/icons-material/Save';
 import CancelIcon from '@mui/icons-material/Close';
 import ActivityGridToolbar from './ActivityGridToolbar';
 import { useNavigate } from 'react-router-dom';
-import { Duration } from 'luxon';
 import TimerWidget from 'components/TimerWidget';
 import { diffInSeconds } from 'utils';
 
 const ActivityGrid = () => {
+  const [search, setSearch] = useState('');
   const [rowModesModel, setRowModesModel] = useState({});
   const [page, setPage] = useState(0);
   const [pageSize, setPageSize] = useState(25);
@@ -34,7 +34,7 @@ const ActivityGrid = () => {
     data: activities,
     isLoading,
     refetch,
-  } = useGetActivitiesQuery({ pageSize, offset: page * pageSize, sort, filters });
+  } = useGetActivitiesQuery({ pageSize, offset: page * pageSize, sort, filters, search });
 
   const [addActivityMutation] = useAddActivityMutation();
   const [updateActivity] = useUpdateActivityMutation();
@@ -235,6 +235,7 @@ const ActivityGrid = () => {
           },
         },
       }}
+      rowHeight={72}
       rowCount={activities?.total || 0}
       paginationMode="server"
       sortingMode="server"
@@ -256,6 +257,7 @@ const ActivityGrid = () => {
           onRefetch: refetch,
           onAddActivity: handleAddActivity,
           onNewClicked: handleOnNewClicked,
+          onSearch: debounce(setSearch, 500),
         },
       }}
       editMode="row"

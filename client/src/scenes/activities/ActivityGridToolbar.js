@@ -6,15 +6,18 @@ import {
 } from '@mui/x-data-grid';
 import PropTypes from 'prop-types';
 import { useState } from 'react';
-import { IconButton, Button, InputAdornment, Stack, TextField } from '@mui/material';
+import { IconButton, Button, InputAdornment, Stack, TextField, Icon } from '@mui/material';
 import NewIcon from '@mui/icons-material/CreateOutlined';
 import DownloadIcon from '@mui/icons-material/DownloadOutlined';
 import RefetchIcon from '@mui/icons-material/RefreshOutlined';
+import SearchIcon from '@mui/icons-material/SearchOutlined';
+import ClearIcon from '@mui/icons-material/ClearOutlined';
 import AddIcon from '@mui/icons-material/AddOutlined';
 import Grid2 from '@mui/material/Unstable_Grid2/Grid2';
 
-const ActivityGridToolbar = ({ onRefetch, onExport, onAddActivity, onNewClicked }) => {
+const ActivityGridToolbar = ({ onRefetch, onExport, onAddActivity, onNewClicked, onSearch }) => {
   const [activity, setActivity] = useState('');
+  const [search, setSearch] = useState('');
   return (
     <GridToolbarContainer>
       <Grid2 container flex={1} alignItems={'center'} mx={1}>
@@ -32,10 +35,38 @@ const ActivityGridToolbar = ({ onRefetch, onExport, onAddActivity, onNewClicked 
         <Grid2 xs={'auto'} gap={2}>
           <Stack direction={'row'} gap={1}>
             <TextField
-              label="Add Activity..."
-              variant="outlined"
+              label="Search..."
+              variant="standard"
               size="small"
-              fullWidth
+              value={search}
+              onChange={(e) => {
+                setSearch(e.target.value);
+                onSearch(e.target.value);
+              }}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <SearchIcon />
+                  </InputAdornment>
+                ),
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton
+                      onClick={() => {
+                        setSearch('');
+                        onSearch('');
+                      }}
+                    >
+                      <ClearIcon />
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
+            />
+            {/* <TextField
+              label="Add Activity..."
+              variant="standard"
+              size="small"
               onChange={(e) => setActivity(e.target.value)}
               value={activity}
               InputProps={{
@@ -53,7 +84,7 @@ const ActivityGridToolbar = ({ onRefetch, onExport, onAddActivity, onNewClicked 
                   </InputAdornment>
                 ),
               }}
-            />
+            /> */}
             {onExport && (
               <IconButton size="small" onClick={onExport}>
                 <DownloadIcon />
