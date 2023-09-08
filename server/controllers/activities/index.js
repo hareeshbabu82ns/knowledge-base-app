@@ -340,7 +340,7 @@ export const getActivities = async (req, res) => {
 
     const sortFormatted = Boolean(sort) ? genSort() : {};
 
-    if (!sortFormatted.description) sortFormatted.description = 1;
+    if (!sortFormatted.isRunning) sortFormatted.isRunning = -1;
 
     const data = await Activity.find({
       userId: user._id,

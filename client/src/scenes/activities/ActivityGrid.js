@@ -9,8 +9,6 @@ import {
 } from 'state/activitySlice';
 import { Checkbox, debounce } from '@mui/material';
 
-import StartIcon from '@mui/icons-material/PlayArrowOutlined';
-import StopIcon from '@mui/icons-material/StopOutlined';
 import EditIcon from '@mui/icons-material/EditOutlined';
 import DeleteIcon from '@mui/icons-material/DeleteOutlined';
 
@@ -136,13 +134,20 @@ const ActivityGrid = () => {
     {
       field: 'runtime',
       headerName: 'Runtime',
-      width: 100,
+      width: 130,
       editable: false,
       // valueGetter: ({ value }) => formatDuration({ seconds: value }),
       renderCell: ({ value, row }) => {
         // console.log(value, row.startedAt);
         const diff = value + (row?.isRunning ? diffInSeconds({ dateStart: row.startedAt }) : 0);
-        return <TimerWidget running={row.isRunning} runtime={diff} />;
+        return (
+          <TimerWidget
+            running={row.isRunning}
+            runtime={diff}
+            onStart={() => updateActivity({ id: row._id, data: { isRunning: true } })}
+            onStop={() => updateActivity({ id: row._id, data: { isRunning: false } })}
+          />
+        );
       },
     },
     {
@@ -171,30 +176,6 @@ const ActivityGrid = () => {
           ];
         }
         return [
-          !isRunning ? (
-            <GridActionsCellItem
-              key={`start_${id}`}
-              icon={<StartIcon />}
-              label="Start"
-              className="textPrimary"
-              onClick={() => updateActivity({ id, data: { isRunning: true } })}
-              color="inherit"
-            />
-          ) : (
-            <React.Fragment />
-          ),
-          isRunning ? (
-            <GridActionsCellItem
-              key={`stop_${id}`}
-              icon={<StopIcon />}
-              label="Stop"
-              className="textPrimary"
-              onClick={() => updateActivity({ id, data: { isRunning: false } })}
-              color="inherit"
-            />
-          ) : (
-            <React.Fragment />
-          ),
           <GridActionsCellItem
             key={`edit_${id}`}
             icon={<EditIcon />}
@@ -267,6 +248,7 @@ const ActivityGrid = () => {
       onRowEditStop={handleRowEditStop}
       processRowUpdate={processRowUpdate}
       onRowDoubleClick={({ id }) => navigate(id)}
+      rowSelection={false}
     ></StyledDataGrid>
   );
 };

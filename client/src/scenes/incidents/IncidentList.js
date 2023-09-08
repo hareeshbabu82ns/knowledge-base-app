@@ -1,10 +1,8 @@
 import {
   Chip,
-  IconButton,
   List,
   ListItem,
   ListItemText,
-  Pagination,
   Stack,
   TablePagination,
   Typography,
@@ -15,16 +13,12 @@ import { DateTime } from 'luxon';
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useGetIncidentsQuery } from 'state/incidentSlice';
-import NewIcon from '@mui/icons-material/AddBoxOutlined';
-import IncidentGridToolbar from './IncidentGridToolbar';
 import IncidentListToolbar from './IncidentListToolbar';
 
 const IncidentList = () => {
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(0);
   const [pageSize, setPageSize] = useState(25);
-  const [sort, setSort] = useState({});
-  const [filters, setFilters] = useState([]);
   const navigate = useNavigate();
 
   const {
@@ -32,7 +26,7 @@ const IncidentList = () => {
     isLoading,
     isFetching,
     refetch,
-  } = useGetIncidentsQuery({ pageSize, page, sort, filters, search });
+  } = useGetIncidentsQuery({ pageSize, page, search });
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage);

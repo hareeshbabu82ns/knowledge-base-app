@@ -4,11 +4,10 @@ import Loadable from 'layouts/full/shared/loadable/Loadable';
 import { ProtectedRoute } from 'components/ProtectedRoute';
 import TransactionForm from 'scenes/expenses/TransactionForm';
 import TransactionsGrid from 'scenes/expenses/TransactionsGrid';
-import ActivityGrid from 'scenes/activities/ActivityGrid';
 import ActivityForm from 'scenes/activities/ActivityForm';
-import IncidentGrid from 'scenes/incidents/IncidentGrid';
 import IncidentForm from 'scenes/incidents/IncidentForm';
 import IncidentsWrapper from 'scenes/incidents/IncidentsWrapper';
+import ActivitiesWrapper from 'scenes/activities/ActivitiesWrapper';
 
 /* ***Layouts**** */
 const FullLayout = Loadable(lazy(() => import('layouts/full/FullLayout')));
@@ -96,7 +95,7 @@ const Router = [
         path: '/activities',
         element: <Activities />,
         children: [
-          { path: '', exact: true, element: <ActivityGrid /> },
+          { path: '', exact: true, element: <ActivitiesWrapper /> },
           { path: ':id', element: <ActivityForm /> },
         ],
       },

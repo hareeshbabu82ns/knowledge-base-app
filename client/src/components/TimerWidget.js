@@ -1,8 +1,10 @@
-import { set } from 'lodash';
+import { Button } from '@mui/material';
 import { Duration } from 'luxon';
 import React, { useState, useEffect } from 'react';
+import StartIcon from '@mui/icons-material/PlayArrowOutlined';
+import StopIcon from '@mui/icons-material/StopOutlined';
 
-function TimerWidget({ running, runtime }) {
+function TimerWidget({ running, runtime, onStart, onStop }) {
   const [seconds, setSeconds] = useState(runtime);
   const [isRunning, setIsRunning] = useState(running);
 
@@ -26,18 +28,16 @@ function TimerWidget({ running, runtime }) {
     return () => clearInterval(interval);
   }, [isRunning]);
 
-  // const startTimer = () => {
-  //   setIsRunning(true);
-  // };
-
-  // const stopTimer = () => {
-  //   setIsRunning(false);
-  // };
-
-  // const resetTimer = () => {
-  //   setIsRunning(false);
-  //   setSeconds(0);
-  // };
+  if (onStart && onStop)
+    return (
+      <Button
+        variant={isRunning ? 'contained' : 'outlined'}
+        endIcon={isRunning ? <StopIcon /> : <StartIcon />}
+        onClick={() => (isRunning ? onStop() : onStart())}
+      >
+        {Duration.fromObject({ seconds }).toFormat('hh:mm:ss')}
+      </Button>
+    );
 
   return <p>{Duration.fromObject({ seconds }).toFormat('hh:mm:ss')}</p>;
 }
