@@ -8,6 +8,7 @@ import ActivityGrid from 'scenes/activities/ActivityGrid';
 import ActivityForm from 'scenes/activities/ActivityForm';
 import IncidentGrid from 'scenes/incidents/IncidentGrid';
 import IncidentForm from 'scenes/incidents/IncidentForm';
+import IncidentsWrapper from 'scenes/incidents/IncidentsWrapper';
 
 /* ***Layouts**** */
 const FullLayout = Loadable(lazy(() => import('layouts/full/FullLayout')));
@@ -103,7 +104,7 @@ const Router = [
         path: '/incidents',
         element: <Incidents />,
         children: [
-          { path: '', exact: true, element: <IncidentGrid /> },
+          { path: '', exact: true, element: <IncidentsWrapper /> },
           { path: ':id', element: <IncidentForm /> },
         ],
       },

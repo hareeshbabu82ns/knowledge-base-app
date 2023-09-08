@@ -8,6 +8,7 @@ import {
   IconButton,
   useTheme,
   Typography,
+  useMediaQuery,
 } from '@mui/material';
 import PropTypes from 'prop-types';
 
@@ -40,7 +41,7 @@ const Header = (props) => {
   const header = useSelector(headerSelector);
   const subHeader = useSelector(subHeaderSelector);
 
-  // const lgUp = useMediaQuery((theme) => theme.breakpoints.up('lg'));
+  const lgUp = useMediaQuery((theme) => theme.breakpoints.up('lg'));
   // const lgDown = useMediaQuery((theme) => theme.breakpoints.down('lg'));
 
   return (
@@ -79,13 +80,15 @@ const Header = (props) => {
 
         <Box flexGrow={1} />
         <Stack spacing={1} direction="row" alignItems="center">
-          <IconButton onClick={() => dispatch(setMode())}>
-            {theme.palette.isDark ? (
-              <DarkModeOutlined sx={{ fontSize: '25px' }} />
-            ) : (
-              <LightModeOutlined sx={{ fontSize: '25px' }} />
-            )}
-          </IconButton>
+          {lgUp && (
+            <IconButton onClick={() => dispatch(setMode())}>
+              {theme.palette.isDark ? (
+                <DarkModeOutlined sx={{ fontSize: '25px' }} />
+              ) : (
+                <LightModeOutlined sx={{ fontSize: '25px' }} />
+              )}
+            </IconButton>
+          )}
 
           <SettingsDrawerButton />
           <Profile />

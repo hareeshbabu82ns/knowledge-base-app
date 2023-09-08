@@ -12,7 +12,7 @@ const PageContainer = ({ title, description, children, sx }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [title, description]);
   return (
-    <Box sx={{ m: '1rem 1.5rem', ...sx }}>
+    <Box sx={{ m: { xs: '1rem 0.5rem', md: '1rem 1.5rem' }, ...sx }}>
       <Helmet>
         <title>{title}</title>
         <meta name="description" content={description} />

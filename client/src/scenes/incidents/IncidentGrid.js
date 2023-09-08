@@ -18,8 +18,6 @@ import SaveIcon from '@mui/icons-material/Save';
 import CancelIcon from '@mui/icons-material/Close';
 import IncidentGridToolbar from './IncidentGridToolbar';
 import { useNavigate } from 'react-router-dom';
-import TimerWidget from 'components/TimerWidget';
-import { diffInSeconds } from 'utils';
 import { DateTime } from 'luxon';
 
 const IncidentGrid = () => {
@@ -124,7 +122,7 @@ const IncidentGrid = () => {
     {
       field: 'updatedAt',
       headerName: 'Updated At',
-      width: 200,
+      width: 150,
       valueFormatter: ({ value }) => DateTime.fromISO(value).toFormat('MMM dd yyyy HH:mm'),
     },
 

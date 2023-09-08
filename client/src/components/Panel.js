@@ -129,7 +129,7 @@ const Titlebar = ({ title, toolbarActions, titleVarient, titleIcon, showHistoryB
         )}
         {titleIcon}
         {typeof title === 'string' ? (
-          <Typography variant="h6" sx={{ flexGrow: 1 }}>
+          <Typography variant="h6" sx={{ flexGrow: 1, pl: 1 }}>
             {title}
           </Typography>
         ) : (

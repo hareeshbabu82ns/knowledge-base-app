@@ -9,6 +9,7 @@ import {
   ListItemIcon,
   ListItemText,
   Typography,
+  useMediaQuery,
 } from '@mui/material';
 
 // import { IconListCheck, IconMail, IconUser } from '@tabler/icons';
@@ -19,6 +20,7 @@ import { useSelector } from 'react-redux';
 import { clearUserLocal } from 'scenes/user/utils';
 
 const Profile = () => {
+  const lgUp = useMediaQuery((theme) => theme.breakpoints.up('lg'));
   const user = useSelector((state) => state.global.user);
   // console.log('user:', user);
   const navigate = useNavigate();
@@ -60,12 +62,14 @@ const Profile = () => {
           borderRadius="50%"
           sx={{ objectFit: 'cover' }}
         />
-        <Box textAlign="left" borderLeft={5}>
-          <Typography fontWeight="bold" fontSize="1rem">
-            {user.name}
-          </Typography>
-          <Typography fontSize="0.7rem">{user.occupation}</Typography>
-        </Box>
+        {lgUp && (
+          <Box textAlign="left" borderLeft={5}>
+            <Typography fontWeight="bold" fontSize="1rem">
+              {user.name}
+            </Typography>
+            <Typography fontSize="0.7rem">{user.occupation}</Typography>
+          </Box>
+        )}
       </IconButton>
       {/* ------------------------------------------- */}
       {/* Message Dropdown */}
@@ -84,6 +88,11 @@ const Profile = () => {
           },
         }}
       >
+        {!lgUp && (
+          <MenuItem>
+            <ListItemText>{user.name}</ListItemText>
+          </MenuItem>
+        )}
         <MenuItem>
           <ListItemIcon>
             <IconUser width={20} />
