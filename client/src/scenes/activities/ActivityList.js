@@ -61,7 +61,7 @@ const ActivityList = () => {
         <TablePagination
           component="div"
           labelRowsPerPage=""
-          count={activities?.total}
+          count={activities?.total || 0}
           page={page}
           onPageChange={handleChangePage}
           rowsPerPage={pageSize}

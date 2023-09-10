@@ -95,7 +95,7 @@ const Panel = ({
 export default Panel;
 
 Panel.propTypes = {
-  title: PropTypes.string,
+  title: PropTypes.oneOfType([PropTypes.string, PropTypes.node]),
   titleIcon: PropTypes.node,
   toolbarActions: PropTypes.node,
   children: PropTypes.node,
@@ -144,7 +144,7 @@ const Titlebar = ({ title, toolbarActions, titleVarient, titleIcon, showHistoryB
 };
 
 Titlebar.propTypes = {
-  title: PropTypes.string,
+  title: PropTypes.oneOfType([PropTypes.string, PropTypes.node]),
   titleIcon: PropTypes.node,
   toolbarActions: PropTypes.node,
   titleVarient: PropTypes.string,

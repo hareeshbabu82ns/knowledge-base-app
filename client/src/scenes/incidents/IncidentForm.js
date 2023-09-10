@@ -10,12 +10,14 @@ import BackIcon from '@mui/icons-material/ArrowBackOutlined';
 import SaveIcon from '@mui/icons-material/SaveOutlined';
 import DeleteIcon from '@mui/icons-material/DeleteOutlined';
 import React, { useEffect, useState } from 'react';
-import { Button, IconButton, Stack, Switch, TextField } from '@mui/material';
+import { Box, Button, IconButton, Stack, TextField } from '@mui/material';
 import { toast } from 'react-toastify';
 import Panel from '../../components/Panel';
 import Grid2 from '@mui/material/Unstable_Grid2/Grid2';
 import { useFormik } from 'formik';
 import IncidentTagsSelect from './IncidentTagsSelect';
+import { CustomTextarea } from 'components/forms/theme-elements/CustomTextArea';
+import MuiMarkdown from 'mui-markdown';
 
 const initIncident = {
   description: '',
@@ -157,19 +159,8 @@ const IncidentForm = () => {
       actionsRight={actionsRight}
     >
       <form onSubmit={handleSubmit}>
-        <Grid2 container gap={2}>
-          <Grid2>
-            <TextField
-              id="description"
-              name="description"
-              label="Content"
-              type="text"
-              onChange={handleChange}
-              value={values.description}
-            />
-          </Grid2>
-
-          <Grid2 xs={6}>
+        <Grid2 container spacing={2}>
+          <Grid2 xs={12}>
             <IncidentTagsSelect
               size="small"
               freeSolo
@@ -183,6 +174,33 @@ const IncidentForm = () => {
                 })
               }
             />
+          </Grid2>
+
+          <Grid2 xs={12} container>
+            <Grid2 xs={6}>
+              <CustomTextarea
+                id="description"
+                name="description"
+                label="Content"
+                minRows={15}
+                maxRows={15}
+                onChange={handleChange}
+                value={values.description}
+              />
+            </Grid2>
+            <Grid2 xs={6}>
+              <Box
+                sx={{
+                  border: (theme) => `1px solid ${theme.palette.grey[400]}`,
+                  borderRadius: 1,
+                  p: 1,
+                  height: 340,
+                  overflowY: 'scroll',
+                }}
+              >
+                <MuiMarkdown>{values.description}</MuiMarkdown>
+              </Box>
+            </Grid2>
           </Grid2>
           {/* <Grid2 xs={12}>
             <pre>{JSON.stringify(incident, null, "\t")}</pre>

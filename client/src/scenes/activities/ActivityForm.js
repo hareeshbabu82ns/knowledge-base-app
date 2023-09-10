@@ -10,16 +10,32 @@ import BackIcon from '@mui/icons-material/ArrowBackOutlined';
 import SaveIcon from '@mui/icons-material/SaveOutlined';
 import DeleteIcon from '@mui/icons-material/DeleteOutlined';
 import React, { useEffect, useState } from 'react';
-import { Button, IconButton, Stack, Switch, TextField } from '@mui/material';
+import {
+  Box,
+  Button,
+  FormControlLabel,
+  IconButton,
+  Stack,
+  Switch,
+  TextField,
+  TextareaAutosize,
+} from '@mui/material';
 import { toast } from 'react-toastify';
 import Panel from '../../components/Panel';
 import Grid2 from '@mui/material/Unstable_Grid2/Grid2';
 import { useFormik } from 'formik';
+import ActivityTrackGrid from './ActivityTrackGrid';
+import TimerWidget from 'components/TimerWidget';
+import { diffInSeconds } from 'utils';
+import MuiMarkdown from 'mui-markdown';
+import { CustomTextarea } from 'components/forms/theme-elements/CustomTextArea';
 
 const initActivity = {
   description: '',
   isExclusive: false,
   userId: '',
+  runtime: 0,
+  startedAt: '',
 };
 
 const ActivityForm = () => {
@@ -155,25 +171,65 @@ const ActivityForm = () => {
       actionsRight={actionsRight}
     >
       <form onSubmit={handleSubmit}>
-        <Grid2 container>
-          <Grid2>
-            <TextField
-              id="description"
-              name="description"
-              label="Content"
-              type="text"
-              onChange={handleChange}
-              value={values.description}
+        <Grid2 container spacing={2}>
+          <Grid2 xs={6}>
+            <FormControlLabel
+              label="Exclusive"
+              labelPlacement="start"
+              control={
+                <Switch
+                  name="isExclusive"
+                  id="isExclusive"
+                  checked={values.isExclusive}
+                  onChange={handleChange}
+                />
+              }
             />
           </Grid2>
 
-          <Grid2>
-            <Switch
-              name="isExclusive"
-              id="isExclusive"
-              checked={values.isExclusive}
-              onChange={handleChange}
-            />
+          <Grid2 xs={6}>
+            {id !== 'new' && (
+              <TimerWidget
+                running={values.isRunning}
+                runtime={
+                  values?.runtime +
+                  (values?.isRunning ? diffInSeconds({ dateStart: values?.startedAt }) : 0)
+                }
+                onStart={() => updateActivity({ id: id, data: { isRunning: true } })}
+                onStop={() => updateActivity({ id: id, data: { isRunning: false } })}
+              />
+            )}
+          </Grid2>
+
+          <Grid2 xs={12} container>
+            <Grid2 xs={6}>
+              <CustomTextarea
+                id="description"
+                name="description"
+                label="Content"
+                minRows={15}
+                maxRows={15}
+                onChange={handleChange}
+                value={values.description}
+              />
+            </Grid2>
+            <Grid2 xs={6}>
+              <Box
+                sx={{
+                  border: (theme) => `1px solid ${theme.palette.grey[400]}`,
+                  borderRadius: 1,
+                  p: 1,
+                  height: 340,
+                  overflowY: 'scroll',
+                }}
+              >
+                <MuiMarkdown>{values.description}</MuiMarkdown>
+              </Box>
+            </Grid2>
+          </Grid2>
+
+          <Grid2 xs={12}>
+            <ActivityTrackGrid activityRefetch={refetch} />
           </Grid2>
           {/* <Grid2 xs={12}>
             <pre>{JSON.stringify(activity, null, "\t")}</pre>

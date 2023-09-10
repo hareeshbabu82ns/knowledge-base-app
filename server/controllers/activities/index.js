@@ -3,6 +3,7 @@ import { DateTime } from "luxon";
 
 import Activity from "../../models/Activities/Activity.js";
 import ActivityTrack from "../../models/Activities/ActivityTrack.js";
+import { formatToDateTime } from "../../utils.js";
 
 const validateActivity = ({ description, isExclusive, isRunning }) => {
   if (description.length === 0) {
@@ -64,13 +65,13 @@ export const addActivity = async (req, res) => {
     );
 
     if (error) {
-      res.status(404).json({ message: error });
+      res.status(501).json({ message: error });
     } else {
       res.status(201).json({ id: data._id });
     }
   } catch (err) {
     console.log(err);
-    res.status(404).json({ message: err.message });
+    res.status(501).json({ message: err.message });
   }
 };
 
@@ -358,5 +359,197 @@ export const getActivities = async (req, res) => {
     res.status(200).json({ data, total });
   } catch (err) {
     res.status(404).json({ message: err.message });
+  }
+};
+
+export const getActivityTracks = async (req, res) => {
+  try {
+    const { user } = req.auth;
+    const { id: activityId } = req.params;
+
+    // sort should look like : { "field": "userId", "sort": "desc" }
+    const { page = 0, pageSize = 20, sort = null } = req.query;
+
+    // formatted sort should look like: {userId: -1}
+    const genSort = () => {
+      const sortParsed = JSON.parse(sort);
+      const sortFormatted = {
+        [sortParsed.field]: sortParsed.sort === "asc" ? 1 : -1,
+      };
+      return sortFormatted;
+    };
+
+    const sortFormatted = Boolean(sort) ? genSort() : {};
+
+    if (!sortFormatted.runtime) sortFormatted.runtime = -1;
+
+    const data = await ActivityTrack.find({
+      userId: user._id,
+      activityId,
+    })
+      .sort(sortFormatted)
+      .skip(page * pageSize)
+      .limit(pageSize);
+
+    const total = await ActivityTrack.countDocuments({
+      userId: user._id,
+      activityId,
+    });
+
+    res.status(200).json({ data, total });
+  } catch (err) {
+    res.status(404).json({ message: err.message });
+  }
+};
+
+export const deleteActivityTrack = async (req, res) => {
+  try {
+    const { user } = req.auth;
+
+    const { id } = req.params;
+
+    // fetch existing ActivityTrack
+    const oldActivityTrack = await ActivityTrack.findById(
+      new mongoose.Types.ObjectId(id)
+    );
+    // console.log( oldActivityTrack )
+
+    if (!oldActivityTrack)
+      throw new Error(`No Activity Track found with id ${id}`);
+
+    if (oldActivityTrack.userId !== user.id)
+      throw new Error(`Activity Track is not from same user`);
+
+    const session = await mongoose.startSession();
+
+    try {
+      session.startTransaction();
+      // delete Activity entry
+      await oldActivityTrack.deleteOne({ session });
+      const activity = await Activity.findById(
+        new mongoose.Types.ObjectId(oldActivityTrack.activityId)
+      );
+      if (activity) {
+        if (oldActivityTrack.dateEnd === "" || oldActivityTrack.runtime === 0) {
+          // track not yet ended, just stop running the activity
+          activity.isRunning = false;
+        } else {
+          activity.runtime -= oldActivityTrack.runtime;
+        }
+        await activity.save({ session });
+      }
+
+      // calculate tracks total by reducing the runtime from activity
+
+      // const activityTracks = await ActivityTrack.find({
+      //   userId: user._id,
+      //   activityId: oldActivityTrack.activityId,
+      // });
+      // for(const track of activityTracks){
+      //   if(track._id === new mongoose.Types.ObjectId(id)) continue;
+
+      // }
+
+      //TODO: delete related stats
+
+      await session.commitTransaction();
+      session.endSession();
+
+      res.status(200).json({ id: oldActivityTrack._id });
+    } catch (err) {
+      await session.abortTransaction();
+      session.endSession();
+      res.status(404).json({ message: err.message });
+    }
+  } catch (err) {
+    console.log(err);
+    res.status(404).json({ message: err.message });
+  }
+};
+
+export const updateActivityTrack = async (req, res) => {
+  try {
+    const { user } = req.auth;
+
+    const { id } = req.params;
+
+    const { dateStart, dateEnd } = req.body;
+
+    // fetch existing ActivityTrack
+    const oldActivityTrack = await ActivityTrack.findById(
+      new mongoose.Types.ObjectId(id)
+    );
+    // console.log(oldActivityTrack);
+
+    if (!oldActivityTrack)
+      throw new Error(`No Activity Track found with id ${id}`);
+
+    if (oldActivityTrack.userId !== user.id)
+      throw new Error(`Activity Track is not from same user`);
+
+    const session = await mongoose.startSession();
+
+    try {
+      session.startTransaction();
+
+      // update Activity Track entry
+      oldActivityTrack.dateStart = dateStart;
+      oldActivityTrack.dateEnd = dateEnd;
+
+      // calculate diff
+      oldActivityTrack.runtime = formatToDateTime({ dateStr: dateEnd }).diff(
+        formatToDateTime({ dateStr: dateStart }),
+        "seconds"
+      ).seconds;
+
+      if (oldActivityTrack.runtime <= 0)
+        throw new Error("Track Start and End Dates inconsistant");
+
+      await oldActivityTrack.save({ session });
+
+      // check if there are overlapping track entries and calculate new runtime
+      const activityTracks = await ActivityTrack.find({
+        userId: user._id,
+        activityId: oldActivityTrack.activityId,
+      });
+      const calc = { runtime: 0 };
+
+      for (const track of activityTracks) {
+        if (track._id.equals(id)) {
+          calc.runtime += oldActivityTrack.runtime;
+          continue;
+        }
+        console.log(track._id, id);
+        if (track.dateStart >= dateStart && dateStart <= track.dateEnd)
+          throw new Error(
+            `Track overlapped with dateStart ${track.dateStart} >= ${dateStart} <= ${track.dateEnd}`
+          );
+        if (track.dateStart >= dateEnd && dateEnd <= track.dateEnd)
+          throw new Error(
+            `Track overlapped with dateEnd ${track.dateStart} >= ${dateEnd} <= ${track.dateEnd}`
+          );
+        calc.runtime += track.runtime;
+      }
+
+      const activity = await Activity.findById(
+        new mongoose.Types.ObjectId(oldActivityTrack.activityId)
+      );
+      if (activity) {
+        activity.runtime = calc.runtime;
+        await activity.save({ session });
+      }
+
+      await session.commitTransaction();
+      session.endSession();
+
+      res.status(200).json({ id: oldActivityTrack._id });
+    } catch (err) {
+      await session.abortTransaction();
+      session.endSession();
+      res.status(501).json({ message: err.message });
+    }
+  } catch (err) {
+    console.log(err);
+    res.status(501).json({ message: err.message });
   }
 };
