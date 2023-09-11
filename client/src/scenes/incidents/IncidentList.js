@@ -79,7 +79,9 @@ const IncidentListItem = ({ data, onClick }) => {
     <ListItem onClick={onClick} disablePadding>
       <Stack>
         <ListItemText
-          primary={<Typography variant="h5">{data.description}</Typography>}
+          primary={
+            <Typography variant="h5">{data.isEncrypted ? '***' : data.description}</Typography>
+          }
           secondary={DateTime.fromISO(data.updatedAt).toFormat('MMM dd yyyy HH:mm')}
         ></ListItemText>
         <ListItemText>

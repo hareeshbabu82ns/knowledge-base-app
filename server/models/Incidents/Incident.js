@@ -10,6 +10,10 @@ const IncidentSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    isEncrypted: {
+      type: Boolean,
+      default: false,
+    },
     tags: {
       type: [String],
       of: Number,

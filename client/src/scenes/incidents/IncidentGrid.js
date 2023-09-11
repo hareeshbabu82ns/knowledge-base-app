@@ -96,10 +96,17 @@ const IncidentGrid = () => {
       flex: 1,
     },
     {
+      field: 'isEncrypted',
+      headerName: 'Enc',
+      type: 'boolean',
+      editable: true,
+    },
+    {
       field: 'description',
       headerName: 'Description',
       flex: 2,
       editable: true,
+      valueGetter: ({ value, row: { isEncrypted } }) => (isEncrypted ? '***' : value),
     },
     {
       field: 'tags',

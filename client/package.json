@@ -25,6 +25,7 @@
     "axios": "^1.4.0",
     "chance": "^1.1.11",
     "coloring-palette": "^1.0.0",
+    "crypto-js": "^4.1.1",
     "formik": "^2.4.3",
     "jwt-decode": "^3.1.2",
     "lodash": "^4.17.21",

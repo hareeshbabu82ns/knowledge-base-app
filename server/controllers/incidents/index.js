@@ -11,9 +11,10 @@ const validateIncident = ({ description }) => {
   return true;
 };
 
-const addIncidentRecord = async ({ description, tags }, user) => {
+const addIncidentRecord = async ({ description, isEncrypted, tags }, user) => {
   const isValid = validateIncident({
     description,
+    isEncrypted,
     tags,
   });
 
@@ -26,6 +27,7 @@ const addIncidentRecord = async ({ description, tags }, user) => {
     const newIncident = new Incident({
       userId: user._id,
       description,
+      isEncrypted,
       tags,
     });
     const incident = await newIncident.save({ session });
@@ -56,11 +58,12 @@ export const addIncident = async (req, res) => {
   try {
     const { user } = req.auth;
 
-    const { description, tags } = req.body;
+    const { description, isEncrypted, tags } = req.body;
 
     const { data, error } = await addIncidentRecord(
       {
         description,
+        isEncrypted,
         tags,
       },
       user
@@ -124,7 +127,7 @@ export const updateIncident = async (req, res) => {
   try {
     const { user } = req.auth;
 
-    const { description, tags } = req.body;
+    const { description, tags, isEncrypted } = req.body;
 
     const { id } = req.params;
 
@@ -141,6 +144,7 @@ export const updateIncident = async (req, res) => {
 
     const newIncident = {
       description,
+      isEncrypted,
       tags,
     };
 
@@ -163,7 +167,7 @@ export const updateIncident = async (req, res) => {
 const updateIncidentRecord = async (oldIncident, newIncident, user) => {
   const { _id, description: descriptionOld } = oldIncident;
 
-  const { description, tags } = newIncident;
+  const { tags } = newIncident;
 
   // const isValid = validateIncident({
   //   description,

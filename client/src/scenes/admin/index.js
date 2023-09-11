@@ -1,98 +1,66 @@
-import React from "react";
-import { Box, useTheme } from "@mui/material";
-import { useGetAdminsQuery } from "state/api";
-import { DataGrid } from "@mui/x-data-grid";
-import Header from "components/Header";
-import CustomColumnMenu from "components/DataGridCustomColumnMenu";
+import * as React from 'react';
+import PropTypes from 'prop-types';
+import Tabs from '@mui/material/Tabs';
+import Tab from '@mui/material/Tab';
+import Box from '@mui/material/Box';
+import UsersGrid from './UsersGrid';
+import PageContainer from 'components/container/PageContainer';
+import BasicSettings from './BasicSettings';
 
-const Admin = () => {
-  const theme = useTheme();
-  const { data, isLoading } = useGetAdminsQuery();
-
-  const columns = [
-    {
-      field: "_id",
-      headerName: "ID",
-      flex: 1,
-    },
-    {
-      field: "name",
-      headerName: "Name",
-      flex: 0.5,
-    },
-    {
-      field: "email",
-      headerName: "Email",
-      flex: 1,
-    },
-    {
-      field: "phoneNumber",
-      headerName: "Phone Number",
-      flex: 0.5,
-      renderCell: (params) => {
-        return params.value?.replace(/^(\d{3})(\d{3})(\d{4})/, "($1)$2-$3");
-      },
-    },
-    {
-      field: "country",
-      headerName: "Country",
-      flex: 0.4,
-    },
-    {
-      field: "occupation",
-      headerName: "Occupation",
-      flex: 1,
-    },
-    {
-      field: "role",
-      headerName: "Role",
-      flex: 0.5,
-    },
-  ];
+function CustomTabPanel(props) {
+  const { children, value, index, ...other } = props;
 
   return (
-    <Box m="1.5rem 2.5rem">
-      <Header title="ADMINS" subtitle="Managing admins and list of admins" />
-      <Box
-        mt="40px"
-        height="75vh"
-        sx={{
-          "& .MuiDataGrid-root": {
-            border: "none",
-          },
-          "& .MuiDataGrid-cell": {
-            borderBottom: "none",
-          },
-          "& .MuiDataGrid-columnHeaders": {
-            backgroundColor: theme.palette.background.alt,
-            color: theme.palette.secondary[700],
-            borderBottom: "none",
-          },
-          "& .MuiDataGrid-virtualScroller": {
-            backgroundColor: theme.palette.primary.light,
-          },
-          "& .MuiDataGrid-footerContainer": {
-            backgroundColor: theme.palette.background.alt,
-            color: theme.palette.secondary[600],
-            borderTop: "none",
-          },
-          "& .MuiDataGrid-toolbarContainer .MuiButton-text": {
-            color: `${theme.palette.secondary[800]} !important`,
-          },
-        }}
-      >
-        <DataGrid
-          loading={isLoading || !data}
-          getRowId={(row) => row._id}
-          rows={data || []}
-          columns={columns}
-          slots={{
-            ColumnMenu: CustomColumnMenu,
-          }}
-        />
-      </Box>
-    </Box>
+    <div
+      role="tabpanel"
+      hidden={value !== index}
+      id={`admin-tabpanel-${index}`}
+      aria-labelledby={`admin-tab-${index}`}
+      {...other}
+    >
+      {value === index && <Box sx={{ p: 3 }}>{children}</Box>}
+    </div>
   );
+}
+
+CustomTabPanel.propTypes = {
+  children: PropTypes.node,
+  index: PropTypes.number.isRequired,
+  value: PropTypes.number.isRequired,
 };
 
-export default Admin;
+function a11yProps(index) {
+  return {
+    id: `admin-tab-${index}`,
+    'aria-controls': `admin-tabpanel-${index}`,
+  };
+}
+
+export default function Admin() {
+  const [value, setValue] = React.useState(0);
+
+  const handleChange = (event, newValue) => {
+    setValue(newValue);
+  };
+
+  return (
+    <PageContainer title="Admin">
+      <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+        <Tabs value={value} onChange={handleChange} aria-label="basic tabs example">
+          <Tab label="Basic Settings" {...a11yProps(0)} />
+          <Tab label="Users Grid" {...a11yProps(1)} />
+          <Tab label="Extras" {...a11yProps(2)} />
+        </Tabs>
+      </Box>
+      <CustomTabPanel value={value} index={0}>
+        <BasicSettings />
+      </CustomTabPanel>
+      <CustomTabPanel value={value} index={1}>
+        <UsersGrid />
+      </CustomTabPanel>
+      <CustomTabPanel value={value} index={2}>
+        Extras
+      </CustomTabPanel>
+    </PageContainer>
+  );
+}

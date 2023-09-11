@@ -10,6 +10,7 @@ const initialState = {
   token,
   header: null,
   subHeader: null,
+  encKey: '',
 };
 
 export const globalSlice = createSlice({
@@ -25,12 +26,16 @@ export const globalSlice = createSlice({
       state.header = payload?.header;
       state.subHeader = payload?.subHeader;
     },
+    setEncryption: (state, { payload }) => {
+      state.encKey = payload;
+    },
   },
 });
 
-export const { setUser, setHeader } = globalSlice.actions;
+export const { setUser, setHeader, setEncryption } = globalSlice.actions;
 
 export const headerSelector = (state) => state.global.header;
 export const subHeaderSelector = (state) => state.global.subHeader;
+export const encryptionKeySelector = (state) => state.global.encKey;
 
 export default globalSlice.reducer;

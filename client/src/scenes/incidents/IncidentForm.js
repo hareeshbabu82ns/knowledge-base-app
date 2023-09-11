@@ -6,11 +6,12 @@ import {
   useUpdateIncidentMutation,
 } from 'state/incidentSlice';
 import RefreshIcon from '@mui/icons-material/RefreshOutlined';
+import LockIcon from '@mui/icons-material/LockOutlined';
 import BackIcon from '@mui/icons-material/ArrowBackOutlined';
 import SaveIcon from '@mui/icons-material/SaveOutlined';
 import DeleteIcon from '@mui/icons-material/DeleteOutlined';
 import React, { useEffect, useState } from 'react';
-import { Box, Button, IconButton, Stack, TextField } from '@mui/material';
+import { Box, Button, FormControlLabel, IconButton, Stack, Switch, Tooltip } from '@mui/material';
 import { toast } from 'react-toastify';
 import Panel from '../../components/Panel';
 import Grid2 from '@mui/material/Unstable_Grid2/Grid2';
@@ -18,17 +19,22 @@ import { useFormik } from 'formik';
 import IncidentTagsSelect from './IncidentTagsSelect';
 import { CustomTextarea } from 'components/forms/theme-elements/CustomTextArea';
 import MuiMarkdown from 'mui-markdown';
+import { useSelector } from 'react-redux';
+import { encryptionKeySelector } from 'state';
+import { decryptData, encryptData } from 'utils';
 
 const initIncident = {
   description: '',
   userId: '',
   tags: '',
+  isEncrypted: false,
 };
 
 const IncidentForm = () => {
   const { id } = useParams();
   const [incident, setIncident] = useState(initIncident);
   const navigate = useNavigate();
+  const encKey = useSelector(encryptionKeySelector);
 
   const [addIncidentMutation] = useAddIncidentMutation();
   const [updateIncident] = useUpdateIncidentMutation();
@@ -39,14 +45,33 @@ const IncidentForm = () => {
   });
 
   useEffect(() => {
-    // console.log(data);
-    setIncident(data || initIncident);
+    // console.log(data, encKey);
+    const res = data
+      ? {
+          ...data,
+        }
+      : initIncident;
+    try {
+      if (encKey === '') toast.error('Empty Encryption Key');
+      else {
+        res.description = data?.isEncrypted
+          ? decryptData({ key: encKey, data: data?.description })
+          : data?.description;
+        // console.log(data?.description, description);
+      }
+    } catch (ex) {
+      toast.error('Decryption failed');
+    }
+    setIncident(res);
   }, [data]);
 
-  const processAdd = async ({ description, tags }, { setSubmitting }) => {
+  const processAdd = async ({ description, isEncrypted, tags }, { setSubmitting }) => {
     // console.log('Adding Incident');
+    const encDesc = isEncrypted ? encryptData({ key: encKey, data: description }) : description;
+    console.log('Adding Incident', description, encDesc);
     const data = {
-      description,
+      description: encDesc,
+      isEncrypted,
       tags: tags.split(','),
     };
     // console.log(data, user);
@@ -63,11 +88,12 @@ const IncidentForm = () => {
     }
   };
 
-  const processUpdate = async ({ _id: id, description, tags }, { setSubmitting }) => {
-    console.log(tags);
+  const processUpdate = async ({ _id: id, description, isEncrypted, tags }, { setSubmitting }) => {
+    // console.log(tags);
+    const encDesc = isEncrypted ? encryptData({ key: encKey, data: description }) : description;
     const res = await updateIncident({
       id,
-      data: { description, tags },
+      data: { description: encDesc, isEncrypted, tags },
     });
     // console.log(res);
     if (res.error) {
@@ -160,7 +186,23 @@ const IncidentForm = () => {
     >
       <form onSubmit={handleSubmit}>
         <Grid2 container spacing={2}>
-          <Grid2 xs={12}>
+          <Grid2 xs={4} sm={2}>
+            <Tooltip title="Encrypt Content">
+              <FormControlLabel
+                label={<LockIcon />}
+                labelPlacement="start"
+                control={
+                  <Switch
+                    name="isEncrypted"
+                    id="isEncrypted"
+                    checked={values.isEncrypted}
+                    onChange={handleChange}
+                  />
+                }
+              />
+            </Tooltip>
+          </Grid2>
+          <Grid2 xs={8} sm={10}>
             <IncidentTagsSelect
               size="small"
               freeSolo
@@ -177,7 +219,7 @@ const IncidentForm = () => {
           </Grid2>
 
           <Grid2 xs={12} container>
-            <Grid2 xs={6}>
+            <Grid2 xs={12} md={6}>
               <CustomTextarea
                 id="description"
                 name="description"
@@ -188,7 +230,7 @@ const IncidentForm = () => {
                 value={values.description}
               />
             </Grid2>
-            <Grid2 xs={6}>
+            <Grid2 xs={12} md={6}>
               <Box
                 sx={{
                   border: (theme) => `1px solid ${theme.palette.grey[400]}`,

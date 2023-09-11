@@ -29,12 +29,13 @@ export const incidentApiSlice = api.injectEndpoints({
       providesTags: (_, __, arg) => [{ type: 'Incident', id: arg }],
     }),
     addIncident: builder.mutation({
-      query: ({ description, tags }) => {
+      query: ({ description, isEncrypted, tags }) => {
         return {
           url: `api/activity/incidents`,
           method: 'POST',
           body: {
             description,
+            isEncrypted,
             tags: typeof tags === 'string' ? tags.split(',') : tags,
             clientDate: getCurrentDate(),
           },
@@ -43,11 +44,12 @@ export const incidentApiSlice = api.injectEndpoints({
       invalidatesTags: ['Incidents', 'IncidentTags'],
     }),
     updateIncident: builder.mutation({
-      query: ({ id, data: { description, tags } }) => ({
+      query: ({ id, data: { description, isEncrypted, tags } }) => ({
         url: `api/activity/incidents/${id}`,
         method: 'PATCH',
         body: {
           description,
+          isEncrypted,
           tags: typeof tags === 'string' ? tags.split(',') : tags,
           clientDate: getCurrentDate(),
         },
