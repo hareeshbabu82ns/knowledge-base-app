@@ -11,17 +11,16 @@ import BackIcon from '@mui/icons-material/ArrowBackOutlined';
 import SaveIcon from '@mui/icons-material/SaveOutlined';
 import DeleteIcon from '@mui/icons-material/DeleteOutlined';
 import React, { useEffect, useState } from 'react';
-import { Box, Button, FormControlLabel, IconButton, Stack, Switch, Tooltip } from '@mui/material';
+import { Button, FormControlLabel, IconButton, Stack, Switch, Tooltip } from '@mui/material';
 import { toast } from 'react-toastify';
 import Panel from '../../components/Panel';
 import Grid2 from '@mui/material/Unstable_Grid2/Grid2';
 import { useFormik } from 'formik';
 import IncidentTagsSelect from './IncidentTagsSelect';
-import { CustomTextarea } from 'components/forms/theme-elements/CustomTextArea';
-import MuiMarkdown from 'mui-markdown';
 import { useSelector } from 'react-redux';
 import { encryptionKeySelector } from 'state';
 import { decryptData, encryptData } from 'utils';
+import MarkDownTextArea from 'components/forms/theme-elements/MarkDownTextArea';
 
 const initIncident = {
   description: '',
@@ -218,31 +217,16 @@ const IncidentForm = () => {
             />
           </Grid2>
 
-          <Grid2 xs={12} container>
-            <Grid2 xs={12} md={6}>
-              <CustomTextarea
-                id="description"
-                name="description"
-                label="Content"
-                minRows={15}
-                maxRows={15}
-                onChange={handleChange}
-                value={values.description}
-              />
-            </Grid2>
-            <Grid2 xs={12} md={6}>
-              <Box
-                sx={{
-                  border: (theme) => `1px solid ${theme.palette.grey[400]}`,
-                  borderRadius: 1,
-                  p: 1,
-                  height: 340,
-                  overflowY: 'scroll',
-                }}
-              >
-                <MuiMarkdown>{values.description}</MuiMarkdown>
-              </Box>
-            </Grid2>
+          <Grid2 xs={12}>
+            <MarkDownTextArea
+              id="description"
+              name="description"
+              label="Content"
+              minRows={15}
+              maxRows={15}
+              onChange={handleChange}
+              value={values.description}
+            />
           </Grid2>
           {/* <Grid2 xs={12}>
             <pre>{JSON.stringify(incident, null, "\t")}</pre>

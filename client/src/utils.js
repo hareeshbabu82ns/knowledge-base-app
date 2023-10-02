@@ -44,6 +44,29 @@ export function decryptData({ key, data }) {
   return bytes.toString(enc.Utf8);
 }
 
+// DataGrid Filters to MDB Filters
+export function dataGridFiltersToMDB(filters = []) {
+  const res = filters
+    .filter((f) => f.value && f.value.length > 0)
+    .map(({ field, operator, value }) => {
+      let mdbOperator = '$eq';
+      let mdbValue = value;
+      switch (operator) {
+        case 'is':
+          mdbOperator = '$eq';
+          break;
+        case 'isAnyOf':
+          mdbOperator = '$in';
+          break;
+        default:
+          break;
+      }
+      return { [field]: { [mdbOperator]: mdbValue } };
+    });
+  // for DataGrid non Pro its only one filter
+  return res[0];
+}
+
 // Crypto usage:
 // (async () => {
 //   try {

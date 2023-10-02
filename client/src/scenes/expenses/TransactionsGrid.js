@@ -17,7 +17,11 @@ import { toast } from 'react-toastify';
 import { DateTime } from 'luxon';
 
 import { INTL_DATE_SHORT_OPTIONS } from 'constants';
-import { useGetExpenseTransactionsQuery, useRecalculateExpenseStatsMutation } from 'state/api';
+import {
+  useGetExpenseAccountsQuery,
+  useGetExpenseTransactionsQuery,
+  useRecalculateExpenseStatsMutation,
+} from 'state/api';
 import {
   getBackgroundColor,
   getHoverBackgroundColor,
@@ -28,6 +32,7 @@ import TransactionsGridToolbar from './TransactionsGridToolbar';
 import { useNavigate } from 'react-router-dom';
 import Grid2 from '@mui/material/Unstable_Grid2/Grid2';
 import { CalculateOutlined as ReCalcStatsIcon } from '@mui/icons-material';
+import { dataGridFiltersToMDB } from 'utils';
 
 const StyledDataGrid = styled(DataGrid)(({ theme }) => ({
   '& .MuiDataGrid-root': {
@@ -90,80 +95,86 @@ const StyledDataGrid = styled(DataGrid)(({ theme }) => ({
   },
 }));
 
-const columns = [
-  {
-    field: '_id',
-    headerName: 'ID',
-    flex: 1,
-  },
-  // {
-  //   field: 'userId',
-  //   headerName: 'User Id',
-  //   flex: 1,
-  // },
-  {
-    field: 'type',
-    headerName: 'Type',
-    resizable: false,
-    renderCell: ({ value }) => (
-      <Typography variant="h6" color={value === 'Income' ? 'green' : 'error'}>
-        {value}
-      </Typography>
-    ),
-  },
-  {
-    field: 'date',
-    headerName: 'Date',
-    width: 120,
-    type: 'date',
-    valueGetter: ({ value }) => new Date(value),
-    renderCell: ({ value }) => (
-      <Typography variant="h6">{value.toLocaleString('en', INTL_DATE_SHORT_OPTIONS)}</Typography>
-    ),
-  },
-  {
-    field: 'description',
-    headerName: 'Description',
-    flex: 2,
-  },
-  {
-    field: 'amount',
-    headerName: 'Amount',
-    width: 100,
-    type: 'number',
-    renderCell: ({ value, row }) => (
-      <Typography variant="h5" color={row.type === 'Expense' ? 'chocolate' : 'inherit'}>
-        {Number(value).toFixed(2)}
-      </Typography>
-    ),
-  },
-  {
-    field: 'account',
-    headerName: 'Account',
-    width: 120,
-    valueGetter: ({ value }) => {
-      return value?.name || value;
+const getColumns = ({ accounts }) => {
+  const bankAccountFilters = accounts?.map((b) => ({ label: b.name, value: b._id, code: b._id }));
+  const columns = [
+    {
+      field: '_id',
+      headerName: 'ID',
+      flex: 1,
     },
-  },
-  {
-    field: 'tags',
-    headerName: 'Tags',
-    flex: 1,
-    renderCell: ({ value }) => {
-      return (
-        <Stack direction="row" spacing={1}>
-          {value.map((v, idx) => (
-            <Chip
-              key={`${v}_${idx}`}
-              label={<Typography variant="body2">{v}</Typography>}
-              variant="outlined"
-            />
-          ))}
-        </Stack>
-      );
+    // {
+    //   field: 'userId',
+    //   headerName: 'User Id',
+    //   flex: 1,
+    // },
+    {
+      field: 'type',
+      headerName: 'Type',
+      resizable: false,
+      renderCell: ({ value }) => (
+        <Typography variant="h6" color={value === 'Income' ? 'green' : 'error'}>
+          {value}
+        </Typography>
+      ),
     },
-  },
-];
+    {
+      field: 'date',
+      headerName: 'Date',
+      width: 120,
+      type: 'date',
+      valueGetter: ({ value }) => new Date(value),
+      renderCell: ({ value }) => (
+        <Typography variant="h6">{value.toLocaleString('en', INTL_DATE_SHORT_OPTIONS)}</Typography>
+      ),
+    },
+    {
+      field: 'description',
+      headerName: 'Description',
+      flex: 2,
+    },
+    {
+      field: 'amount',
+      headerName: 'Amount',
+      width: 100,
+      type: 'number',
+      renderCell: ({ value, row }) => (
+        <Typography variant="h5" color={row.type === 'Expense' ? 'chocolate' : 'inherit'}>
+          {Number(value).toFixed(2)}
+        </Typography>
+      ),
+    },
+    {
+      field: 'account',
+      headerName: 'Account',
+      width: 120,
+      valueGetter: ({ value }) => {
+        return value?._id || value;
+      },
+      valueOptions: bankAccountFilters,
+      type: 'singleSelect',
+    },
+    {
+      field: 'tags',
+      headerName: 'Tags',
+      flex: 1,
+      renderCell: ({ value }) => {
+        return (
+          <Stack direction="row" spacing={1}>
+            {value.map((v, idx) => (
+              <Chip
+                key={`${v}_${idx}`}
+                label={<Typography variant="body2">{v}</Typography>}
+                variant="outlined"
+              />
+            ))}
+          </Stack>
+        );
+      },
+    },
+  ];
+  return columns;
+};
 
 const TransactionsGrid = () => {
   return (
@@ -242,29 +253,36 @@ const TransactionsResult = () => {
   const [pageSize, setPageSize] = useState(25);
   const [sort, setSort] = useState({});
   const [search, setSearch] = useState('');
+  const [filters, setFilters] = useState([]);
   const navigate = useNavigate();
 
   // const [rowSelectionModel, setRowSelectionModel] = useState([]);
+
+  const { data: bankAccounts, isLoading: bankAccountsLoading } = useGetExpenseAccountsQuery({});
 
   const { data, isLoading } = useGetExpenseTransactionsQuery({
     page,
     pageSize,
     sort: JSON.stringify(sort),
+    filters: JSON.stringify(dataGridFiltersToMDB(filters)),
     search,
   });
 
   return (
     <Box height="75vh" width="100%">
       <StyledDataGrid
-        loading={isLoading || !data}
+        loading={isLoading || bankAccountsLoading || !data}
         rows={data?.transactions || []}
         rowSelection={true}
         getRowId={(row) => row._id}
-        columns={columns}
+        columns={getColumns({ accounts: bankAccounts?.accounts })}
         rowCount={data?.total || 0}
         pagination
         page={page}
         initialState={{
+          filter: {
+            filterModel: { items: filters },
+          },
           pagination: {
             paginationModel: { pageSize, page },
           },
@@ -277,12 +295,16 @@ const TransactionsResult = () => {
         }}
         paginationMode="server"
         sortingMode="server"
+        filterMode="server"
         onPaginationModelChange={(m) => {
           if (page !== m.page) setPage(m.page);
           if (pageSize !== m.pageSize) setPageSize(m.pageSize);
         }}
         onSortModelChange={(m) => {
           setSort(m[0]);
+        }}
+        onFilterModelChange={(newFilterModel) => {
+          setFilters(newFilterModel.items);
         }}
         disableRowSelectionOnClick={true}
         // onRowSelectionModelChange={(newRowSelectionModel) => {

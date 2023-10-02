@@ -195,10 +195,10 @@ export const api = createApi({
       ],
     }),
     getExpenseTransactions: build.query({
-      query: ({ page, pageSize, sort, search }) => ({
+      query: ({ page, pageSize, sort, search, filters }) => ({
         url: `api/expenses/transactions`,
         method: 'GET',
-        params: { page, pageSize, sort, search },
+        params: { page, pageSize, sort, search, filters },
       }),
       providesTags: ['ExpenseTransactions'],
     }),

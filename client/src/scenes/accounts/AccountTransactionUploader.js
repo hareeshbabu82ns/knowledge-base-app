@@ -8,18 +8,15 @@ import {
   Select,
   Stack,
   Typography,
-} from "@mui/material";
-import { DataGrid } from "@mui/x-data-grid";
-import { INTL_DATE_LONG_OPTIONS } from "constants";
-import React, { useEffect, useState } from "react";
-import {
-  useUploadTransactionsMutation,
-  useGetExpenseAccountsQuery,
-} from "state/api";
-import FileUploader from "components/FileUploader";
+} from '@mui/material';
+import { DataGrid } from '@mui/x-data-grid';
+import { INTL_DATE_LONG_OPTIONS } from 'constants';
+import React, { useEffect, useState } from 'react';
+import { useUploadTransactionsMutation, useGetExpenseAccountsQuery } from 'state/api';
+import FileUploader from 'components/FileUploader';
 
 const AccountTransactionUploader = ({ account }) => {
-  const [bankAccount, setBankAccount] = useState("");
+  const [bankAccount, setBankAccount] = useState('');
   const [config, setConfig] = useState(null);
   const [dataToUpload, setDataToUpload] = useState(null);
   const [dataMdb, setDataMdb] = useState(null);
@@ -28,8 +25,7 @@ const AccountTransactionUploader = ({ account }) => {
     setBankAccount(account?._id);
   }, [account]);
 
-  const { data: bankAccounts, isLoading: bankAccountsLoading } =
-    useGetExpenseAccountsQuery({});
+  const { data: bankAccounts, isLoading: bankAccountsLoading } = useGetExpenseAccountsQuery({});
 
   const [uploadTransactions] = useUploadTransactionsMutation();
 
@@ -40,7 +36,6 @@ const AccountTransactionUploader = ({ account }) => {
   const onUpload = async (data) => {
     const { filename: file } = data;
     const {
-      message,
       data: resData,
       dataMdb: resDataMdb,
       config,
@@ -75,11 +70,9 @@ const AccountTransactionUploader = ({ account }) => {
               onChange={onBankAccountSelected}
             >
               {bankAccountsLoading ? (
-                <MenuItem value={""}>{"Loading..."}</MenuItem>
+                <MenuItem value={''}>{'Loading...'}</MenuItem>
               ) : (
-                bankAccounts?.accounts?.map((c) => (
-                  <MenuItem value={c._id}>{c.name}</MenuItem>
-                ))
+                bankAccounts?.accounts?.map((c) => <MenuItem value={c._id}>{c.name}</MenuItem>)
               )}
             </Select>
           </FormControl>
@@ -109,8 +102,7 @@ const ResultUploadTable = ({ config, data }) => {
     field: f.name,
     headerName: f.name,
     flex: 1,
-    renderCell: ({ value }) =>
-      f.type === "amount" ? `$ ${Number(value).toFixed(2)}` : value,
+    renderCell: ({ value }) => (f.type === 'amount' ? `$ ${Number(value).toFixed(2)}` : value),
   }));
 
   return (
@@ -136,42 +128,40 @@ const columnsMDB = [
   //   flex: 1,
   // },
   {
-    field: "type",
-    headerName: "Type",
+    field: 'type',
+    headerName: 'Type',
     resizable: false,
     renderCell: ({ value }) => (
-      <Typography variant="h6" color={value === "Income" ? "green" : "error"}>
+      <Typography variant="h6" color={value === 'Income' ? 'green' : 'error'}>
         {value}
       </Typography>
     ),
   },
   {
-    field: "description",
-    headerName: "Descripiton",
+    field: 'description',
+    headerName: 'Descripiton',
     resizable: false,
     flex: 2.5,
   },
   {
-    field: "date",
-    headerName: "Transaction Date",
+    field: 'date',
+    headerName: 'Transaction Date',
     flex: 1,
     renderCell: ({ value }) => (
       <Typography variant="h6">
-        {new Date(value).toLocaleString("en", INTL_DATE_LONG_OPTIONS)}
+        {new Date(value).toLocaleString('en', INTL_DATE_LONG_OPTIONS)}
       </Typography>
     ),
   },
   {
-    field: "amount",
-    headerName: "Amount",
+    field: 'amount',
+    headerName: 'Amount',
     flex: 0.5,
-    renderCell: ({ value }) => (
-      <Typography variant="h5">{Number(value).toFixed(2)}</Typography>
-    ),
+    renderCell: ({ value }) => <Typography variant="h5">{Number(value).toFixed(2)}</Typography>,
   },
   {
-    field: "tags",
-    headerName: "Tags",
+    field: 'tags',
+    headerName: 'Tags',
     flex: 1,
     renderCell: ({ value }) => {
       return (

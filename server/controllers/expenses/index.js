@@ -881,7 +881,13 @@ export const getTransactions = async (req, res) => {
     const { user } = req.auth;
 
     // sort should look like : { "field": "userId", "sort": "desc" }
-    const { page = 0, pageSize = 20, sort = null, search = "" } = req.query;
+    const {
+      page = 0,
+      pageSize = 20,
+      sort = null,
+      search = "",
+      filters = "",
+    } = req.query;
 
     // formatted sort should look like: {userId: -1}
     const genSort = () => {
@@ -896,13 +902,21 @@ export const getTransactions = async (req, res) => {
 
     if (!sortFormatted.date) sortFormatted.date = -1;
 
-    const transactions = await Transaction.find({
-      userId: user._id,
-      $or: [
+    const searchFilters = { userId: user._id };
+    if (filters.length > 0) {
+      const filtersParsed = JSON.parse(filters);
+      Object.keys(filtersParsed).forEach((key) => {
+        if (filtersParsed[key]) searchFilters[key] = filtersParsed[key];
+      });
+    }
+    if (search.length > 0) {
+      searchFilters["$or"] = [
         { tags: { $regex: new RegExp(search, "i") } },
         { description: { $regex: new RegExp(search, "i") } },
-      ],
-    })
+      ];
+    }
+
+    const transactions = await Transaction.find(searchFilters)
       .populate("account")
       .sort(sortFormatted)
       .skip(page * pageSize)
