@@ -915,6 +915,7 @@ export const getTransactions = async (req, res) => {
         { description: { $regex: new RegExp(search, "i") } },
       ];
     }
+    // console.log(searchFilters);
 
     const transactions = await Transaction.find(searchFilters)
       .populate("account")
@@ -922,13 +923,7 @@ export const getTransactions = async (req, res) => {
       .skip(page * pageSize)
       .limit(pageSize);
 
-    const total = await Transaction.countDocuments({
-      userId: user._id,
-      $or: [
-        { tags: { $regex: new RegExp(search, "i") } },
-        { description: { $regex: new RegExp(search, "i") } },
-      ],
-    });
+    const total = await Transaction.countDocuments(searchFilters);
 
     res.status(200).json({ transactions, total });
   } catch (err) {

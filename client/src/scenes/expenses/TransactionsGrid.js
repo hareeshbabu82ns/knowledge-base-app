@@ -259,12 +259,17 @@ const TransactionsResult = () => {
   // const [rowSelectionModel, setRowSelectionModel] = useState([]);
 
   const { data: bankAccounts, isLoading: bankAccountsLoading } = useGetExpenseAccountsQuery({});
-
   const { data, isLoading } = useGetExpenseTransactionsQuery({
     page,
     pageSize,
     sort: JSON.stringify(sort),
-    filters: JSON.stringify(dataGridFiltersToMDB(filters)),
+    filters: JSON.stringify(
+      dataGridFiltersToMDB(
+        filters.map((f) =>
+          f.field === 'date' ? { ...f, value: DateTime.fromISO(f.value).toISO() } : f,
+        ),
+      ),
+    ),
     search,
   });
 
@@ -304,6 +309,7 @@ const TransactionsResult = () => {
           setSort(m[0]);
         }}
         onFilterModelChange={(newFilterModel) => {
+          // console.log(newFilterModel.items);
           setFilters(newFilterModel.items);
         }}
         disableRowSelectionOnClick={true}

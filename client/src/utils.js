@@ -52,8 +52,28 @@ export function dataGridFiltersToMDB(filters = []) {
       let mdbOperator = '$eq';
       let mdbValue = value;
       switch (operator) {
+        case '=':
         case 'is':
           mdbOperator = '$eq';
+          break;
+        case '!=':
+          mdbOperator = '$ne';
+          break;
+        case '<':
+        case 'before':
+          mdbOperator = '$lt';
+          break;
+        case '<=':
+        case 'onOrBefore':
+          mdbOperator = '$lte';
+          break;
+        case '>':
+        case 'after':
+          mdbOperator = '$gt';
+          break;
+        case '>=':
+        case 'onOrAfter':
+          mdbOperator = '$gte';
           break;
         case 'isAnyOf':
           mdbOperator = '$in';
