@@ -1,18 +1,15 @@
 ### init project
 
 ```sh
-npx create-next-app@latest kbase
+pnpm create next-app@latest kbase --typescript --tailwind --eslint
 
 git config --local commit.gpgsign false
 git config --local user.email hareeshbabu82ns@gmail.com
 ```
 
 ```sh
-npx tailwindcss int -p
-npx shadcn-ui@latest init
-
-npx shadcn-ui@latest add -a
-
+pnpm dlx shadcn-ui@latest init
+pnpm dlx shadcn-ui@latest add -a
 ```
 
 ```sh
