@@ -10,6 +10,8 @@ import React, { PropsWithChildren } from "react";
 import { HiX } from "react-icons/hi";
 import { HiHomeModern as HiBolt } from "react-icons/hi2";
 import { HiOutlineArrowRightOnRectangle } from "react-icons/hi2";
+import { useSession } from "next-auth/react";
+import { signOut } from "@/lib/auth/actions";
 
 export interface SidebarProps extends PropsWithChildren {
   routes: IRoute[];
@@ -22,6 +24,7 @@ interface SidebarLinksProps extends PropsWithChildren {
 
 function Sidebar(props: SidebarProps) {
   const router = useRouter();
+  const session = useSession();
   const { routes } = props;
 
   // SIDEBAR
@@ -63,21 +66,22 @@ function Sidebar(props: SidebarProps) {
             <div className="mt-5 flex w-full items-center rounded-none border-t p-4">
               <a href="/dashboard/settings">
                 <Avatar className="min-h-10 min-w-10">
-                  <AvatarImage src={props.userDetails?.avatar_url ?? ""} />
+                  <AvatarImage src={session?.data?.user.image ?? ""} />
                   <AvatarFallback className="font-bold">US</AvatarFallback>
                 </Avatar>
               </a>
               <a href="/dashboard/settings">
                 <p className="ml-2 mr-3 flex items-center text-sm font-semibold leading-none">
-                  {props.userDetails?.full_name
-                    ? props.userDetails?.full_name
+                  {session?.data?.user.name
+                    ? session?.data?.user.name
                     : "User Not Found"}
                 </p>
               </a>
               <Button
                 variant="outline"
                 className="ml-auto flex h-[40px] w-[40px] cursor-pointer items-center justify-center rounded-full p-0 text-center text-sm font-medium"
-                onClick={() => {
+                onClick={async () => {
+                  await signOut();
                   router.push("/");
                 }}
               >
