@@ -12,8 +12,8 @@ import {
 
 export const routes: IRoute[] = [
   {
-    name: "Main Dashboard",
-    path: "/dashboard/main",
+    name: "Dashboard",
+    path: "/dashboard",
     icon: <HiOutlineHome className="-mt-[7px] h-4 w-4 stroke-2 text-inherit" />,
     collapse: false,
   },

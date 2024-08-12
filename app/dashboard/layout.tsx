@@ -4,7 +4,6 @@ import Sidebar from "@/components/sidebar/Sidebar";
 import { usePathname } from "next/navigation";
 import { routes } from "@/components/routes";
 import React from "react";
-import Footer from "@/components/footer/FooterAdmin";
 import Navbar from "@/components/navbar/NavbarAdmin";
 import { getActiveRoute } from "@/utils/navigation";
 
@@ -20,18 +19,13 @@ const Layout = ({
     <div className="flex h-full w-full ">
       <Sidebar routes={routes} open={open} setOpen={() => setOpen(!open)} />
       <div className="h-full w-full ">
-        <main
-          className={`mx-2.5 flex-none transition-all md:pr-2 xl:ml-[328px]`}
-        >
-          <div className="mx-auto min-h-screen p-2 !pt-[90px] md:p-2 md:!pt-[118px]">
-            {children}
-          </div>
+        <main className={`mx-2.5 flex-none transition-all xl:ml-[316px]`}>
           <Navbar
             onOpen={() => setOpen(!open)}
             brandText={getActiveRoute(routes, pathname)}
           />
-          <div className="p-3">
-            <Footer />
+          <div className="min-h-screen overflow-y-auto p-2 pt-[80px] md:pt-[100px]">
+            {children}
           </div>
         </main>
       </div>
