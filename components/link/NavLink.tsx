@@ -2,6 +2,13 @@
 
 import NextLink, { LinkProps as NextLinkProps } from "next/link";
 import { CSSProperties, PropsWithChildren, useMemo } from "react";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "../ui/accordion";
+import { cn } from "@/lib/utils";
 
 export type NavLinkProps = NextLinkProps &
   PropsWithChildren & {
@@ -9,7 +16,14 @@ export type NavLinkProps = NextLinkProps &
     borderRadius?: string;
   };
 
-function NavLink({ className, children, styles, borderRadius, ...props }: any) {
+function NavLink({
+  className,
+  children,
+  styles,
+  borderRadius,
+  childNavLinks,
+  ...props
+}: any) {
   const memoizedStyles = useMemo(
     () => ({
       borderRadius: borderRadius || 0,
@@ -18,11 +32,26 @@ function NavLink({ className, children, styles, borderRadius, ...props }: any) {
     [borderRadius, styles],
   );
 
-  return (
-    <NextLink className={`${className}`} style={memoizedStyles} {...props}>
-      {children}
-    </NextLink>
-  );
+  if (!childNavLinks) {
+    return (
+      <NextLink className={`${className}`} style={memoizedStyles} {...props}>
+        {children}
+      </NextLink>
+    );
+  } else {
+    return (
+      <Accordion type="single" collapsible className={cn(className, "w-full")}>
+        <AccordionItem value={props.href} className="border-none">
+          <AccordionTrigger className="p-0 hover:no-underline">
+            {children}
+          </AccordionTrigger>
+          <AccordionContent className="pt-6 pb-0">
+            {childNavLinks}
+          </AccordionContent>
+        </AccordionItem>
+      </Accordion>
+    );
+  }
 }
 
 export default NavLink;

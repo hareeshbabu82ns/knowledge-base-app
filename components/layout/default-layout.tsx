@@ -7,7 +7,7 @@ import React from "react";
 import Navbar from "@/components/navbar/NavbarAdmin";
 import { getActiveRoute } from "@/utils/navigation";
 
-const Layout = ({
+const WithDefaultLayout = ({
   children,
 }: Readonly<{
   children: React.ReactNode;
@@ -33,4 +33,4 @@ const Layout = ({
   );
 };
 
-export default Layout;
+export default WithDefaultLayout;

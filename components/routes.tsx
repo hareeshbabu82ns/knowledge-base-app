@@ -18,6 +18,23 @@ export const routes: IRoute[] = [
     collapse: false,
   },
   {
+    name: "Expenses",
+    path: "/expenses",
+    icon: <HiOutlineHome className="-mt-[7px] h-4 w-4 stroke-2 text-inherit" />,
+    collapse: false,
+    items: [
+      {
+        name: "Upload",
+        layout: "/expenses",
+        path: "/upload",
+        icon: (
+          <HiOutlineHome className="-mt-[7px] h-4 w-4 stroke-2 text-inherit" />
+        ),
+        collapse: false,
+      },
+    ],
+  },
+  {
     name: "AI Chat",
     path: "/dashboard/ai-chat",
     icon: (
