@@ -71,5 +71,7 @@ git push origin v1.0.0
 # push multiple tags
 git tag -a v1.0.0 -m "tag instructions"
 git tag -a v1 -m "tag instructions"
-git p
+git push origin --tags
+
+pnpm run release:patch # pushes to origin and tags together
 ```
