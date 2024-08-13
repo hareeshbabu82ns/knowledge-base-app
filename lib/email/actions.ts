@@ -4,7 +4,6 @@ import { UserRole } from "@prisma/client";
 import { db } from "../db";
 import { Resend } from "resend";
 
-const resend = new Resend(process.env.AUTH_RESEND_KEY);
 export async function sendMail({
   to,
   subject,
@@ -33,7 +32,8 @@ export async function sendMail({
   if (process.env.NODE_ENV === "development") {
     return;
   }
-
+  
+  const resend = new Resend(process.env.AUTH_RESEND_KEY);
   const data = await resend.emails.send({
     from: `Calgary Srithevi Karumariamman Temple <${process.env.SMTP_FROM}>`,
     to: [...to],
