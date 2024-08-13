@@ -56,3 +56,20 @@ npm run dev
   - Bg Type: Gradient
   - Gradient: #497A6E, #36574E, 45deg
   - fav icon: Circle
+
+### commit with tags
+
+```sh
+git add .
+git commit -m "update instructions"
+git push origin main
+
+# push single tag
+git tag -a v1.0.0 -m "tag instructions"
+git push origin v1.0.0
+
+# push multiple tags
+git tag -a v1.0.0 -m "tag instructions"
+git tag -a v1 -m "tag instructions"
+git p
+```
