@@ -2,8 +2,9 @@
 
 import { UserRole } from "@prisma/client";
 import { db } from "../db";
-import { resend } from ".";
+import { Resend } from "resend";
 
+const resend = new Resend(process.env.AUTH_RESEND_KEY);
 export async function sendMail({
   to,
   subject,
