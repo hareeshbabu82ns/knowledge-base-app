@@ -45,7 +45,7 @@ function NavLink({
           <AccordionTrigger className="p-0 hover:no-underline">
             {children}
           </AccordionTrigger>
-          <AccordionContent className="pt-6 pb-0">
+          <AccordionContent className="pb-0 pt-6">
             {childNavLinks}
           </AccordionContent>
         </AccordionItem>

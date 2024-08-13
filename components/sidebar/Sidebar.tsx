@@ -30,6 +30,7 @@ function Sidebar(props: SidebarProps) {
   // SIDEBAR
   return (
     <div
+      // eslint-disable-next-line tailwindcss/enforces-negative-arbitrary-values
       className={`lg:!z-99 fixed !z-[99] min-h-full w-[300px] transition-all md:!z-[99] xl:!z-0 ${
         props.variant === "auth" ? "xl:hidden" : "xl:block"
       } ${props.open ? "" : "-translate-x-[120%] xl:translate-x-[unset]"}`}
@@ -38,20 +39,20 @@ function Sidebar(props: SidebarProps) {
         <div className="flex h-full flex-col justify-between">
           <div>
             <span
-              className="absolute top-4 right-4 block cursor-pointer xl:hidden"
+              className="absolute right-4 top-4 block cursor-pointer xl:hidden"
               onClick={() => props.setOpen(false)}
             >
               <HiX className="size-5" />
             </span>
             <div className={`mt-8 flex items-center justify-center`}>
-              <div className="me-2 flex h-[40px] w-[40px] items-center justify-center rounded-md bg-zinc-950 text-white dark:bg-white dark:text-zinc-950">
-                <HiBolt className="h-5 w-5" />
+              <div className="me-2 flex size-[40px] items-center justify-center rounded-md bg-zinc-950 text-white dark:bg-white dark:text-zinc-950">
+                <HiBolt className="size-5" />
               </div>
               <h5 className="me-2 text-2xl font-bold leading-5 text-zinc-950 dark:text-white">
                 Knowledge Base
               </h5>
             </div>
-            <div className="mb-8 mt-8 h-px bg-zinc-200 dark:bg-white/10" />
+            <div className="my-8 h-px bg-zinc-200 dark:bg-white/10" />
             {/* Nav item */}
             <ul>
               <Links routes={routes} />
@@ -79,14 +80,14 @@ function Sidebar(props: SidebarProps) {
               </a>
               <Button
                 variant="outline"
-                className="ml-auto flex h-[40px] w-[40px] cursor-pointer items-center justify-center rounded-full p-0 text-center text-sm font-medium"
+                className="ml-auto flex size-[40px] cursor-pointer items-center justify-center rounded-full p-0 text-center text-sm font-medium"
                 onClick={async () => {
                   await signOut();
                   router.push("/");
                 }}
               >
                 <HiOutlineArrowRightOnRectangle
-                  className="h-4 w-4 stroke-2"
+                  className="size-4 stroke-2"
                   width="16px"
                   height="16px"
                   color="inherit"

@@ -117,11 +117,11 @@ export default function LoginForm() {
 
           {/* divider */}
           <div className="flex w-full items-center py-4">
-            <div className="h-px flex-1 bg-primary" />
-            <span className="px-2 text-sm text-primary">
+            <div className="bg-primary h-px flex-1" />
+            <span className="text-primary px-2 text-sm">
               <Icons.login className="size-4" />
             </span>
-            <div className="h-px flex-1 bg-primary" />
+            <div className="bg-primary h-px flex-1" />
           </div>
 
           <Button

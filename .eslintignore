@@ -5,3 +5,4 @@ node_modules
 *.esm.js
 data
 legacy-code/*
+components/ui/*

@@ -1,3 +1,4 @@
+/* eslint-disable tailwindcss/enforces-negative-arbitrary-values */
 import { IRoute } from "@/types/types";
 import {
   HiOutlineHome,
@@ -14,13 +15,13 @@ export const routes: IRoute[] = [
   {
     name: "Dashboard",
     path: "/dashboard",
-    icon: <HiOutlineHome className="-mt-[7px] h-4 w-4 stroke-2 text-inherit" />,
+    icon: <HiOutlineHome className="-mt-[7px] size-4 stroke-2 text-inherit" />,
     collapse: false,
   },
   {
     name: "Expenses",
     path: "/expenses",
-    icon: <HiOutlineHome className="-mt-[7px] h-4 w-4 stroke-2 text-inherit" />,
+    icon: <HiOutlineHome className="-mt-[7px] size-4 stroke-2 text-inherit" />,
     collapse: false,
     items: [
       {
@@ -28,7 +29,7 @@ export const routes: IRoute[] = [
         layout: "/expenses",
         path: "/upload",
         icon: (
-          <HiOutlineHome className="-mt-[7px] h-4 w-4 stroke-2 text-inherit" />
+          <HiOutlineHome className="-mt-[7px] size-4 stroke-2 text-inherit" />
         ),
         collapse: false,
       },
@@ -38,7 +39,7 @@ export const routes: IRoute[] = [
     name: "AI Chat",
     path: "/dashboard/ai-chat",
     icon: (
-      <HiOutlineCpuChip className="-mt-[7px] h-4 w-4 stroke-2 text-inherit" />
+      <HiOutlineCpuChip className="-mt-[7px] size-4 stroke-2 text-inherit" />
     ),
     collapse: false,
   },
@@ -46,7 +47,7 @@ export const routes: IRoute[] = [
     name: "AI Generator",
     path: "/dashboard/ai-generator",
     icon: (
-      <HiOutlineDocumentText className="-mt-[7px] h-4 w-4 stroke-2 text-inherit" />
+      <HiOutlineDocumentText className="-mt-[7px] size-4 stroke-2 text-inherit" />
     ),
     collapse: false,
     disabled: true,
@@ -54,16 +55,14 @@ export const routes: IRoute[] = [
   {
     name: "AI Assistant",
     path: "/dashboard/ai-assistant",
-    icon: <HiOutlineUser className="-mt-[7px] h-4 w-4 stroke-2 text-inherit" />,
+    icon: <HiOutlineUser className="-mt-[7px] size-4 stroke-2 text-inherit" />,
     collapse: false,
     disabled: true,
   },
   {
     name: "Users List",
     path: "/dashboard/users-list",
-    icon: (
-      <HiOutlineUsers className="-mt-[7px] h-4 w-4 stroke-2 text-inherit" />
-    ),
+    icon: <HiOutlineUsers className="-mt-[7px] size-4 stroke-2 text-inherit" />,
     collapse: false,
     disabled: true,
   },
@@ -71,7 +70,7 @@ export const routes: IRoute[] = [
     name: "Profile Settings",
     path: "/dashboard/settings",
     icon: (
-      <HiOutlineCog8Tooth className="-mt-[7px] h-4 w-4 stroke-2 text-inherit" />
+      <HiOutlineCog8Tooth className="-mt-[7px] size-4 stroke-2 text-inherit" />
     ),
     collapse: false,
     disabled: true,
@@ -80,7 +79,7 @@ export const routes: IRoute[] = [
     name: "Subscription",
     path: "/dashboard/subscription",
     icon: (
-      <HiOutlineCreditCard className="-mt-[7px] h-4 w-4 stroke-2 text-inherit" />
+      <HiOutlineCreditCard className="-mt-[7px] size-4 stroke-2 text-inherit" />
     ),
     collapse: false,
     disabled: true,
@@ -89,7 +88,7 @@ export const routes: IRoute[] = [
     name: "Landing Page",
     path: "/home",
     icon: (
-      <HiOutlineDocumentText className="-mt-[7px] h-4 w-4 stroke-2 text-inherit" />
+      <HiOutlineDocumentText className="-mt-[7px] size-4 stroke-2 text-inherit" />
     ),
     collapse: false,
     disabled: true,
@@ -98,7 +97,7 @@ export const routes: IRoute[] = [
     name: "Pricing Page",
     path: "/pricing",
     icon: (
-      <HiOutlineCurrencyDollar className="-mt-[7px] h-4 w-4 stroke-2 text-inherit" />
+      <HiOutlineCurrencyDollar className="-mt-[7px] size-4 stroke-2 text-inherit" />
     ),
     collapse: false,
     disabled: true,

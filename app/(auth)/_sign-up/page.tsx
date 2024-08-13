@@ -1,18 +1,18 @@
-"use client"
-import { LockKeyholeIcon } from "lucide-react"
-import Link from "next/link"
-import { signIn } from "next-auth/react"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Button } from "@/components/ui/button"
+"use client";
+import { LockKeyholeIcon } from "lucide-react";
+import Link from "next/link";
+import { signIn } from "next-auth/react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 export default function SignupForm() {
   return (
@@ -53,11 +53,11 @@ export default function SignupForm() {
           </Button>
           {/* divider */}
           <div className="flex w-full items-center py-4">
-            <div className="h-px flex-1 bg-primary" />
-            <span className="px-2 text-sm text-primary">
+            <div className="bg-primary h-px flex-1" />
+            <span className="text-primary px-2 text-sm">
               <LockKeyholeIcon className="size-4" />
             </span>
-            <div className="h-px flex-1 bg-primary" />
+            <div className="bg-primary h-px flex-1" />
           </div>
           <Button
             variant="outline"
@@ -75,5 +75,5 @@ export default function SignupForm() {
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }

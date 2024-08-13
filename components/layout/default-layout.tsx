@@ -16,9 +16,9 @@ const WithDefaultLayout = ({
   const [open, setOpen] = React.useState(false);
 
   return (
-    <div className="flex h-full w-full ">
+    <div className="flex size-full ">
       <Sidebar routes={routes} open={open} setOpen={() => setOpen(!open)} />
-      <div className="h-full w-full ">
+      <div className="size-full ">
         <main className={`mx-2.5 flex-none transition-all xl:ml-[316px]`}>
           <Navbar
             onOpen={() => setOpen(!open)}
