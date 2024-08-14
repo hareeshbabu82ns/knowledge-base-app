@@ -40,13 +40,18 @@ function NavLink({
     );
   } else {
     return (
-      <Accordion type="single" collapsible className={cn(className, "w-full")}>
+      <Accordion
+        type="single"
+        defaultValue={props.href}
+        collapsible
+        className={cn(className, "w-full")}
+      >
         <AccordionItem value={props.href} className="border-none">
           <AccordionTrigger className="p-0 hover:no-underline">
             {children}
           </AccordionTrigger>
-          <AccordionContent className="pb-0 pt-6">
-            {childNavLinks}
+          <AccordionContent className="pb-0 pt-5">
+            <ul className="ml-3">{childNavLinks}</ul>
           </AccordionContent>
         </AccordionItem>
       </Accordion>

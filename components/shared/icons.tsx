@@ -51,6 +51,11 @@ import {
   X,
 } from "lucide-react";
 
+// https://react-icons.github.io/react-icons/
+import { FaMoneyBillTrendUp } from "react-icons/fa6";
+import { RiMoneyRupeeCircleLine } from "react-icons/ri";
+import { MdOutlineAccountBalance } from "react-icons/md";
+
 export type Icon = typeof LucideIcon;
 
 export const Icons = {
@@ -102,6 +107,11 @@ export const Icons = {
   logout: LogOut,
   login: LockKeyholeIcon,
   upload: Upload,
+
+  expenses: FaMoneyBillTrendUp,
+  accounts: MdOutlineAccountBalance,
+  rupee: RiMoneyRupeeCircleLine,
+
   sidebarMenu: ({ ...props }: LucideProps) => (
     <svg
       aria-hidden="true"

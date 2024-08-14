@@ -52,9 +52,8 @@ function Sidebar(props: SidebarProps) {
                 Knowledge Base
               </h5>
             </div>
-            <div className="my-8 h-px bg-zinc-200 dark:bg-white/10" />
             {/* Nav item */}
-            <ul>
+            <ul className="mt-8">
               <Links routes={routes} />
             </ul>
           </div>
