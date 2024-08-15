@@ -10,6 +10,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { cn } from "@/lib/utils";
 import {
   PaginationState,
   createColumnHelper,
@@ -101,7 +102,7 @@ function AccountsTable(props: { tableData: RowObj[] }) {
   const [{ pageIndex, pageSize }, setPagination] =
     React.useState<PaginationState>({
       pageIndex: 0,
-      pageSize: 11,
+      pageSize: 10,
     });
 
   const pagination = React.useMemo(
@@ -135,26 +136,19 @@ function AccountsTable(props: { tableData: RowObj[] }) {
   });
 
   return (
-    <Card
-      className={
-        "size-full border-zinc-200 p-0 sm:overflow-auto dark:border-zinc-800"
-      }
-    >
+    <Card className={"size-full p-0 sm:overflow-auto"}>
       <div className="overflow-x-scroll xl:overflow-x-hidden">
         <Table className="w-full">
           {table.getHeaderGroups().map((headerGroup: any) => (
-            <TableHeader
-              key={headerGroup.id}
-              className="border-b border-zinc-200 p-6 dark:border-zinc-800"
-            >
-              <tr className="dark:border-zinc-800">
+            <TableHeader key={headerGroup.id} className="border-b p-6 ">
+              <tr className="">
                 {headerGroup.headers.map((header: any) => {
                   return (
                     <TableHead
                       key={header.id}
                       colSpan={header.colSpan}
                       onClick={header.column.getToggleSortingHandler()}
-                      className="cursor-pointer border-zinc-200 pl-5 pr-4 pt-2 text-start dark:border-zinc-800"
+                      className="cursor-pointer pl-5 pr-4 pt-2 text-start"
                     >
                       {flexRender(
                         header.column.columnDef.header,
@@ -171,31 +165,25 @@ function AccountsTable(props: { tableData: RowObj[] }) {
             </TableHeader>
           ))}
           <TableBody>
-            {table
-              .getRowModel()
-              .rows.slice(0, 7)
-              .map((row: any) => {
-                return (
-                  <TableRow
-                    key={row.id}
-                    className="px-6 dark:hover:bg-gray-900"
-                  >
-                    {row.getVisibleCells().map((cell: any) => {
-                      return (
-                        <TableCell
-                          key={cell.id}
-                          className="w-max border-b border-zinc-200 py-5 pl-5 pr-4 dark:border-white/10"
-                        >
-                          {flexRender(
-                            cell.column.columnDef.cell,
-                            cell.getContext(),
-                          )}
-                        </TableCell>
-                      );
-                    })}
-                  </TableRow>
-                );
-              })}
+            {table.getRowModel().rows.map((row: any) => {
+              return (
+                <TableRow key={row.id} className="px-6">
+                  {row.getVisibleCells().map((cell: any) => {
+                    return (
+                      <TableCell
+                        key={cell.id}
+                        className="w-max border-b py-5 pl-5 pr-4 hover:bg-white/5"
+                      >
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext(),
+                        )}
+                      </TableCell>
+                    );
+                  })}
+                </TableRow>
+              );
+            })}
           </TableBody>
         </Table>
         {/* pagination */}
@@ -203,7 +191,7 @@ function AccountsTable(props: { tableData: RowObj[] }) {
           {/* left side */}
           <div className="flex items-center gap-3">
             <p className="text-sm font-medium text-zinc-500 dark:text-zinc-400">
-              Showing 6 rows per page
+              Showing {pageSize} rows per page
             </p>
           </div>
           {/* right side */}
@@ -216,21 +204,24 @@ function AccountsTable(props: { tableData: RowObj[] }) {
               <MdChevronLeft />
             </Button>
 
-            {/* {createPages(table.getPageCount()).map((pageNumber, index) => {
-       return (
-        <Button
-         className={`font-mediumflex p-0 items-center justify-center rounded-lg p-2 text-sm transition duration-200 ${
-          pageNumber === pageIndex + 1
-           ? ''
-           : 'border border-zinc-200 bg-[transparent] dark:border-zinc-800 dark:text-white'
-         }`}
-         onClick={() => table.setPageIndex(pageNumber - 1)}
-         key={index}
-        >
-         {pageNumber}
-        </Button>
-       );
-      })} */}
+            {createPages(table.getPageCount()).map((pageNumber, index) => {
+              return (
+                <Button
+                  className={cn(
+                    "flex items-center justify-center rounded-lg p-2 font-medium transition duration-200",
+                    pageNumber === pageIndex + 1
+                      ? "text-lg font-bold"
+                      : "text-sm",
+                  )}
+                  variant="ghost"
+                  disabled={pageNumber === pageIndex + 1}
+                  onClick={() => table.setPageIndex(pageNumber - 1)}
+                  key={index}
+                >
+                  {pageNumber}
+                </Button>
+              );
+            })}
             <Button
               onClick={() => table.nextPage()}
               disabled={!table.getCanNextPage()}

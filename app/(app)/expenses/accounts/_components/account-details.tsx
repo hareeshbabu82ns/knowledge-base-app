@@ -1,9 +1,12 @@
+"use client";
+
 import { ExpenseAccount } from "@prisma/client";
+import { AccountForm } from "./account-form";
 
 const AccountDetails = ({ account }: { account: ExpenseAccount }) => {
   return (
     <div>
-      <pre>{JSON.stringify(account, null, "\n")}</pre>
+      <AccountForm id={account.id} data={account} type="update" />
     </div>
   );
 };

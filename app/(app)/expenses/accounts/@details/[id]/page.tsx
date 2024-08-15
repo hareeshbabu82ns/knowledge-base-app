@@ -8,11 +8,11 @@ const Page = async ({ params: { id } }: { params: { id: string } }) => {
 
     return (
       <div>
-        Account Details
         <AccountDetails account={item} />
       </div>
     );
   } catch (error) {
+    console.log(error);
     return <div>Account not found with id: {decodeURIComponent(id)}</div>;
   }
 };

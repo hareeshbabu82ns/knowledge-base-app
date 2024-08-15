@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import "react-datepicker/dist/react-datepicker.css";
 import "./globals.css";
 import { fontSans } from "@/lib/fonts";
 import { cn } from "@/lib/utils";
