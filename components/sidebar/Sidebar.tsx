@@ -64,13 +64,13 @@ function Sidebar(props: SidebarProps) {
             </div> */}
             {/* Sidebar profile info */}
             <div className="mt-5 flex w-full items-center rounded-none border-t p-4">
-              <a href="/dashboard/settings">
+              <a href="/settings">
                 <Avatar className="min-h-10 min-w-10">
                   <AvatarImage src={session?.data?.user.image ?? ""} />
                   <AvatarFallback className="font-bold">US</AvatarFallback>
                 </Avatar>
               </a>
-              <a href="/dashboard/settings">
+              <a href="/settings">
                 <p className="ml-2 mr-3 flex items-center text-sm font-semibold leading-none">
                   {session?.data?.user.name
                     ? session?.data?.user.name

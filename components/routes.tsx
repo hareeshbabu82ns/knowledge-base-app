@@ -69,11 +69,10 @@ export const routes: IRoute[] = [
     disabled: true,
   },
   {
-    name: "Profile Settings",
-    path: "/dashboard/settings",
+    name: "Settings",
+    path: "/settings",
     icon: <HiOutlineCog8Tooth className="size-4 stroke-2 text-inherit" />,
     collapse: false,
-    disabled: true,
   },
   {
     name: "Subscription",
