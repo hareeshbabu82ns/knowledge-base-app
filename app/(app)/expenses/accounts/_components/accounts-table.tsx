@@ -84,19 +84,19 @@ function AccountsTable(props: { tableData: RowObj[] }) {
         </div>
       ),
     }),
-    columnHelper.accessor("updatedAt", {
-      id: "updatedAt",
-      header: () => (
-        <p className="text-xs font-semibold text-zinc-500 dark:text-zinc-400">
-          Updated At
-        </p>
-      ),
-      cell: (info: any) => (
-        <p className="text-sm font-medium text-zinc-950 dark:text-white">
-          {info.getValue().toLocaleDateString()}
-        </p>
-      ),
-    }),
+    // columnHelper.accessor("updatedAt", {
+    //   id: "updatedAt",
+    //   header: () => (
+    //     <p className="text-xs font-semibold text-zinc-500 dark:text-zinc-400">
+    //       Updated At
+    //     </p>
+    //   ),
+    //   cell: (info: any) => (
+    //     <p className="text-sm font-medium text-zinc-950 dark:text-white">
+    //       {info.getValue().toLocaleDateString()}
+    //     </p>
+    //   ),
+    // }),
   ]; // eslint-disable-next-line
   const [data, setData] = React.useState(() => [...defaultData]);
   const [{ pageIndex, pageSize }, setPagination] =

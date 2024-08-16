@@ -1,6 +1,11 @@
+"use client";
+
 import React from "react";
+import { useQuery } from "@tanstack/react-query";
 import { getAccountDetails } from "../../actions";
 import AccountDetails from "../../_components/account-details";
+import { useParams } from "next/navigation";
+import { toast } from "sonner";
 
 const defaultAccount = {
   id: "",
@@ -13,22 +18,27 @@ const defaultAccount = {
   updatedAt: new Date(),
 };
 
-const Page = async ({ params: { id } }: { params: { id: string } }) => {
-  try {
-    const item =
-      id === "new"
-        ? defaultAccount
-        : await getAccountDetails(decodeURIComponent(id));
+function Page() {
+  const params = useParams();
+  const id = decodeURIComponent(params.id as string);
+  const { isPending, isError, data, error } = useQuery({
+    queryKey: ["account", id],
+    queryFn: async () => await getAccountDetails(id),
+    enabled: id !== "new",
+  });
 
-    return (
-      <div>
-        <AccountDetails account={item} />
-      </div>
-    );
-  } catch (error) {
-    console.log(error);
-    return <div>Account not found with id: {decodeURIComponent(id)}</div>;
+  if (id !== "new" && isPending) {
+    return <span>Loading...</span>;
   }
-};
+
+  if (isError) {
+    toast.error(error.message, { id: `${id}-error` });
+    // return <span>Error: {error.message}</span>;
+    return null;
+  }
+
+  // We can assume by this point that `isSuccess === true`
+  return <AccountDetails account={id === "new" ? defaultAccount : data!} />;
+}
 
 export default Page;

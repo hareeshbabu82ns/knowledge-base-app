@@ -1,6 +1,6 @@
 "use client";
 
-import { ExpenseAccount } from "@prisma/client";
+import { ExpenseAccount, Prisma } from "@prisma/client";
 import { AccountForm } from "./account-form";
 
 const AccountDetails = ({ account }: { account: ExpenseAccount }) => {

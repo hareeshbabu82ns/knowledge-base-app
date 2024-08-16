@@ -19,6 +19,9 @@ import SubmitButton from "@/components/SubmitButton";
 import CustomFormField, { FormFieldType } from "@/components/CustomFormField";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { accountTypes } from "@/variables/expenses";
+import { SelectItem } from "@/components/ui/select";
 
 interface AccountFormProps {
   id: ExpenseAccount["id"];
@@ -30,6 +33,7 @@ export const AccountForm = ({ id, data, type }: AccountFormProps) => {
   const router = useRouter();
   const session = useSession();
   const [isLoading, setIsLoading] = useState(false);
+  const queryClient = useQueryClient();
 
   const FormValidation = getExpenseAccountSchema(type);
 
@@ -38,6 +42,7 @@ export const AccountForm = ({ id, data, type }: AccountFormProps) => {
     defaultValues: {
       id: id ? id : "",
       name: data.name ? data.name : "",
+      type: data?.type || "",
       description: data?.description || "",
     },
   });
@@ -46,63 +51,99 @@ export const AccountForm = ({ id, data, type }: AccountFormProps) => {
     formState: { errors },
   } = form;
 
-  const onDelete = async () => {
-    setIsLoading(true);
-    try {
-      if (id) {
-        const deletedData = await deleteAction(id);
-
-        if (deletedData) {
-          router.replace("/expenses/accounts");
-          toast.success("Account deleted successfully");
-        }
-      }
-    } catch (error) {
+  const updateMutation = useMutation({
+    mutationKey: ["account", id],
+    mutationFn: async ({
+      id,
+      values,
+    }: {
+      id: ExpenseAccount["id"];
+      values: z.infer<typeof FormValidation>;
+    }) => {
+      const updateData = {
+        name: values.name,
+        description: values.description,
+      } as Prisma.ExpenseAccountUpdateInput;
+      const updatedData = await updateAction(id, updateData);
+      return updatedData;
+    },
+    onMutate: async () => {
+      setIsLoading(true);
+    },
+    onSuccess: (updatedData) => {
+      queryClient.invalidateQueries({ queryKey: ["accounts", "account", id] });
+      form.reset(updatedData);
+      toast.success("Account updated successfully");
+    },
+    onError: (error) => {
       console.log(error);
       toast.error("An error occurred. Please try again.");
-    }
-    setIsLoading(false);
-  };
+    },
+    onSettled: () => {
+      setIsLoading(false);
+    },
+  });
+  const createMutation = useMutation({
+    mutationFn: async (values: z.infer<typeof FormValidation>) => {
+      const createData = {
+        id: Buffer.from(values.name).toString("base64"),
+        name: values.name,
+        description: values.description,
+        type: "Saving Account",
+        config: {},
+        user: { connect: { id: session.data?.user.id } },
+      } as Prisma.ExpenseAccountCreateInput;
+      const createdData = await createAction(createData);
+      return createdData;
+    },
+    onMutate: async () => {
+      setIsLoading(true);
+    },
+    onSuccess: (createdData) => {
+      queryClient.invalidateQueries({ queryKey: ["accounts"] });
+      form.reset();
+      router.push(`/expenses/accounts/${createdData.id}`);
+      router.refresh();
+      toast.success("Account created successfully");
+    },
+    onError: (error) => {
+      console.log(error);
+      toast.error("An error occurred. Please try again.");
+    },
+    onSettled: () => {
+      setIsLoading(false);
+    },
+  });
+  const deleteMutation = useMutation({
+    mutationKey: ["accounts"],
+    mutationFn: async (id: ExpenseAccount["id"]) => {
+      const deletedData = await deleteAction(id);
+      return deletedData;
+    },
+    onMutate: async () => {
+      setIsLoading(true);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["accounts"] });
+      router.replace("/expenses/accounts");
+      router.refresh();
+      toast.success("Account deleted successfully");
+    },
+    onError: (error) => {
+      console.log(error);
+      toast.error("An error occurred. Please try again.");
+    },
+    onSettled: () => {
+      setIsLoading(false);
+    },
+  });
 
   const onSubmit = async (values: z.infer<typeof FormValidation>) => {
-    setIsLoading(true);
-
-    try {
-      if (type === "update" && id) {
-        const updateData = {
-          name: values.name,
-          description: values.description,
-        } as Prisma.ExpenseAccountUpdateInput;
-
-        const updatedData = await updateAction(id, updateData);
-
-        if (updatedData) {
-          form.reset(updatedData);
-          toast.success("Account updated successfully");
-        }
-      } else {
-        const createData = {
-          id: Buffer.from(values.name).toString("base64"),
-          name: values.name,
-          description: values.description,
-          type: "Saving Account",
-          config: {},
-          user: { connect: { id: session.data?.user.id } },
-        } as Prisma.ExpenseAccountCreateInput;
-
-        const createdData = await createAction(createData);
-
-        if (createdData) {
-          form.reset();
-          router.push(`/expenses/accounts/${createdData.id}`);
-          toast.success("Account created successfully");
-        }
-      }
-    } catch (error) {
-      console.log(error);
-      toast.error("An error occurred. Please try again.");
+    if (type === "update" && id) {
+      updateMutation.mutate({ id, values });
+    } else {
+      createMutation.mutate(values);
     }
-    setIsLoading(false);
   };
 
   let buttonLabel;
@@ -143,6 +184,22 @@ export const AccountForm = ({ id, data, type }: AccountFormProps) => {
           />
 
           <CustomFormField
+            fieldType={FormFieldType.SELECT}
+            control={form.control}
+            name="type"
+            label="Type"
+            placeholder="Select account type"
+          >
+            {accountTypes.map((account, i) => (
+              <SelectItem key={account.name + i} value={account.name}>
+                <div className="flex cursor-pointer items-center gap-2">
+                  <p>{account.name}</p>
+                </div>
+              </SelectItem>
+            ))}
+          </CustomFormField>
+
+          <CustomFormField
             fieldType={FormFieldType.TEXTAREA}
             control={form.control}
             name="description"
@@ -162,7 +219,7 @@ export const AccountForm = ({ id, data, type }: AccountFormProps) => {
           <Button
             variant="destructive"
             type="button"
-            onClick={onDelete}
+            onClick={() => deleteMutation.mutate(id)}
             disabled={type === "create" || isLoading}
           >
             Delete

@@ -1,13 +1,5 @@
-import AccountsTable from "../_components/accounts-table";
-import { fetchAccounts } from "../actions";
+"use client";
 
-async function Page() {
-  const accounts = await fetchAccounts();
-  return (
-    <div>
-      <AccountsTable tableData={accounts} />
-    </div>
-  );
-}
+import Page from "./page";
 
 export default Page;
