@@ -12,6 +12,7 @@ import {
   Clock,
   Command,
   CreditCard,
+  Download,
   Mail as eMail,
   File,
   FileText,
@@ -107,6 +108,7 @@ export const Icons = {
   logout: LogOut,
   login: LockKeyholeIcon,
   upload: Upload,
+  download: Download,
 
   expenses: FaMoneyBillTrendUp,
   accounts: MdOutlineAccountBalance,

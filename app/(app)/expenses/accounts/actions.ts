@@ -8,7 +8,7 @@ export const fetchAccounts = async () => {
   return accounts;
 };
 
-export const getAccountDetails = async (id: string) => {
+export const getAccountDetails = async (id: ExpenseAccount["id"]) => {
   const dbAccount = await db.expenseAccount.findUnique({ where: { id } });
   if (!dbAccount) throw new Error("Account not found with " + id);
   return dbAccount;
@@ -26,5 +26,11 @@ export const updateAccount = async (
 export const createAccount = async (data: Prisma.ExpenseAccountCreateInput) => {
   const dbAccount = await db.expenseAccount.create({ data });
   if (!dbAccount) throw new Error("Account not created");
+  return dbAccount;
+};
+
+export const deleteAccount = async (id: ExpenseAccount["id"]) => {
+  const dbAccount = await db.expenseAccount.delete({ where: { id } });
+  if (!dbAccount) throw new Error("Account not deleted");
   return dbAccount;
 };

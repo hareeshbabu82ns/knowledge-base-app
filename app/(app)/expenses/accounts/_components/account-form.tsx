@@ -11,12 +11,14 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import {
   createAccount as createAction,
   updateAccount as updateAction,
+  deleteAccount as deleteAction,
 } from "../actions";
 import { useSession } from "next-auth/react";
 import { Form } from "@/components/ui/form";
 import SubmitButton from "@/components/SubmitButton";
 import CustomFormField, { FormFieldType } from "@/components/CustomFormField";
 import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
 
 interface AccountFormProps {
   id: ExpenseAccount["id"];
@@ -40,11 +42,29 @@ export const AccountForm = ({ id, data, type }: AccountFormProps) => {
     },
   });
 
-  const { formState } = form;
-  console.log(formState);
+  const {
+    formState: { errors },
+  } = form;
+
+  const onDelete = async () => {
+    setIsLoading(true);
+    try {
+      if (id) {
+        const deletedData = await deleteAction(id);
+
+        if (deletedData) {
+          router.replace("/expenses/accounts");
+          toast.success("Account deleted successfully");
+        }
+      }
+    } catch (error) {
+      console.log(error);
+      toast.error("An error occurred. Please try again.");
+    }
+    setIsLoading(false);
+  };
 
   const onSubmit = async (values: z.infer<typeof FormValidation>) => {
-    console.log(values);
     setIsLoading(true);
 
     try {
@@ -57,7 +77,8 @@ export const AccountForm = ({ id, data, type }: AccountFormProps) => {
         const updatedData = await updateAction(id, updateData);
 
         if (updatedData) {
-          form.reset();
+          form.reset(updatedData);
+          toast.success("Account updated successfully");
         }
       } else {
         const createData = {
@@ -74,10 +95,12 @@ export const AccountForm = ({ id, data, type }: AccountFormProps) => {
         if (createdData) {
           form.reset();
           router.push(`/expenses/accounts/${createdData.id}`);
+          toast.success("Account created successfully");
         }
       }
     } catch (error) {
       console.log(error);
+      toast.error("An error occurred. Please try again.");
     }
     setIsLoading(false);
   };
@@ -127,9 +150,25 @@ export const AccountForm = ({ id, data, type }: AccountFormProps) => {
           />
         </div>
 
-        <SubmitButton isLoading={isLoading} className="w-full">
-          {buttonLabel}
-        </SubmitButton>
+        <div className="flex flex-row gap-2">
+          <Button
+            variant="outline"
+            type="button"
+            onClick={() => form.reset()}
+            disabled={isLoading}
+          >
+            Reset
+          </Button>
+          <Button
+            variant="destructive"
+            type="button"
+            onClick={onDelete}
+            disabled={type === "create" || isLoading}
+          >
+            Delete
+          </Button>
+          <SubmitButton isLoading={isLoading}>{buttonLabel}</SubmitButton>
+        </div>
       </form>
     </Form>
   );

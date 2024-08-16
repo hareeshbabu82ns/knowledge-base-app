@@ -1,5 +1,7 @@
-const Page = () => {
-  return <div>SettingsPage</div>;
-};
+"use client";
 
-export default Page;
+import AppearanceSettings from "./_components/appearance";
+
+export default function Page() {
+  return <AppearanceSettings />;
+}

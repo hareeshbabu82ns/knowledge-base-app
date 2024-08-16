@@ -172,7 +172,7 @@ function AccountsTable(props: { tableData: RowObj[] }) {
                     return (
                       <TableCell
                         key={cell.id}
-                        className="w-max border-b py-5 pl-5 pr-4 hover:bg-white/5"
+                        className="w-max border-b py-5 pl-5 pr-4 hover:bg-black/5 dark:hover:bg-white/5"
                       >
                         {flexRender(
                           cell.column.columnDef.cell,
@@ -210,7 +210,7 @@ function AccountsTable(props: { tableData: RowObj[] }) {
                   className={cn(
                     "flex items-center justify-center rounded-lg p-2 font-medium transition duration-200",
                     pageNumber === pageIndex + 1
-                      ? "text-lg font-bold"
+                      ? "text-lg font-bold underline"
                       : "text-sm",
                   )}
                   variant="ghost"
