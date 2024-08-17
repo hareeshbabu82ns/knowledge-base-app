@@ -12,6 +12,7 @@ import { HiHomeModern as HiBolt } from "react-icons/hi2";
 import { HiOutlineArrowRightOnRectangle } from "react-icons/hi2";
 import { useSession } from "next-auth/react";
 import { signOut } from "@/lib/auth/actions";
+import { Icons } from "../shared/icons";
 
 export interface SidebarProps extends PropsWithChildren {
   routes: IRoute[];
@@ -46,7 +47,7 @@ function Sidebar(props: SidebarProps) {
             </span>
             <div className={`mt-8 flex items-center justify-center`}>
               <div className="me-2 flex size-[40px] items-center justify-center rounded-md bg-zinc-950 text-white dark:bg-white dark:text-zinc-950">
-                <HiBolt className="size-5" />
+                <Icons.logo className="size-5" />
               </div>
               <h5 className="me-2 text-2xl font-bold leading-5 text-zinc-950 dark:text-white">
                 Knowledge Base

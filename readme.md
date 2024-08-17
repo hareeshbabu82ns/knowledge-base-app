@@ -41,6 +41,10 @@ npm run dev
 ```
 
 - Config Ref: https://github.com/Blazity/next-enterprise
+- UI Ref
+  - [shadcn-nextjs-boilerplate](https://github.com/horizon-ui/shadcn-nextjs-boilerplate)
+  - [flowbite](https://flowbite.com/docs/components/pagination/)
+  - [React Icons](https://react-icons.github.io/react-icons/search/#q=)
 
 ## Icon Generation
 

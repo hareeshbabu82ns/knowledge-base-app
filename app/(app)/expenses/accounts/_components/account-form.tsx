@@ -22,6 +22,7 @@ import { Button } from "@/components/ui/button";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { accountTypes } from "@/variables/expenses";
 import { SelectItem } from "@/components/ui/select";
+import { Icons } from "@/components/shared/icons";
 
 interface AccountFormProps {
   id: ExpenseAccount["id"];
@@ -158,7 +159,7 @@ export const AccountForm = ({ id, data, type }: AccountFormProps) => {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="flex-1 space-y-6">
-        <section className="mb-12 space-y-4">
+        <section className="mb-5 space-y-4">
           <h1 className="header">
             {type === "create" ? "New Account" : "Update Account"}
           </h1>
@@ -171,33 +172,38 @@ export const AccountForm = ({ id, data, type }: AccountFormProps) => {
             label="ID"
             placeholder="Account ID"
             disabled
+            className="hidden"
           />
         )}
 
         <div className="flex flex-col gap-6">
-          <CustomFormField
-            fieldType={FormFieldType.INPUT}
-            control={form.control}
-            name="name"
-            label="Name"
-            placeholder="Account Name"
-          />
+          <div className="@lg/details:flex-row @lg/details:gap-2 flex flex-col gap-6">
+            <CustomFormField
+              fieldType={FormFieldType.INPUT}
+              control={form.control}
+              name="name"
+              label="Name"
+              required
+              placeholder="Account Name"
+            />
 
-          <CustomFormField
-            fieldType={FormFieldType.SELECT}
-            control={form.control}
-            name="type"
-            label="Type"
-            placeholder="Select account type"
-          >
-            {accountTypes.map((account, i) => (
-              <SelectItem key={account.name + i} value={account.name}>
-                <div className="flex cursor-pointer items-center gap-2">
-                  <p>{account.name}</p>
-                </div>
-              </SelectItem>
-            ))}
-          </CustomFormField>
+            <CustomFormField
+              fieldType={FormFieldType.SELECT}
+              control={form.control}
+              name="type"
+              label="Type"
+              placeholder="Select account type"
+              className="@lg/details:max-w-[200px]"
+            >
+              {accountTypes.map((account, i) => (
+                <SelectItem key={account.name + i} value={account.name}>
+                  <div className="flex cursor-pointer items-center gap-2">
+                    <p>{account.name}</p>
+                  </div>
+                </SelectItem>
+              ))}
+            </CustomFormField>
+          </div>
 
           <CustomFormField
             fieldType={FormFieldType.TEXTAREA}

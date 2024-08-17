@@ -1,6 +1,9 @@
 import type { Config } from "tailwindcss";
 import { fontFamily } from "tailwindcss/defaultTheme";
 
+import animatePlugin from "tailwindcss-animate";
+import containerQueryPlugin from "@tailwindcss/container-queries";
+
 const config = {
   darkMode: ["class"],
   content: [
@@ -101,7 +104,7 @@ const config = {
       },
     },
   },
-  plugins: [require("tailwindcss-animate")],
+  plugins: [animatePlugin, containerQueryPlugin],
 } satisfies Config;
 
 export default config;

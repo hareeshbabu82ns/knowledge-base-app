@@ -32,8 +32,8 @@ interface CustomProps {
   name: string;
   label?: string;
   placeholder?: string;
-  iconSrc?: string;
-  iconAlt?: string;
+  required?: boolean;
+  iconSrc?: React.ReactNode;
   disabled?: boolean;
   dateFormat?: string;
   showTimeSelect?: boolean;
@@ -48,25 +48,26 @@ const RenderInput = ({ field, props }: { field: any; props: CustomProps }) => {
   switch (props.fieldType) {
     case FormFieldType.INPUT:
       return (
-        <div className="border-dark-500 bg-dark-400 flex rounded-md border">
-          {props.iconSrc && (
-            <Image
-              src={props.iconSrc}
-              height={24}
-              width={24}
-              alt={props.iconAlt || "icon"}
-              className="ml-2"
-            />
-          )}
-          <FormControl>
+        <FormControl>
+          <div className="relative">
+            {props.iconSrc && (
+              <div className="pointer-events-none absolute inset-y-0 start-0 flex items-center ps-2">
+                {props.iconSrc}
+              </div>
+            )}
             <Input
               placeholder={props.placeholder}
               {...field}
+              required={props.required}
               disabled={props.disabled}
-              className={props.fieldClassName}
+              className={cn(
+                "peer",
+                props.iconSrc ? "p-2.5 ps-10" : "",
+                props.fieldClassName,
+              )}
             />
-          </FormControl>
-        </div>
+          </div>
+        </FormControl>
       );
     case FormFieldType.TEXTAREA:
       return (
@@ -75,6 +76,7 @@ const RenderInput = ({ field, props }: { field: any; props: CustomProps }) => {
             placeholder={props.placeholder}
             {...field}
             disabled={props.disabled}
+            required={props.required}
             className={props.fieldClassName}
           />
         </FormControl>
@@ -100,6 +102,7 @@ const RenderInput = ({ field, props }: { field: any; props: CustomProps }) => {
             <Checkbox
               id={props.name}
               checked={field.value}
+              required={props.required}
               onCheckedChange={field.onChange}
             />
             <label htmlFor={props.name} className="checkbox-label">
@@ -127,6 +130,7 @@ const RenderInput = ({ field, props }: { field: any; props: CustomProps }) => {
               dateFormat={props.dateFormat ?? "MM/dd/yyyy"}
               wrapperClassName="date-picker"
               disabled={props.disabled}
+              required={props.required}
               className={props.fieldClassName}
             />
           </FormControl>
@@ -135,7 +139,12 @@ const RenderInput = ({ field, props }: { field: any; props: CustomProps }) => {
     case FormFieldType.SELECT:
       return (
         <FormControl>
-          <Select onValueChange={field.onChange} defaultValue={field.value}>
+          <Select
+            onValueChange={field.onChange}
+            defaultValue={field.value}
+            required={props.required}
+            disabled={props.disabled}
+          >
             <FormControl>
               <SelectTrigger>
                 <SelectValue placeholder={props.placeholder} />
@@ -160,11 +169,16 @@ const CustomFormField = (props: CustomProps) => {
       control={control}
       name={name}
       render={({ field }) => (
-        <FormItem className={cn("flex-1", className)}>
-          {props.fieldType !== FormFieldType.CHECKBOX && label && (
-            <FormLabel>{label}</FormLabel>
-          )}
+        <FormItem className={cn("relative flex-1", className)}>
           <RenderInput field={field} props={props} />
+          {props.fieldType !== FormFieldType.CHECKBOX && label && (
+            <FormLabel
+              className="bg-background absolute start-1 top-2 z-10 origin-[0] -translate-y-6 scale-90 px-1 duration-300"
+              htmlFor={name}
+            >
+              {props.required ? `${label} *` : label}
+            </FormLabel>
+          )}
           <FormMessage />
         </FormItem>
       )}

@@ -2,6 +2,9 @@
 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { DataTableColumnHeader } from "@/components/ui/datatable-column-header";
+import { DataTablePagination } from "@/components/ui/datatable-pagination";
+import { DataTableViewOptions } from "@/components/ui/datatable-view-options";
 import {
   Table,
   TableBody,
@@ -58,10 +61,8 @@ function AccountsTable(props: { tableData: RowObj[] }) {
   const columns = [
     columnHelper.accessor("name", {
       id: "name",
-      header: () => (
-        <p className="text-xs font-semibold text-zinc-500 dark:text-zinc-400">
-          Account Name
-        </p>
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Account Name" />
       ),
       cell: (info: any) => (
         <Link href={`/expenses/accounts/${info.row.original.id}`}>
@@ -71,10 +72,8 @@ function AccountsTable(props: { tableData: RowObj[] }) {
     }),
     columnHelper.accessor("type", {
       id: "type",
-      header: () => (
-        <p className="text-xs font-semibold text-zinc-500 dark:text-zinc-400">
-          Type
-        </p>
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Type" />
       ),
       cell: (info: any) => (
         <div className="flex w-full items-center gap-[14px]">
@@ -136,101 +135,61 @@ function AccountsTable(props: { tableData: RowObj[] }) {
   });
 
   return (
-    <Card className={"size-full p-0 sm:overflow-auto"}>
-      <div className="overflow-x-scroll xl:overflow-x-hidden">
-        <Table className="w-full">
-          {table.getHeaderGroups().map((headerGroup: any) => (
-            <TableHeader key={headerGroup.id} className="border-b p-6 ">
-              <tr className="">
-                {headerGroup.headers.map((header: any) => {
+    <Card className={"size-full p-0"}>
+      <div className="flex items-center border-b p-2">
+        <h5 className="ml-2">Accounts</h5>
+        <DataTableViewOptions table={table} />
+      </div>
+      <Table className="w-full">
+        {table.getHeaderGroups().map((headerGroup: any) => (
+          <TableHeader key={headerGroup.id} className="border-b p-6">
+            <tr className="">
+              {headerGroup.headers.map((header: any) => {
+                return (
+                  <TableHead
+                    key={header.id}
+                    colSpan={header.colSpan}
+                    onClick={header.column.getToggleSortingHandler()}
+                    className="cursor-pointer pl-5 pr-4 pt-2 text-start"
+                  >
+                    {flexRender(
+                      header.column.columnDef.header,
+                      header.getContext(),
+                    )}
+                    {{
+                      asc: "",
+                      desc: "",
+                    }[header.column.getIsSorted() as string] ?? null}
+                  </TableHead>
+                );
+              })}
+            </tr>
+          </TableHeader>
+        ))}
+        <TableBody>
+          {table.getRowModel().rows.map((row: any) => {
+            return (
+              <TableRow key={row.id} className="px-6">
+                {row.getVisibleCells().map((cell: any) => {
                   return (
-                    <TableHead
-                      key={header.id}
-                      colSpan={header.colSpan}
-                      onClick={header.column.getToggleSortingHandler()}
-                      className="cursor-pointer pl-5 pr-4 pt-2 text-start"
+                    <TableCell
+                      key={cell.id}
+                      className="w-max border-b py-5 pl-5 pr-4 hover:bg-black/5 dark:hover:bg-white/5"
                     >
                       {flexRender(
-                        header.column.columnDef.header,
-                        header.getContext(),
+                        cell.column.columnDef.cell,
+                        cell.getContext(),
                       )}
-                      {{
-                        asc: "",
-                        desc: "",
-                      }[header.column.getIsSorted() as string] ?? null}
-                    </TableHead>
+                    </TableCell>
                   );
-                })}{" "}
-              </tr>
-            </TableHeader>
-          ))}
-          <TableBody>
-            {table.getRowModel().rows.map((row: any) => {
-              return (
-                <TableRow key={row.id} className="px-6">
-                  {row.getVisibleCells().map((cell: any) => {
-                    return (
-                      <TableCell
-                        key={cell.id}
-                        className="w-max border-b py-5 pl-5 pr-4 hover:bg-black/5 dark:hover:bg-white/5"
-                      >
-                        {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext(),
-                        )}
-                      </TableCell>
-                    );
-                  })}
-                </TableRow>
-              );
-            })}
-          </TableBody>
-        </Table>
-        {/* pagination */}
-        <div className="mt-2 flex h-20 w-full items-center justify-between px-6">
-          {/* left side */}
-          <div className="flex items-center gap-3">
-            <p className="text-sm font-medium text-zinc-500 dark:text-zinc-400">
-              Showing {pageSize} rows per page
-            </p>
-          </div>
-          {/* right side */}
-          <div className="flex items-center gap-2">
-            <Button
-              onClick={() => table.previousPage()}
-              disabled={!table.getCanPreviousPage()}
-              className={`flex items-center justify-center rounded-lg bg-transparent p-2 text-lg text-zinc-950 transition duration-200 hover:bg-transparent active:bg-transparent dark:text-white dark:hover:bg-transparent dark:active:bg-transparent`}
-            >
-              <MdChevronLeft />
-            </Button>
-
-            {createPages(table.getPageCount()).map((pageNumber, index) => {
-              return (
-                <Button
-                  className={cn(
-                    "flex items-center justify-center rounded-lg p-2 font-medium transition duration-200",
-                    pageNumber === pageIndex + 1
-                      ? "text-lg font-bold underline"
-                      : "text-sm",
-                  )}
-                  variant="ghost"
-                  disabled={pageNumber === pageIndex + 1}
-                  onClick={() => table.setPageIndex(pageNumber - 1)}
-                  key={index}
-                >
-                  {pageNumber}
-                </Button>
-              );
-            })}
-            <Button
-              onClick={() => table.nextPage()}
-              disabled={!table.getCanNextPage()}
-              className={`flex min-w-[34px] items-center justify-center rounded-lg bg-transparent p-2 text-lg text-zinc-950 transition duration-200 hover:bg-transparent active:bg-transparent dark:text-white dark:hover:bg-transparent dark:active:bg-transparent`}
-            >
-              <MdChevronRight />
-            </Button>
-          </div>
-        </div>
+                })}
+              </TableRow>
+            );
+          })}
+        </TableBody>
+      </Table>
+      <div className="py-2">
+        <DataTablePagination table={table} />
       </div>
     </Card>
   );
