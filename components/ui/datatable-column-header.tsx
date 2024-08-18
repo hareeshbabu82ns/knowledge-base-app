@@ -16,15 +16,37 @@ interface DataTableColumnHeaderProps<TData, TValue>
   extends React.HTMLAttributes<HTMLDivElement> {
   column: Column<TData, TValue>;
   title: string;
+  sortOnly?: boolean;
 }
 
 export function DataTableColumnHeader<TData, TValue>({
   column,
   title,
   className,
+  sortOnly = false,
 }: DataTableColumnHeaderProps<TData, TValue>) {
   if (!column.getCanSort()) {
     return <div className={cn(className)}>{title}</div>;
+  }
+
+  if (sortOnly) {
+    return (
+      <Button
+        variant="ghost"
+        size="sm"
+        className={cn("h-8", className)}
+        onClick={() => column.toggleSorting()}
+      >
+        <span>{title}</span>
+        {column.getIsSorted() === "desc" ? (
+          <ArrowDownIcon className="ml-2 h-4 w-4" />
+        ) : column.getIsSorted() === "asc" ? (
+          <ArrowUpIcon className="ml-2 h-4 w-4" />
+        ) : (
+          <FaSort className="ml-2 h-4 w-4" />
+        )}
+      </Button>
+    );
   }
 
   return (

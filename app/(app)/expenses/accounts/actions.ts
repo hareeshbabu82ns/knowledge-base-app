@@ -3,6 +3,11 @@
 import { db } from "@/lib/db";
 import { ExpenseAccount, Prisma } from "@prisma/client";
 
+export const fetchTags = async () => {
+  const tags = await db.expenseTags.findMany();
+  return tags;
+};
+
 export const fetchAccounts = async () => {
   const accounts = await db.expenseAccount.findMany();
   return accounts;

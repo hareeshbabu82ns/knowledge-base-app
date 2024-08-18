@@ -24,9 +24,11 @@ model User {
   // Optional for WebAuthn support
   Authenticator Authenticator[]
 
-  createdAt      DateTime         @default(now())
-  updatedAt      DateTime         @updatedAt
-  ExpenseAccount ExpenseAccount[]
+  createdAt          DateTime             @default(now())
+  updatedAt          DateTime             @updatedAt
+  ExpenseAccount     ExpenseAccount[]
+  ExpenseTransaction ExpenseTransaction[]
+  ExpenseTags        ExpenseTags[]
 }
 
 model Account {
@@ -87,8 +89,9 @@ model Authenticator {
   @@unique([userId, credentialID])
 }
 
-/// accounts
+/// **** Expenses  ****
 
+/// accounts
 model ExpenseAccount {
   id          String @id @map("_id")
   userId      String @db.ObjectId
@@ -99,9 +102,43 @@ model ExpenseAccount {
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt          DateTime             @default(now())
+  updatedAt          DateTime             @updatedAt
+  ExpenseTransaction ExpenseTransaction[]
 
   @@unique([userId, name])
   @@map("expense_accounts")
 }
+
+/// transactions
+model ExpenseTransaction {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId      String   @db.ObjectId
+  account     String
+  amount      Float    @default(0)
+  description String   @default("")
+  type        String   @default("Expense")
+  tags        String[] @default([])
+  date        DateTime @default(now())
+  dateZ       String   @default("")
+
+  user       User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accountObj ExpenseAccount @relation(fields: [account], references: [id], onDelete: Restrict)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("expense_transactions")
+}
+
+model ExpenseTags {
+  id     String @id @default(auto()) @map("_id") @db.ObjectId
+  userId String @db.ObjectId
+  tag    String
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("expense_tags")
+}
+
+/// **** Expenses  ****
