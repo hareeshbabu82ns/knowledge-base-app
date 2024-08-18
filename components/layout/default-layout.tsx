@@ -16,15 +16,15 @@ const WithDefaultLayout = ({
   const [open, setOpen] = React.useState(false);
 
   return (
-    <div className="flex size-full ">
+    <div className="flex size-full">
       <Sidebar routes={routes} open={open} setOpen={() => setOpen(!open)} />
-      <div className="size-full ">
-        <main className={`mx-2.5 flex-none transition-all xl:ml-[316px]`}>
+      <div className="size-full">
+        <main className="mx-2.5 flex-none transition-all xl:ml-[316px]">
           <Navbar
             onOpen={() => setOpen(!open)}
             brandText={getActiveRoute(routes, pathname)}
           />
-          <div className="min-h-screen overflow-y-auto p-2 pt-[80px] md:pt-[100px]">
+          <div className="@container/main-content min-h-screen overflow-y-auto p-2 pt-[80px] md:pt-[100px]">
             {children}
           </div>
         </main>

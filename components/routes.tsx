@@ -33,10 +33,17 @@ export const routes: IRoute[] = [
         collapse: false,
       },
       {
+        name: "Transactions",
+        layout: "/expenses",
+        path: "/transactions",
+        icon: <Icons.transactions className="size-4 stroke-2 text-inherit" />,
+        collapse: false,
+      },
+      {
         name: "Upload",
         layout: "/expenses",
         path: "/upload",
-        icon: <HiOutlineHome className="size-4 stroke-2 text-inherit" />,
+        icon: <Icons.upload className="size-4 stroke-2 text-inherit" />,
         collapse: false,
       },
     ],

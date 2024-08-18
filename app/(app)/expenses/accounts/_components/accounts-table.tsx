@@ -9,6 +9,7 @@ import {
   Table,
   TableBody,
   TableCell,
+  TableFooter,
   TableHead,
   TableHeader,
   TableRow,
@@ -135,10 +136,10 @@ function AccountsTable(props: { tableData: RowObj[] }) {
   });
 
   return (
-    <Card className={"size-full p-0"}>
+    <Card className={"w-full"}>
       <div className="flex items-center border-b p-2">
         <h5 className="ml-2">Accounts</h5>
-        <DataTableViewOptions table={table} />
+        {/* <DataTableViewOptions table={table} /> */}
       </div>
       <Table className="w-full">
         {table.getHeaderGroups().map((headerGroup: any) => (
@@ -188,9 +189,7 @@ function AccountsTable(props: { tableData: RowObj[] }) {
           })}
         </TableBody>
       </Table>
-      <div className="py-2">
-        <DataTablePagination table={table} />
-      </div>
+      <DataTablePagination table={table} />
     </Card>
   );
 }

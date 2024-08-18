@@ -2,6 +2,7 @@ import {
   AlertTriangle,
   ArrowLeft,
   ArrowRight,
+  BanknoteIcon,
   Bell,
   Calendar,
   CalendarCheck,
@@ -53,9 +54,9 @@ import {
 } from "lucide-react";
 
 // https://react-icons.github.io/react-icons/
-import { FaMoneyBillTrendUp } from "react-icons/fa6";
-import { RiMoneyRupeeCircleLine } from "react-icons/ri";
-import { MdOutlineAccountBalance } from "react-icons/md";
+import { FaIndianRupeeSign } from "react-icons/fa6";
+import { HiBanknotes } from "react-icons/hi2";
+import { MdFoodBank } from "react-icons/md";
 
 export type Icon = typeof LucideIcon;
 
@@ -127,9 +128,27 @@ export const Icons = {
   upload: Upload,
   download: Download,
 
-  expenses: FaMoneyBillTrendUp,
-  accounts: MdOutlineAccountBalance,
-  rupee: RiMoneyRupeeCircleLine,
+  expenses: BanknoteIcon,
+  accounts: ({ ...props }: LucideProps) => (
+    <svg
+      className="size-6 text-gray-800 dark:text-white"
+      aria-hidden="true"
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      fill="none"
+      viewBox="0 0 24 24"
+    >
+      <path
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="2"
+        d="M3 10h18M6 14h2m3 0h5M3 7v10a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1V7a1 1 0 0 0-1-1H4a1 1 0 0 0-1 1Z"
+      />
+    </svg>
+  ),
+  transactions: FaIndianRupeeSign,
 
   sidebarMenu: ({ ...props }: LucideProps) => (
     <svg

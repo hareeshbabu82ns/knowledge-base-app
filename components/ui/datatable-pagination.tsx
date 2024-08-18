@@ -14,23 +14,37 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { cn } from "@/lib/utils";
 
 interface DataTablePaginationProps<TData> {
   table: Table<TData>;
+  showSelectedText?: boolean;
+  className?: string;
 }
 
 export function DataTablePagination<TData>({
   table,
+  showSelectedText = false,
+  className,
 }: DataTablePaginationProps<TData>) {
   return (
-    <div className="flex items-center justify-between px-2">
-      <div className="flex-1 text-sm text-muted-foreground">
-        {table.getFilteredSelectedRowModel().rows.length} of{" "}
-        {table.getFilteredRowModel().rows.length} row(s) selected.
-      </div>
-      <div className="flex items-center space-x-6 lg:space-x-8">
+    <div
+      className={cn(
+        "@container/tfooter bg-muted/50 flex flex-1 items-center justify-between p-2 font-medium",
+        className,
+      )}
+    >
+      {showSelectedText && (
+        <div className="flex-1 text-sm text-muted-foreground">
+          {table.getFilteredSelectedRowModel().rows.length} of{" "}
+          {table.getFilteredRowModel().rows.length} row(s) selected.
+        </div>
+      )}
+      <div className="flex flex-1 items-center justify-between gap-4 flex-col @xs/tfooter:flex-row">
         <div className="flex items-center space-x-2">
-          <p className="text-sm font-medium">Rows per page</p>
+          <p className="text-sm font-medium hidden @lg/tfooter:block">
+            Rows per page
+          </p>
           <Select
             value={`${table.getState().pagination.pageSize}`}
             onValueChange={(value) => {
@@ -49,9 +63,9 @@ export function DataTablePagination<TData>({
             </SelectContent>
           </Select>
         </div>
-        <div className="flex w-[100px] items-center justify-center text-sm font-medium">
-          Page {table.getState().pagination.pageIndex + 1} of{" "}
-          {table.getPageCount()}
+        <div className="flex items-center justify-center text-sm font-medium">
+          <span className="hidden @lg/tfooter:block">Page :</span>
+          {table.getState().pagination.pageIndex + 1} of {table.getPageCount()}
         </div>
         <div className="flex items-center space-x-2">
           <Button
