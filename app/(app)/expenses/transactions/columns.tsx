@@ -2,9 +2,10 @@
 
 import { Badge } from "@/components/ui/badge";
 import { DataTableColumnHeader } from "@/components/ui/datatable-column-header";
-import { ExpenseTransaction, Prisma } from "@prisma/client";
+import { ExpenseTransaction } from "@prisma/client";
 import { ColumnDef } from "@tanstack/react-table";
 import { fetchAccounts, fetchTags } from "../accounts/actions";
+import { cn } from "@/lib/utils";
 
 export const columns: ColumnDef<Partial<ExpenseTransaction>>[] = [
   {
@@ -13,9 +14,11 @@ export const columns: ColumnDef<Partial<ExpenseTransaction>>[] = [
   },
   {
     accessorKey: "date",
+    size: 100,
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Date" sortOnly />
+      <DataTableColumnHeader column={column} title="Date" />
     ),
+    meta: { filterVariant: "dateRange" },
     cell: (info: any) => (
       <p className="text-sm font-medium">
         {info.getValue().toLocaleDateString()}
@@ -25,33 +28,48 @@ export const columns: ColumnDef<Partial<ExpenseTransaction>>[] = [
   {
     accessorKey: "description",
     header: "Description",
-    filterFn: "includesString",
     meta: { filterVariant: "text" },
+    size: 500,
   },
   {
     accessorKey: "amount",
-    header: "Amount",
+    size: 50,
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Amount" />
+    ),
     meta: { filterVariant: "range" },
     cell: ({ row }) => {
       const amount = parseFloat(row.getValue("amount"));
-      const formatted = new Intl.NumberFormat("en-CA").format(amount);
+      const formatted = new Intl.NumberFormat("en-CA", {
+        minimumFractionDigits: 2,
+      }).format(amount);
 
-      return <div className="text-right font-medium">{formatted}</div>;
+      return (
+        <div
+          className={cn(
+            "text-right text-lg font-bold tracking-wider",
+            row.original.type === "Expense"
+              ? "text-red-700 dark:text-red-500"
+              : "text-green-700 dark:text-green-500",
+          )}
+        >
+          {formatted}
+        </div>
+      );
     },
   },
   {
     accessorKey: "accountObj",
     header: "Account",
+    size: 50,
     meta: {
-      filterVariant: "select",
+      filterVariant: "multiSelect",
       filterOptionsFn: async () => {
         const accounts = await fetchAccounts();
-        const acc = new Map();
-        acc.set("", "Select an account");
-        accounts.forEach((account) => {
-          acc.set(account.id, account.name);
-        });
-        return acc;
+        return accounts.map((account) => ({
+          label: account.name,
+          value: account.id,
+        }));
       },
     },
     cell: (info: any) => info.getValue().name,
@@ -61,15 +79,13 @@ export const columns: ColumnDef<Partial<ExpenseTransaction>>[] = [
     accessorKey: "tags",
     header: "Tags",
     meta: {
-      filterVariant: "select",
+      filterVariant: "multiSelect",
       filterOptionsFn: async () => {
         const tags = await fetchTags();
-        const acc = new Map();
-        acc.set("", "Select an tag");
-        tags.forEach((tag) => {
-          acc.set(tag.tag, tag.tag);
-        });
-        return acc;
+        return tags.map((tag) => ({
+          label: tag.tag,
+          value: tag.tag,
+        }));
       },
     },
     cell: (info: any) => (

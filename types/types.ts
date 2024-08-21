@@ -1,3 +1,4 @@
+import { Option } from "@/components/ui/multi-select";
 import { RowData } from "@tanstack/react-table";
 import { ComponentType, ReactNode } from "react";
 
@@ -29,8 +30,14 @@ declare global {
 declare module "@tanstack/react-table" {
   //allows us to define custom properties for our columns
   interface ColumnMeta<TData extends RowData, TValue> {
-    filterVariant?: "text" | "range" | "select";
-    filterOptions?: Map<string, string> | string[];
-    filterOptionsFn?: () => Promise<Map<string, string> | string[]>;
+    filterVariant?:
+      | "text"
+      | "range"
+      | "select"
+      | "multiSelect"
+      | "date"
+      | "dateRange";
+    filterOptions?: Option[];
+    filterOptionsFn?: () => Promise<Option[] | undefined>;
   }
 }

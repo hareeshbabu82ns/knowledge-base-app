@@ -1,5 +1,6 @@
 "use server";
 
+import { Option } from "@/components/ui/multi-select";
 import { db } from "@/lib/db";
 import {
   ColumnFilter,
@@ -17,8 +18,9 @@ const convertColumnFiltersToPrisma = (filters?: ColumnFilter[]) => {
       } else if (id === "accountObj") {
         acc["account"] = { equals: value };
       } else acc[id] = { contains: value, mode: "insensitive" };
-    } else if (Array.isArray(value) && value.length === 2) {
-      if (["date", "createdAt", "updatedAt"].includes(id)) {
+    } else if (Array.isArray(value)) {
+      if (value.length === 0) {
+      } else if (["date", "createdAt", "updatedAt"].includes(id)) {
         acc[id] = {};
         if (value[0]) acc[id] = { ...acc[id], gte: new Date(value[0]) };
         if (value[1]) acc[id] = { ...acc[id], lte: new Date(value[1]) };
@@ -26,11 +28,19 @@ const convertColumnFiltersToPrisma = (filters?: ColumnFilter[]) => {
         acc[id] = {};
         if (value[0]) acc[id] = { ...acc[id], gte: Number(value[0]) };
         if (value[1]) acc[id] = { ...acc[id], lte: Number(value[1]) };
+      } else if (["accountObj"].includes(id)) {
+        const values = (value as Option[]).map((o) => o.value);
+        acc["account"] = { in: values };
+      } else if (["tags"].includes(id)) {
+        const values = (value as Option[]).map((o) => o.value);
+        acc[id] = { hasSome: values };
       } else {
         acc[id] = {};
         if (value[0]) acc[id] = { ...acc[id], gte: value[0] };
         if (value[1]) acc[id] = { ...acc[id], lte: value[1] };
       }
+    } else {
+      acc[id] = { equals: value };
     }
     return acc;
   }, {} as any);
@@ -47,6 +57,7 @@ export const fetchTransactions = async ({
 }) => {
   // filters [ { id: 'description', value: 'des*' } ] to { description: { contains: 'des' } }
   const where = convertColumnFiltersToPrisma(filters);
+  console.log({ filters, where });
 
   // sorting [ { id: 'date', desc: true } ] to { date: 'desc' }
   const orderBy = sorting?.reduce((acc, { id, desc }) => {

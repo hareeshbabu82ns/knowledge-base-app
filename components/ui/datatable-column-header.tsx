@@ -16,74 +16,86 @@ interface DataTableColumnHeaderProps<TData, TValue>
   extends React.HTMLAttributes<HTMLDivElement> {
   column: Column<TData, TValue>;
   title: string;
-  sortOnly?: boolean;
+  withMenu?: boolean;
 }
 
 export function DataTableColumnHeader<TData, TValue>({
   column,
   title,
   className,
-  sortOnly = false,
+  withMenu = false,
 }: DataTableColumnHeaderProps<TData, TValue>) {
   if (!column.getCanSort()) {
-    return <div className={cn(className)}>{title}</div>;
+    return (
+      <div
+        className={cn("flex flex-row justify-between items-center", className)}
+      >
+        {title}
+      </div>
+    );
   }
 
-  if (sortOnly) {
+  if (withMenu) {
     return (
-      <Button
-        variant="ghost"
-        size="sm"
-        className={cn("h-8", className)}
-        onClick={() => column.toggleSorting()}
+      <div
+        className={cn("flex flex-row justify-between items-center", className)}
       >
-        <span>{title}</span>
-        {column.getIsSorted() === "desc" ? (
-          <ArrowDownIcon className="ml-2 h-4 w-4" />
-        ) : column.getIsSorted() === "asc" ? (
-          <ArrowUpIcon className="ml-2 h-4 w-4" />
-        ) : (
-          <FaSort className="ml-2 h-4 w-4" />
-        )}
-      </Button>
+        {title}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="px-1 py-0 data-[state=open]:bg-accent"
+            >
+              {column.getIsSorted() === "desc" ? (
+                <ArrowDownIcon className="size-4" />
+              ) : column.getIsSorted() === "asc" ? (
+                <ArrowUpIcon className="size-4" />
+              ) : (
+                <FaSort className="size-4" />
+              )}
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="start">
+            <DropdownMenuItem onClick={() => column.toggleSorting(false)}>
+              <ArrowUpIcon className="mr-2 h-3.5 w-3.5 text-muted-foreground/70" />
+              Asc
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => column.toggleSorting(true)}>
+              <ArrowDownIcon className="mr-2 h-3.5 w-3.5 text-muted-foreground/70" />
+              Desc
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={() => column.toggleVisibility(false)}>
+              <EyeOffIcon className="mr-2 h-3.5 w-3.5 text-muted-foreground/70" />
+              Hide
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
     );
   }
 
   return (
-    <div className={cn("flex items-center space-x-2", className)}>
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="-ml-3 h-8 data-[state=open]:bg-accent"
-          >
-            <span>{title}</span>
-            {column.getIsSorted() === "desc" ? (
-              <ArrowDownIcon className="ml-2 h-4 w-4" />
-            ) : column.getIsSorted() === "asc" ? (
-              <ArrowUpIcon className="ml-2 h-4 w-4" />
-            ) : (
-              <FaSort className="ml-2 h-4 w-4" />
-            )}
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="start">
-          <DropdownMenuItem onClick={() => column.toggleSorting(false)}>
-            <ArrowUpIcon className="mr-2 h-3.5 w-3.5 text-muted-foreground/70" />
-            Asc
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => column.toggleSorting(true)}>
-            <ArrowDownIcon className="mr-2 h-3.5 w-3.5 text-muted-foreground/70" />
-            Desc
-          </DropdownMenuItem>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={() => column.toggleVisibility(false)}>
-            <EyeOffIcon className="mr-2 h-3.5 w-3.5 text-muted-foreground/70" />
-            Hide
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
+    <div
+      className={cn("flex flex-row justify-between items-center", className)}
+    >
+      {title}
+      <Button
+        variant="ghost"
+        size="sm"
+        className="px-1 py-0"
+        onClick={() => column.toggleSorting()}
+      >
+        {column.getIsSorted() === "desc" ? (
+          <ArrowDownIcon className="size-4" />
+        ) : column.getIsSorted() === "asc" ? (
+          <ArrowUpIcon className="size-4" />
+        ) : (
+          <FaSort className="size-4" />
+        )}
+      </Button>
     </div>
   );
 }
