@@ -1,7 +1,7 @@
 "use client";
 
 import { Badge } from "@/components/ui/badge";
-import { DataTableColumnHeader } from "@/components/ui/datatable-column-header";
+import { DataTableColumnHeader } from "@/components/data-table/datatable-column-header";
 import { ExpenseTransaction } from "@prisma/client";
 import { ColumnDef } from "@tanstack/react-table";
 import { fetchAccounts, fetchTags } from "../accounts/actions";
@@ -15,9 +15,7 @@ export const columns: ColumnDef<Partial<ExpenseTransaction>>[] = [
   {
     accessorKey: "date",
     size: 100,
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Date" />
-    ),
+    header: "Date",
     meta: { filterVariant: "dateRange" },
     cell: (info: any) => (
       <p className="text-sm font-medium">
@@ -34,9 +32,7 @@ export const columns: ColumnDef<Partial<ExpenseTransaction>>[] = [
   {
     accessorKey: "amount",
     size: 50,
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Amount" />
-    ),
+    header: "Amount",
     meta: { filterVariant: "range" },
     cell: ({ row }) => {
       const amount = parseFloat(row.getValue("amount"));

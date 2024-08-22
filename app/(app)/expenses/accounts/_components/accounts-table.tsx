@@ -1,10 +1,9 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { DataTableColumnHeader } from "@/components/ui/datatable-column-header";
-import { DataTablePagination } from "@/components/ui/datatable-pagination";
-import { DataTableViewOptions } from "@/components/ui/datatable-view-options";
+import { DataTableColumnHeader } from "@/components/data-table/datatable-column-header";
+import { DataTablePagination } from "@/components/data-table/datatable-pagination";
+import { DataTableViewOptions } from "@/components/data-table/datatable-view-options";
 import {
   Table,
   TableBody,
@@ -31,7 +30,9 @@ import {
 } from "@tanstack/react-table";
 import Link from "next/link";
 import React from "react";
-import { MdChevronLeft, MdChevronRight } from "react-icons/md";
+import { DataTableHeader } from "@/components/data-table/datatable-header";
+import { Button } from "@/components/ui/button";
+import { Icons } from "@/components/shared/icons";
 
 type RowObj = {
   id?: string;
@@ -62,9 +63,7 @@ function AccountsTable(props: { tableData: RowObj[] }) {
   const columns = [
     columnHelper.accessor("name", {
       id: "name",
-      header: ({ column }) => (
-        <DataTableColumnHeader column={column} title="Account Name" />
-      ),
+      header: "Account Name",
       cell: (info: any) => (
         <Link href={`/expenses/accounts/${info.row.original.id}`}>
           {info.getValue()}
@@ -73,9 +72,7 @@ function AccountsTable(props: { tableData: RowObj[] }) {
     }),
     columnHelper.accessor("type", {
       id: "type",
-      header: ({ column }) => (
-        <DataTableColumnHeader column={column} title="Type" />
-      ),
+      header: "Type",
       cell: (info: any) => (
         <div className="flex w-full items-center gap-[14px]">
           <p className="text-sm font-medium text-zinc-950 dark:text-white">
@@ -84,19 +81,6 @@ function AccountsTable(props: { tableData: RowObj[] }) {
         </div>
       ),
     }),
-    // columnHelper.accessor("updatedAt", {
-    //   id: "updatedAt",
-    //   header: () => (
-    //     <p className="text-xs font-semibold text-zinc-500 dark:text-zinc-400">
-    //       Updated At
-    //     </p>
-    //   ),
-    //   cell: (info: any) => (
-    //     <p className="text-sm font-medium text-zinc-950 dark:text-white">
-    //       {info.getValue().toLocaleDateString()}
-    //     </p>
-    //   ),
-    // }),
   ]; // eslint-disable-next-line
   const [data, setData] = React.useState(() => [...defaultData]);
   const [{ pageIndex, pageSize }, setPagination] =
@@ -137,33 +121,29 @@ function AccountsTable(props: { tableData: RowObj[] }) {
 
   return (
     <Card className={"w-full"}>
-      <div className="flex items-center border-b p-2">
-        <h5 className="ml-2">Accounts</h5>
-        {/* <DataTableViewOptions table={table} /> */}
-      </div>
+      <DataTableHeader
+        table={table}
+        title="Accounts"
+        showGoToPage
+        actions={
+          <>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => table.resetColumnFilters()}
+            >
+              <Icons.reset className="size-4" />
+            </Button>
+          </>
+        }
+      />
       <Table className="w-full">
         {table.getHeaderGroups().map((headerGroup: any) => (
           <TableHeader key={headerGroup.id} className="border-b p-6">
             <tr className="">
-              {headerGroup.headers.map((header: any) => {
-                return (
-                  <TableHead
-                    key={header.id}
-                    colSpan={header.colSpan}
-                    onClick={header.column.getToggleSortingHandler()}
-                    className="cursor-pointer pl-5 pr-4 pt-2 text-start"
-                  >
-                    {flexRender(
-                      header.column.columnDef.header,
-                      header.getContext(),
-                    )}
-                    {{
-                      asc: "",
-                      desc: "",
-                    }[header.column.getIsSorted() as string] ?? null}
-                  </TableHead>
-                );
-              })}
+              {headerGroup.headers.map((header: any) => (
+                <DataTableColumnHeader key={header.id} header={header} />
+              ))}
             </tr>
           </TableHeader>
         ))}

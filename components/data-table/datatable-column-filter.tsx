@@ -1,6 +1,7 @@
+"use client";
+
 import { Column } from "@tanstack/react-table";
-import ReactDatePicker from "react-datepicker";
-import DebouncedInput from "../DebouncedInput";
+import DebouncedInput from "@/components/DebouncedInput";
 import { useQuery } from "@tanstack/react-query";
 import {
   Select,
@@ -8,16 +9,20 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "./select";
-import { Icons } from "../shared/icons";
-import { Button } from "./button";
+} from "@/components/ui/select";
+import { Icons } from "@/components/shared/icons";
+import { Button } from "@/components/ui/button";
 import { useState } from "react";
-import { Popover, PopoverContent, PopoverTrigger } from "./popover";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
-import { Calendar } from "./calendar";
+import { Calendar } from "@/components/ui/calendar";
 import { DateRange } from "react-day-picker";
-import MultipleSelector, { Option } from "./multi-select";
+import MultipleSelector, { Option } from "@/components/ui/multi-select";
 
 function generateFilterOptions(filterOptions?: Option[]) {
   if (!filterOptions) return null;
@@ -66,26 +71,28 @@ export default function DataTableColumnFilter({
   return filterVariant === "range" ? (
     <div className="flex space-x-2">
       <DebouncedInput
-        type="number"
+        type="text"
+        inputMode="numeric"
         value={(columnFilterValue as [number, number])?.[0] ?? ""}
         onChange={(value) =>
           column.setFilterValue((old: [number, number]) => [value, old?.[1]])
         }
         placeholder={`Min`}
-        className="flex-1 border shadow rounded w-20"
+        className="w-16 flex-1 rounded border shadow"
       />
       <DebouncedInput
-        type="number"
+        type="text"
+        inputMode="numeric"
         value={(columnFilterValue as [number, number])?.[1] ?? ""}
         onChange={(value) =>
           column.setFilterValue((old: [number, number]) => [old?.[0], value])
         }
         placeholder={`Max`}
-        className="flex-1 border shadow rounded w-20"
+        className="w-16 flex-1 rounded border shadow"
       />
     </div>
   ) : filterVariant === "select" ? (
-    <div className="flex w-full flex-row justify-between items-center gap-1">
+    <div className="flex w-full flex-row items-center justify-between gap-1">
       <Select
         onValueChange={(e) => {
           column.setFilterValue(e);
@@ -114,7 +121,7 @@ export default function DataTableColumnFilter({
       )}
     </div>
   ) : filterVariant === "multiSelect" ? (
-    <div className="flex max-w-[200px] flex-row justify-between items-center gap-1">
+    <div className="flex max-w-[200px] flex-row items-center justify-between gap-1">
       <MultipleSelector
         onChange={(e) => {
           column.setFilterValue(e);
@@ -135,7 +142,7 @@ export default function DataTableColumnFilter({
       />
     </div>
   ) : filterVariant === "date" ? (
-    <div className="flex w-full flex-row justify-between items-center gap-1">
+    <div className="flex w-full flex-row items-center justify-between gap-1">
       <Popover>
         <PopoverTrigger asChild>
           <Button
@@ -166,7 +173,7 @@ export default function DataTableColumnFilter({
       </Popover>
     </div>
   ) : filterVariant === "dateRange" ? (
-    <div className="flex w-full flex-row justify-between items-center gap-1">
+    <div className="flex w-full flex-row items-center justify-between gap-1">
       <Popover>
         <PopoverTrigger asChild>
           <Button
@@ -216,9 +223,9 @@ export default function DataTableColumnFilter({
       </Popover>
     </div>
   ) : (
-    <div className="flex w-full flex-row justify-between items-center gap-1">
+    <div className="flex w-full flex-row items-center justify-between gap-1">
       <DebouncedInput
-        className="w-full border shadow rounded"
+        className="w-full rounded border shadow"
         onChange={(value) => column.setFilterValue(value)}
         placeholder={`Search...`}
         type="text"

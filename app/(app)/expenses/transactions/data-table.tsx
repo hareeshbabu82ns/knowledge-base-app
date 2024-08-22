@@ -20,12 +20,16 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import React, { useMemo, useState } from "react";
-import { DataTablePagination } from "@/components/ui/datatable-pagination";
+import { DataTablePagination } from "@/components/data-table/datatable-pagination";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { fetchTransactions } from "./actions";
-import DataTableColumnFilter from "@/components/ui/datatable-column-filter";
+import DataTableColumnFilter from "@/components/data-table/datatable-column-filter";
 import { subMonths } from "date-fns";
 import { cn } from "@/lib/utils";
+import { DataTableHeader } from "@/components/data-table/datatable-header";
+import { Button } from "@/components/ui/button";
+import { Icons } from "@/components/shared/icons";
+import { DataTableColumnHeader } from "@/components/data-table/datatable-column-header";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -82,40 +86,29 @@ export function DataTable<TData, TValue>({
 
   return (
     <div className="rounded-md border">
+      <DataTableHeader
+        table={table}
+        title="Transactions"
+        showGoToPage
+        actions={
+          <>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setColumnFilters([])}
+            >
+              <Icons.reset className="size-4" />
+            </Button>
+          </>
+        }
+      />
       <Table>
         <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow key={headerGroup.id}>
-              {headerGroup.headers.map((header) => {
-                return (
-                  <TableHead
-                    key={header.id}
-                    className={cn(
-                      // header.column.columnDef.maxSize !==
-                      //   Number.MAX_SAFE_INTEGER &&
-                      //   `max-w-[${header.column.columnDef.maxSize}px]`,
-                      header.column.columnDef.minSize !== 20 &&
-                        `min-w-[${header.column.columnDef.minSize}px]`,
-                      header.column.columnDef.size !== 150 &&
-                        `w-[${header.column.columnDef.size}px]`,
-                    )}
-                  >
-                    <div className="flex flex-col pb-2">
-                      <div className="min-h-9 w-full content-center">
-                        {header.isPlaceholder
-                          ? null
-                          : flexRender(
-                              header.column.columnDef.header,
-                              header.getContext(),
-                            )}
-                      </div>
-                      {header.column.getCanFilter() ? (
-                        <DataTableColumnFilter column={header.column} />
-                      ) : null}
-                    </div>
-                  </TableHead>
-                );
-              })}
+              {headerGroup.headers.map((header) => (
+                <DataTableColumnHeader key={header.id} header={header} />
+              ))}
             </TableRow>
           ))}
         </TableHeader>
