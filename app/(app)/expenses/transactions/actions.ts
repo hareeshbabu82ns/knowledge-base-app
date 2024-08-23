@@ -57,7 +57,7 @@ export const fetchTransactions = async ({
 }) => {
   // filters [ { id: 'description', value: 'des*' } ] to { description: { contains: 'des' } }
   const where = convertColumnFiltersToPrisma(filters);
-  console.log({ filters, where });
+  // console.log({ filters, where });
 
   // sorting [ { id: 'date', desc: true } ] to { date: 'desc' }
   const orderBy = sorting?.reduce((acc, { id, desc }) => {

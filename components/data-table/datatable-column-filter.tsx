@@ -41,9 +41,7 @@ export default function DataTableColumnFilter({
 }: {
   column: Column<any, unknown>;
 }) {
-  const [columnFilterValue, setColumnFilterValue] = useState(
-    column.getFilterValue(),
-  );
+  const columnFilterValue = column.getFilterValue();
 
   const { filterVariant, filterOptions, filterOptionsFn } =
     column.columnDef.meta ?? {};
@@ -68,169 +66,183 @@ export default function DataTableColumnFilter({
   });
   if (isLoading || isPending) return <div>Loading...</div>;
 
-  return filterVariant === "range" ? (
-    <div className="flex space-x-2">
-      <DebouncedInput
-        type="text"
-        inputMode="numeric"
-        value={(columnFilterValue as [number, number])?.[0] ?? ""}
-        onChange={(value) =>
-          column.setFilterValue((old: [number, number]) => [value, old?.[1]])
-        }
-        placeholder={`Min`}
-        className="w-16 flex-1 rounded border shadow"
-      />
-      <DebouncedInput
-        type="text"
-        inputMode="numeric"
-        value={(columnFilterValue as [number, number])?.[1] ?? ""}
-        onChange={(value) =>
-          column.setFilterValue((old: [number, number]) => [old?.[0], value])
-        }
-        placeholder={`Max`}
-        className="w-16 flex-1 rounded border shadow"
-      />
-    </div>
-  ) : filterVariant === "select" ? (
-    <div className="flex w-full flex-row items-center justify-between gap-1">
-      <Select
-        onValueChange={(e) => {
-          column.setFilterValue(e);
-          setColumnFilterValue(e);
-        }}
-        value={columnFilterValue?.toString()}
-        defaultValue={column.getFilterValue()?.toString()}
-      >
-        <SelectTrigger>
-          <SelectValue placeholder="select filter" />
-        </SelectTrigger>
-        <SelectContent>{generateFilterOptions(options)}</SelectContent>
-      </Select>
-      {!!columnFilterValue && (
-        <Button
-          variant="ghost"
-          size="icon"
-          className="size-5"
-          onClick={(e) => {
-            column.setFilterValue(undefined);
-            setColumnFilterValue(undefined);
-          }}
-        >
-          <Icons.close className="size-4" />
-        </Button>
-      )}
-    </div>
-  ) : filterVariant === "multiSelect" ? (
-    <div className="flex max-w-[200px] flex-row items-center justify-between gap-1">
-      <MultipleSelector
-        onChange={(e) => {
-          column.setFilterValue(e);
-          setColumnFilterValue(e);
-        }}
-        value={columnFilterValue as Option[]}
-        options={options}
-        commandProps={{
-          filter: (value, search, keywords) => {
-            return options
-              ?.find((o) => o.value === value)
-              ?.label?.toLowerCase()
-              .includes(search.toLowerCase())
-              ? 1
-              : 0;
-          },
-        }}
-      />
-    </div>
-  ) : filterVariant === "date" ? (
-    <div className="flex w-full flex-row items-center justify-between gap-1">
-      <Popover>
-        <PopoverTrigger asChild>
-          <Button
-            variant={"outline"}
-            className={cn(
-              "w-full justify-start text-left font-normal",
-              !columnFilterValue && "text-muted-foreground",
-            )}
+  switch (filterVariant) {
+    case "range":
+      const rangeValue = columnFilterValue as [number, number];
+      return (
+        <div className="flex space-x-2">
+          <DebouncedInput
+            type="text"
+            inputMode="numeric"
+            value={rangeValue?.[0] ?? ""}
+            onChange={(value) =>
+              column.setFilterValue((old: [number, number]) => [
+                value,
+                old?.[1],
+              ])
+            }
+            placeholder={`Min`}
+            className="w-16 flex-1 rounded border shadow"
+          />
+          <DebouncedInput
+            type="text"
+            inputMode="numeric"
+            value={rangeValue?.[1] ?? ""}
+            onChange={(value) =>
+              column.setFilterValue((old: [number, number]) => [
+                old?.[0],
+                value,
+              ])
+            }
+            placeholder={`Max`}
+            className="w-16 flex-1 rounded border shadow"
+          />
+        </div>
+      );
+    case "select":
+      return (
+        <div className="flex w-full flex-row items-center justify-between gap-1">
+          <Select
+            onValueChange={(e) => {
+              column.setFilterValue(e);
+            }}
+            value={columnFilterValue?.toString()}
+            // defaultValue={column.getFilterValue()?.toString()}
           >
-            <Icons.calendar className="mr-2 size-4" />
-            {columnFilterValue ? (
-              format(columnFilterValue as Date, "PPP")
-            ) : (
-              <span>Pick a date</span>
-            )}
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent className="w-auto p-0">
-          <Calendar
-            mode="single"
-            selected={columnFilterValue as Date}
-            onSelect={(date?: Date) => {
-              column.setFilterValue(date);
-              setColumnFilterValue(date);
+            <SelectTrigger>
+              <SelectValue placeholder="select filter" />
+            </SelectTrigger>
+            <SelectContent>{generateFilterOptions(options)}</SelectContent>
+          </Select>
+          {!!columnFilterValue && (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="size-5"
+              onClick={(e) => {
+                column.setFilterValue(undefined);
+              }}
+            >
+              <Icons.close className="size-4" />
+            </Button>
+          )}
+        </div>
+      );
+    case "multiSelect":
+      const optionValue = columnFilterValue as Option[];
+      return (
+        <div className="flex flex-row items-center justify-between gap-1">
+          <MultipleSelector
+            className="w-full"
+            onChange={(e) => {
+              column.setFilterValue(e);
+            }}
+            placeholder="multi select..."
+            value={optionValue}
+            options={options}
+            commandProps={{
+              filter: (value, search, keywords) => {
+                return options
+                  ?.find((o) => o.value === value)
+                  ?.label?.toLowerCase()
+                  .includes(search.toLowerCase())
+                  ? 1
+                  : 0;
+              },
             }}
           />
-        </PopoverContent>
-      </Popover>
-    </div>
-  ) : filterVariant === "dateRange" ? (
-    <div className="flex w-full flex-row items-center justify-between gap-1">
-      <Popover>
-        <PopoverTrigger asChild>
-          <Button
-            id="date"
-            variant={"outline"}
-            className={cn(
-              "w-full justify-start text-left font-normal",
-              !columnFilterValue && "text-muted-foreground",
-            )}
-          >
-            {(columnFilterValue as [Date, Date])?.[0] ? (
-              (columnFilterValue as [Date, Date])?.[1] ? (
-                <>
-                  {format(
-                    (columnFilterValue as [Date, Date])?.[0],
-                    "LLL dd, y",
-                  )}{" "}
-                  -{" "}
-                  {format(
-                    (columnFilterValue as [Date, Date])?.[1],
-                    "LLL dd, y",
-                  )}
-                </>
-              ) : (
-                format((columnFilterValue as [Date, Date])?.[0], "LLL dd, y")
-              )
-            ) : (
-              <span>Pick a date</span>
-            )}
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent className="w-auto p-0" align="start">
-          <Calendar
-            mode="range"
-            defaultMonth={(columnFilterValue as [Date, Date])?.[0]}
-            selected={{
-              from: (columnFilterValue as [Date, Date])?.[0],
-              to: (columnFilterValue as [Date, Date])?.[1],
-            }}
-            onSelect={(dateRange?: DateRange) => {
-              column.setFilterValue([dateRange?.from, dateRange?.to]);
-              setColumnFilterValue([dateRange?.from, dateRange?.to]);
-            }}
-            numberOfMonths={2}
+        </div>
+      );
+    case "date":
+      const dateValue = columnFilterValue as Date;
+      return (
+        <div className="flex w-full flex-row items-center justify-between gap-1">
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                variant={"outline"}
+                className={cn(
+                  "w-full justify-start text-left font-normal",
+                  !columnFilterValue && "text-muted-foreground",
+                )}
+              >
+                <Icons.calendar className="mr-2 size-4" />
+                {columnFilterValue ? (
+                  format(dateValue, "PPP")
+                ) : (
+                  <span>Pick a date</span>
+                )}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0">
+              <Calendar
+                mode="single"
+                selected={dateValue}
+                onSelect={(date?: Date) => {
+                  column.setFilterValue(date);
+                }}
+              />
+            </PopoverContent>
+          </Popover>
+        </div>
+      );
+    case "dateRange":
+      const dateRangeValue = columnFilterValue as [Date, Date];
+      return (
+        <div className="flex w-full flex-row items-center justify-between gap-1">
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                id="date"
+                variant={"outline"}
+                className={cn(
+                  "w-full justify-start text-left font-normal",
+                  !columnFilterValue && "text-muted-foreground",
+                )}
+              >
+                {dateRangeValue?.[0] ? (
+                  dateRangeValue?.[1] ? (
+                    <>
+                      {format(dateRangeValue?.[0], "LLL dd, y")} -{" "}
+                      {format(dateRangeValue?.[1], "LLL dd, y")}
+                    </>
+                  ) : (
+                    format(dateRangeValue?.[0], "LLL dd, y")
+                  )
+                ) : (
+                  <span>Pick a date</span>
+                )}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="start">
+              <Calendar
+                mode="range"
+                defaultMonth={dateRangeValue?.[0]}
+                selected={{
+                  from: dateRangeValue?.[0],
+                  to: dateRangeValue?.[1],
+                }}
+                onSelect={(dateRange?: DateRange) => {
+                  column.setFilterValue([dateRange?.from, dateRange?.to]);
+                }}
+                numberOfMonths={2}
+              />
+            </PopoverContent>
+          </Popover>
+        </div>
+      );
+    default:
+      const value = (columnFilterValue ?? "") as string;
+      return (
+        <div className="flex w-full flex-row items-center justify-between gap-1">
+          <DebouncedInput
+            className="w-full rounded border shadow"
+            onChange={(value) => column.setFilterValue(value)}
+            placeholder={`Search...`}
+            type="text"
+            value={value}
           />
-        </PopoverContent>
-      </Popover>
-    </div>
-  ) : (
-    <div className="flex w-full flex-row items-center justify-between gap-1">
-      <DebouncedInput
-        className="w-full rounded border shadow"
-        onChange={(value) => column.setFilterValue(value)}
-        placeholder={`Search...`}
-        type="text"
-        value={(columnFilterValue ?? "") as string}
-      />
-    </div>
-  );
+        </div>
+      );
+  }
 }

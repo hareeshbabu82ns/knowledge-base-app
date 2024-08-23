@@ -2,6 +2,7 @@
 
 import {
   ColumnFiltersState,
+  flexRender,
   PaginationState,
   SortingState,
   Table,
@@ -28,6 +29,7 @@ import { Button } from "@/components/ui/button";
 import { ChevronDown } from "lucide-react";
 import { Icons } from "@/components/shared/icons";
 import DataTableColumnFilter from "@/components/data-table/datatable-column-filter";
+import { Badge } from "../ui/badge";
 
 export const DEFAULT_PAGE_INDEX = 0;
 export const DEFAULT_PAGE_SIZE = 20;
@@ -57,16 +59,28 @@ export function DataTableFilters<TData>({
         className,
       )}
     >
-      <div className="@md/tfilters:flex-row flex flex-1 flex-col items-end justify-between gap-2">
+      {/* <div className="@md/tfilters:flex-row flex flex-1 flex-col items-end justify-between gap-2"> */}
+      <div className="@xl/tfilters:grid-cols-4 grid grid-cols-2 items-end gap-2 border-b border-dashed pb-4">
         <div className="grid w-full max-w-sm items-center gap-1.5">
           <Label htmlFor="columnVisibility">Column Visibility</Label>
           <DropdownMenu>
             <DropdownMenuTrigger id="columnVisibility" asChild>
-              <Button
-                variant="outline"
-                className="flex w-[150px] justify-between"
-              >
-                Columns <ChevronDown className="ml-2 size-4" />
+              <Button variant="outline" className="flex justify-between">
+                <div className="no-scrollbar flex w-1 flex-1 gap-2 overflow-x-scroll">
+                  {table
+                    .getAllColumns()
+                    .filter(
+                      (column) => column.getCanHide() && column.getIsVisible(),
+                    )
+                    .map((column) => {
+                      return (
+                        <Badge key={column.id} className="capitalize">
+                          {column.id}
+                        </Badge>
+                      );
+                    })}
+                </div>
+                <ChevronDown className="ml-2 size-4" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
@@ -99,7 +113,7 @@ export function DataTableFilters<TData>({
               table.setPageSize(Number(value));
             }}
           >
-            <SelectTrigger id="rowsPerPage" className="w-[100px]">
+            <SelectTrigger id="rowsPerPage" className="">
               <SelectValue placeholder={table.getState().pagination.pageSize} />
             </SelectTrigger>
             <SelectContent side="top">
@@ -118,7 +132,7 @@ export function DataTableFilters<TData>({
             id="gotoPage"
             type="text"
             inputMode="numeric"
-            className="w-[100px]"
+            className=""
             placeholder="Go to page"
             value={table.getState().pagination.pageIndex + 1}
             onChange={(value) => {
@@ -129,31 +143,53 @@ export function DataTableFilters<TData>({
         </div>
 
         {resetFilters && (
-          <Button
-            variant="outline"
-            size="icon"
-            className="px-2"
-            onClick={resetFilters}
-          >
-            <Icons.reset className="size-5" />
-          </Button>
+          <div className="flex justify-end">
+            <Button
+              variant="outline"
+              size="icon"
+              className="px-2"
+              onClick={resetFilters}
+            >
+              <Icons.reset className="size-5" />
+            </Button>
+          </div>
         )}
       </div>
 
       {/* Column Filters */}
       <div className="@4xl/tfilters:grid-cols-3 @sm/tfilters:grid-cols-2 mt-4 grid grid-cols-1 items-end justify-between gap-6">
-        {table.getLeafHeaders().map((header) => {
+        {table.getAllLeafColumns().map((column) => {
+          if (!column.getCanFilter() || !column.columnDef.meta?.filterVariant)
+            return null;
+          return (
+            <div
+              key={column.id}
+              className="flex w-full max-w-sm flex-col gap-2"
+            >
+              <Label htmlFor={column.id}>
+                {(column.columnDef.header as any) || column.id}
+              </Label>
+              <DataTableColumnFilter column={column} />
+            </div>
+          );
+        })}
+        {/* {table.getLeafHeaders().map((header) => {
           if (!header.column.getCanFilter()) return null;
           return (
             <div
               key={header.id}
               className="flex w-full max-w-sm flex-col gap-2"
             >
-              <Label htmlFor={header.id}>{header.column.id}</Label>
+              <Label htmlFor={header.id}>
+                {flexRender(
+                  header.column.columnDef.header,
+                  header.getContext(),
+                )}
+              </Label>
               <DataTableColumnFilter column={header.column} />
             </div>
           );
-        })}
+        })} */}
       </div>
     </div>
   );

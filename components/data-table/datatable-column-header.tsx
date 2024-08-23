@@ -25,7 +25,7 @@ export function DataTableColumnHeader<TData, TValue>({
       key={header.id}
       colSpan={header.colSpan}
       className={cn(
-        "hover:bg-muted/50",
+        "hover:bg-black/5 dark:hover:bg-white/5",
         withFilter && header.column.getCanSort() ? "pb-2" : "",
         className,
       )}

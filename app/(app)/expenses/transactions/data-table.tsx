@@ -24,16 +24,11 @@ import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { fetchTransactions } from "./actions";
 import { subMonths } from "date-fns";
 import { DataTableHeader } from "@/components/data-table/datatable-header";
-import { Button } from "@/components/ui/button";
-import { Icons } from "@/components/shared/icons";
 import { DataTableColumnHeader } from "@/components/data-table/datatable-column-header";
 import {
-  DataTableFilters,
-  DataTableFiltersAtomProps,
   DEFAULT_PAGE_INDEX,
   DEFAULT_PAGE_SIZE,
-} from "./datatable-filters-dlg";
-import { atom } from "jotai";
+} from "@/components/data-table/datatable-filters";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -77,6 +72,10 @@ export function DataTable<TData, TValue>({
       pageIndex: DEFAULT_PAGE_INDEX,
       pageSize: DEFAULT_PAGE_SIZE,
     });
+    setColumnVisibility({
+      id: false,
+      type: false,
+    });
   }, []);
 
   const table = useReactTable({
@@ -96,15 +95,18 @@ export function DataTable<TData, TValue>({
     onColumnFiltersChange: setColumnFilters,
     manualPagination: true,
     manualSorting: true,
+    manualFiltering: true,
   });
 
   return (
     <div className="flex flex-col gap-4">
       <div className="rounded-md border">
-        <DataTableFilters table={table} resetFilters={resetFilters} />
-      </div>
-      <div className="rounded-md border">
-        <DataTableHeader table={table} title="Transactions" />
+        <DataTableHeader
+          table={table}
+          title="Transactions"
+          resetFilters={resetFilters}
+          isFiltersOpen={true}
+        />
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
@@ -123,7 +125,10 @@ export function DataTable<TData, TValue>({
                   data-state={row.getIsSelected() && "selected"}
                 >
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
+                    <TableCell
+                      key={cell.id}
+                      className="hover:bg-black/5 dark:hover:bg-white/5"
+                    >
                       {flexRender(
                         cell.column.columnDef.cell,
                         cell.getContext(),

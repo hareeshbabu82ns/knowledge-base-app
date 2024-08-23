@@ -1,50 +1,62 @@
 "use client";
+
 import { Table } from "@tanstack/react-table";
 
 import { cn } from "@/lib/utils";
 import DebouncedInput from "../DebouncedInput";
+import React from "react";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "../ui/collapsible";
+import { Button } from "../ui/button";
+import { ChevronsUpDown } from "lucide-react";
+import { DataTableFilters } from "./datatable-filters";
+import { Icons } from "../shared/icons";
 
 interface DataTableHeaderProps<TData> {
   table: Table<TData>;
   title?: React.ReactNode;
   actions?: React.ReactNode;
-  showGoToPage?: boolean;
   className?: string;
+  resetFilters?: () => void;
+  isFiltersOpen?: boolean;
 }
 
 export function DataTableHeader<TData>({
   table,
   title,
   actions,
-  showGoToPage = false,
   className,
+  resetFilters,
+  isFiltersOpen: _isFiltersOpen,
 }: DataTableHeaderProps<TData>) {
+  const [isFiltersOpen, setIsFiltersOpen] = React.useState(_isFiltersOpen);
+
+  React.useEffect(() => {
+    setIsFiltersOpen(_isFiltersOpen);
+  }, [_isFiltersOpen]);
+
   return (
-    <div
-      className={cn(
-        "@container/theader bg-muted/50 flex flex-1 items-center justify-between p-2 font-medium",
-        className,
-      )}
-    >
-      <div className="@xs/theader:flex-row flex flex-1 flex-col items-center justify-between gap-2">
-        {title}
-        <div className="flex items-center gap-2">
-          {actions}
-          {showGoToPage && (
-            <DebouncedInput
-              className="w-14"
-              type="text"
-              inputMode="numeric"
-              placeholder="Go to page"
-              value={table.getState().pagination.pageIndex + 1}
-              onChange={(value) => {
-                const page = value ? Number(value) - 1 : 0;
-                table.setPageIndex(page);
-              }}
-            />
-          )}
+    <Collapsible open={isFiltersOpen} onOpenChange={setIsFiltersOpen} asChild>
+      <div className={cn("@container/theader ", className)}>
+        <div className="@xs/theader:flex-row bg-muted/50 flex flex-1 flex-col items-center justify-between gap-2 p-2">
+          {title}
+          <div className="flex items-center gap-2">
+            {actions}
+            <CollapsibleTrigger asChild>
+              <Button variant="ghost" size="sm" className="w-9 p-0">
+                <Icons.settingsSliders className="size-4" />
+                <span className="sr-only">Toggle Filters</span>
+              </Button>
+            </CollapsibleTrigger>
+          </div>
         </div>
+        <CollapsibleContent className="space-y-2 border-b-2">
+          <DataTableFilters table={table} resetFilters={resetFilters} />
+        </CollapsibleContent>
       </div>
-    </div>
+    </Collapsible>
   );
 }

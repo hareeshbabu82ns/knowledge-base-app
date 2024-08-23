@@ -5,7 +5,7 @@ import AccountsTable from "../_components/accounts-table";
 import { fetchAccounts } from "../actions";
 
 function Page() {
-  const { isPending, isError, data, error } = useQuery({
+  const { isPending, isError, data, error, refetch } = useQuery({
     queryKey: ["accounts"],
     queryFn: async () => await fetchAccounts(),
   });
@@ -19,7 +19,7 @@ function Page() {
   }
 
   // We can assume by this point that `isSuccess === true`
-  return <AccountsTable tableData={data} />;
+  return <AccountsTable tableData={data} refetch={() => refetch()} />;
 }
 
 export default Page;

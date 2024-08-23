@@ -8,12 +8,9 @@ import {
   Table,
   TableBody,
   TableCell,
-  TableFooter,
-  TableHead,
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { cn } from "@/lib/utils";
 import {
   PaginationState,
   createColumnHelper,
@@ -44,8 +41,8 @@ type RowObj = {
   updatedAt: Date;
 };
 
-function AccountsTable(props: { tableData: RowObj[] }) {
-  const { tableData } = props;
+function AccountsTable(props: { tableData: RowObj[]; refetch: () => void }) {
+  const { tableData, refetch } = props;
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     [],
   );
@@ -124,15 +121,11 @@ function AccountsTable(props: { tableData: RowObj[] }) {
       <DataTableHeader
         table={table}
         title="Accounts"
-        showGoToPage
+        resetFilters={() => table.resetColumnFilters()}
         actions={
           <>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => table.resetColumnFilters()}
-            >
-              <Icons.reset className="size-4" />
+            <Button variant="ghost" size="icon" onClick={refetch}>
+              <Icons.refresh className="size-4" />
             </Button>
           </>
         }
