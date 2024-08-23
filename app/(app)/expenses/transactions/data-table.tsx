@@ -15,21 +15,25 @@ import {
   Table,
   TableBody,
   TableCell,
-  TableHead,
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import React, { useMemo, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import { DataTablePagination } from "@/components/data-table/datatable-pagination";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { fetchTransactions } from "./actions";
-import DataTableColumnFilter from "@/components/data-table/datatable-column-filter";
 import { subMonths } from "date-fns";
-import { cn } from "@/lib/utils";
 import { DataTableHeader } from "@/components/data-table/datatable-header";
 import { Button } from "@/components/ui/button";
 import { Icons } from "@/components/shared/icons";
 import { DataTableColumnHeader } from "@/components/data-table/datatable-column-header";
+import {
+  DataTableFilters,
+  DataTableFiltersAtomProps,
+  DEFAULT_PAGE_INDEX,
+  DEFAULT_PAGE_SIZE,
+} from "./datatable-filters-dlg";
+import { atom } from "jotai";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -47,8 +51,8 @@ export function DataTable<TData, TValue>({
   ]);
 
   const [pagination, setPagination] = React.useState<PaginationState>({
-    pageIndex: 0,
-    pageSize: 20,
+    pageIndex: DEFAULT_PAGE_INDEX,
+    pageSize: DEFAULT_PAGE_SIZE,
   });
 
   const dataQuery = useQuery({
@@ -64,6 +68,16 @@ export function DataTable<TData, TValue>({
   });
 
   const defaultData = useMemo(() => [], []);
+  const resetFilters = useCallback(() => {
+    setColumnFilters([
+      { id: "date", value: [subMonths(new Date(), 6), undefined] },
+    ]);
+    setSorting([{ id: "date", desc: true }]);
+    setPagination({
+      pageIndex: DEFAULT_PAGE_INDEX,
+      pageSize: DEFAULT_PAGE_SIZE,
+    });
+  }, []);
 
   const table = useReactTable({
     data: (dataQuery.data?.rows as TData[]) ?? defaultData,
@@ -85,57 +99,53 @@ export function DataTable<TData, TValue>({
   });
 
   return (
-    <div className="rounded-md border">
-      <DataTableHeader
-        table={table}
-        title="Transactions"
-        showGoToPage
-        actions={
-          <>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setColumnFilters([])}
-            >
-              <Icons.reset className="size-4" />
-            </Button>
-          </>
-        }
-      />
-      <Table>
-        <TableHeader>
-          {table.getHeaderGroups().map((headerGroup) => (
-            <TableRow key={headerGroup.id}>
-              {headerGroup.headers.map((header) => (
-                <DataTableColumnHeader key={header.id} header={header} />
-              ))}
-            </TableRow>
-          ))}
-        </TableHeader>
-        <TableBody>
-          {table.getRowModel().rows?.length ? (
-            table.getRowModel().rows.map((row) => (
-              <TableRow
-                key={row.id}
-                data-state={row.getIsSelected() && "selected"}
-              >
-                {row.getVisibleCells().map((cell) => (
-                  <TableCell key={cell.id}>
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </TableCell>
+    <div className="flex flex-col gap-4">
+      <div className="rounded-md border">
+        <DataTableFilters table={table} resetFilters={resetFilters} />
+      </div>
+      <div className="rounded-md border">
+        <DataTableHeader table={table} title="Transactions" />
+        <Table>
+          <TableHeader>
+            {table.getHeaderGroups().map((headerGroup) => (
+              <TableRow key={headerGroup.id}>
+                {headerGroup.headers.map((header) => (
+                  <DataTableColumnHeader key={header.id} header={header} />
                 ))}
               </TableRow>
-            ))
-          ) : (
-            <TableRow>
-              <TableCell colSpan={columns.length} className="h-24 text-center">
-                No results.
-              </TableCell>
-            </TableRow>
-          )}
-        </TableBody>
-      </Table>
-      <DataTablePagination table={table} />
+            ))}
+          </TableHeader>
+          <TableBody>
+            {table.getRowModel().rows?.length ? (
+              table.getRowModel().rows.map((row) => (
+                <TableRow
+                  key={row.id}
+                  data-state={row.getIsSelected() && "selected"}
+                >
+                  {row.getVisibleCells().map((cell) => (
+                    <TableCell key={cell.id}>
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext(),
+                      )}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell
+                  colSpan={columns.length}
+                  className="h-24 text-center"
+                >
+                  No results.
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+        <DataTablePagination table={table} />
+      </div>
     </div>
   );
 }

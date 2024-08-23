@@ -11,20 +11,24 @@ import { TableHead } from "../ui/table";
 interface DataTableColumnHeaderProps<TData, TValue>
   extends React.HTMLAttributes<HTMLDivElement> {
   header: Header<TData, TValue>;
-  withMenu?: boolean;
+  withFilter?: boolean;
 }
 
 export function DataTableColumnHeader<TData, TValue>({
   header,
   className,
-  withMenu = false,
+  withFilter = false,
 }: DataTableColumnHeaderProps<TData, TValue>) {
   // const fieldMeta = header.column.columnDef.meta;
   return (
     <TableHead
       key={header.id}
       colSpan={header.colSpan}
-      className={cn(header.column.getCanSort() ? "pb-2" : "", className)}
+      className={cn(
+        "hover:bg-muted/50",
+        withFilter && header.column.getCanSort() ? "pb-2" : "",
+        className,
+      )}
     >
       {header.isPlaceholder ? null : (
         <>
@@ -44,7 +48,7 @@ export function DataTableColumnHeader<TData, TValue>({
               false: <FaSort className="size-4" />,
             }[header.column.getIsSorted() as string] ?? null}
           </div>
-          {header.column.getCanFilter() ? (
+          {withFilter && header.column.getCanFilter() ? (
             <DataTableColumnFilter column={header.column} />
           ) : null}
         </>

@@ -1,7 +1,6 @@
 "use client";
 
 import { Badge } from "@/components/ui/badge";
-import { DataTableColumnHeader } from "@/components/data-table/datatable-column-header";
 import { ExpenseTransaction } from "@prisma/client";
 import { ColumnDef } from "@tanstack/react-table";
 import { fetchAccounts, fetchTags } from "../accounts/actions";
