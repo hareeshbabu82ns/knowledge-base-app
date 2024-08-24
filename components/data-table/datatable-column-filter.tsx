@@ -243,7 +243,7 @@ export default function DataTableColumnFilter({
             className="w-full rounded border shadow"
             onChange={(value) => column.setFilterValue(value)}
             placeholder={`Search...`}
-            type="text"
+            type="search"
             value={value}
           />
         </div>

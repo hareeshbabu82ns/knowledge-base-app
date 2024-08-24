@@ -1,14 +1,37 @@
 import { ColumnDef, ColumnFilter, SortingState } from "@tanstack/react-table";
 import { Option } from "../ui/multi-select";
 
+export const filterFnMultiSelect = (
+  row: any,
+  columnId: string,
+  filterValue: any,
+) => {
+  const arrVal = filterValue as Option[];
+  const value = row.original[columnId] as string;
+  if (arrVal.length && !arrVal.some((v) => v.value === value)) return false;
+  return true;
+};
+
+export const filterFnDateRange = (
+  row: any,
+  columnId: string,
+  filterValue: any,
+) => {
+  const arrVal = filterValue as [string, string];
+  const value = row.original[columnId] as Date;
+  if (arrVal[0] && value < new Date(arrVal[0])) return false;
+  if (arrVal[1] && value > new Date(arrVal[1])) return false;
+  return true;
+};
+
 export const convertSortingToPrisma = (
   sorting: SortingState,
-  columns: ColumnDef<any>[],
+  columns: ColumnDef<any, any>[],
 ) => {
   // sorting [ { id: 'date', desc: true } ] to { date: 'desc' }
 
   return sorting.reduce((acc, { id, desc }) => {
-    const column = columns.find((c: any) => c.accessorKey === id);
+    const column = columns.find((c) => c.id === id);
     const dbId = column?.meta?.dbMapId || id;
 
     if (
@@ -22,24 +45,18 @@ export const convertSortingToPrisma = (
       acc[dbId] = desc ? "desc" : "asc";
     }
     return acc;
-    // if (id === "accountObj") {
-    //   acc["accountObj"] = { name: desc ? "desc" : "asc" };
-    // } else {
-    //   acc[id] = desc ? "desc" : "asc";
-    // }
-    // return acc;
   }, {} as any);
 };
 
 export const convertColumnFiltersToPrisma = (
   filters: ColumnFilter[],
-  columns: ColumnDef<any>[],
+  columns: ColumnDef<any, any>[],
 ) => {
   // filters [ { id: 'description', value: 'des*' } ] to { description: { contains: 'des' } }
 
   // console.dir({ columns }, { depth: 3 });
   return filters?.reduce((acc, { id, value }) => {
-    const column = columns.find((c: any) => c.accessorKey === id);
+    const column = columns.find((c) => c.id === id);
     const dbId = column?.meta?.dbMapId || id;
     switch (column?.meta?.filterVariant) {
       case "dateRange": {

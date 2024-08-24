@@ -8,7 +8,7 @@ import {
   PaginationState,
   SortingState,
 } from "@tanstack/react-table";
-import { columns } from "./columns";
+import { columns, ExpenseTransactionWithAccount } from "./columns";
 import {
   convertColumnFiltersToPrisma,
   convertSortingToPrisma,

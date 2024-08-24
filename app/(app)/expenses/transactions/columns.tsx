@@ -1,6 +1,6 @@
 import { Badge } from "@/components/ui/badge";
 import { ExpenseAccount, ExpenseTransaction } from "@prisma/client";
-import { ColumnDef } from "@tanstack/react-table";
+import { createColumnHelper } from "@tanstack/react-table";
 import { fetchAccounts, fetchTags } from "../accounts/actions";
 import { cn } from "@/lib/utils";
 
@@ -8,13 +8,15 @@ export type ExpenseTransactionWithAccount = ExpenseTransaction & {
   accountObj: ExpenseAccount;
 };
 
-export const columns: ColumnDef<Partial<ExpenseTransactionWithAccount>>[] = [
-  {
-    accessorKey: "id",
+const columnHelper =
+  createColumnHelper<Partial<ExpenseTransactionWithAccount>>();
+export const columns = [
+  columnHelper.accessor("id", {
+    id: "id",
     header: "ID",
-  },
-  {
-    accessorKey: "date",
+  }),
+  columnHelper.accessor("date", {
+    id: "date",
     size: 100,
     header: "Date",
     meta: { filterVariant: "dateRange" },
@@ -23,15 +25,15 @@ export const columns: ColumnDef<Partial<ExpenseTransactionWithAccount>>[] = [
         {info.getValue().toLocaleDateString()}
       </p>
     ),
-  },
-  {
-    accessorKey: "description",
+  }),
+  columnHelper.accessor("description", {
+    id: "description",
     header: "Description",
     meta: { filterVariant: "text" },
     size: 500,
-  },
-  {
-    accessorKey: "amount",
+  }),
+  columnHelper.accessor("amount", {
+    id: "amount",
     size: 50,
     header: "Amount",
     meta: { filterVariant: "range" },
@@ -54,9 +56,9 @@ export const columns: ColumnDef<Partial<ExpenseTransactionWithAccount>>[] = [
         </div>
       );
     },
-  },
-  {
-    accessorKey: "accountObj",
+  }),
+  columnHelper.accessor("accountObj.name", {
+    id: "accountObj",
     header: "Account",
     size: 50,
     // enableSorting: false,
@@ -73,11 +75,10 @@ export const columns: ColumnDef<Partial<ExpenseTransactionWithAccount>>[] = [
         }));
       },
     },
-    cell: (info: any) => info.getValue().name,
-    // cell: ({ row }) => row.original?.accountObj?.name,
-  },
-  {
-    accessorKey: "tags",
+    // cell: (info: any) => info.getValue().name,
+  }),
+  columnHelper.accessor("tags", {
+    id: "tags",
     header: "Tags",
     meta: {
       filterVariant: "multiSelect",
@@ -99,9 +100,9 @@ export const columns: ColumnDef<Partial<ExpenseTransactionWithAccount>>[] = [
         ))}
       </div>
     ),
-  },
-  {
-    accessorKey: "type",
+  }),
+  columnHelper.accessor("type", {
+    id: "type",
     header: "Type",
-  },
+  }),
 ];

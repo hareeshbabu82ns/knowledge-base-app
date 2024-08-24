@@ -1,4 +1,5 @@
 "use client";
+
 import {
   ColumnFiltersState,
   flexRender,
@@ -16,7 +17,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import React, { useCallback, useMemo, useState } from "react";
+import React from "react";
 import { DataTablePagination } from "@/components/data-table/datatable-pagination";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { fetchTransactions } from "./actions";
@@ -48,7 +49,7 @@ export function DataTable() {
   const [pagination, setPagination] = React.useState(defaultPagination);
   const [columnFilters, setColumnFilters] =
     React.useState(defaultColumnFilters);
-  const [columnVisibility, setColumnVisibility] = useState(
+  const [columnVisibility, setColumnVisibility] = React.useState(
     defaultColumnVisibility,
   );
 
@@ -58,11 +59,11 @@ export function DataTable() {
       fetchTransactions({ pagination, sorting, filters: columnFilters }),
     placeholderData: keepPreviousData,
   });
-  const { isFetching, isLoading, refetch } = dataQuery;
+  const { data, isFetching, isLoading, refetch } = dataQuery;
 
-  const defaultData = useMemo(() => [], []);
+  const defaultData = React.useMemo(() => [], []);
 
-  const resetFilters = useCallback(() => {
+  const resetFilters = React.useCallback(() => {
     setSorting(defaultSorting);
     setPagination(defaultPagination);
     setColumnFilters(defaultColumnFilters);
@@ -70,11 +71,9 @@ export function DataTable() {
   }, []);
 
   const table = useReactTable({
-    data: dataQuery.data?.rows ?? defaultData,
-    rowCount: dataQuery.data?.rowCount,
+    data: data?.rows ?? defaultData,
+    rowCount: data?.rowCount,
     columns,
-    getCoreRowModel: getCoreRowModel(),
-    onColumnVisibilityChange: setColumnVisibility,
     state: {
       sorting,
       pagination,
@@ -84,6 +83,8 @@ export function DataTable() {
     onSortingChange: setSorting,
     onPaginationChange: setPagination,
     onColumnFiltersChange: setColumnFilters,
+    onColumnVisibilityChange: setColumnVisibility,
+    getCoreRowModel: getCoreRowModel(),
     manualPagination: true,
     manualSorting: true,
     manualFiltering: true,
