@@ -1,12 +1,16 @@
 "use client";
 
 import { Badge } from "@/components/ui/badge";
-import { ExpenseTransaction } from "@prisma/client";
+import { ExpenseAccount, ExpenseTransaction } from "@prisma/client";
 import { ColumnDef } from "@tanstack/react-table";
 import { fetchAccounts, fetchTags } from "../accounts/actions";
 import { cn } from "@/lib/utils";
 
-export const columns: ColumnDef<Partial<ExpenseTransaction>>[] = [
+export type ExpenseTransactionWithAccount = ExpenseTransaction & {
+  accountObj: ExpenseAccount;
+};
+
+export const columns: ColumnDef<Partial<ExpenseTransactionWithAccount>>[] = [
   {
     accessorKey: "id",
     header: "ID",

@@ -1,4 +1,3 @@
-import { columns } from "./columns";
 import { DataTable } from "./data-table";
 
 function TransactionsPage() {
