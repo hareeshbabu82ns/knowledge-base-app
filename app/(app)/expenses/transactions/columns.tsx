@@ -1,5 +1,3 @@
-"use client";
-
 import { Badge } from "@/components/ui/badge";
 import { ExpenseAccount, ExpenseTransaction } from "@prisma/client";
 import { ColumnDef } from "@tanstack/react-table";
@@ -63,7 +61,10 @@ export const columns: ColumnDef<Partial<ExpenseTransactionWithAccount>>[] = [
     size: 50,
     // enableSorting: false,
     meta: {
+      dbMapId: "account",
       filterVariant: "multiSelect",
+      fieldType: "subObject",
+      subObjectLabelField: "name",
       filterOptionsFn: async () => {
         const accounts = await fetchAccounts();
         return accounts.map((account) => ({
@@ -80,6 +81,7 @@ export const columns: ColumnDef<Partial<ExpenseTransactionWithAccount>>[] = [
     header: "Tags",
     meta: {
       filterVariant: "multiSelect",
+      fieldType: "array",
       filterOptionsFn: async () => {
         const tags = await fetchTags();
         return tags.map((tag) => ({

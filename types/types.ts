@@ -39,5 +39,8 @@ declare module "@tanstack/react-table" {
       | "dateRange";
     filterOptions?: Option[];
     filterOptionsFn?: () => Promise<Option[] | undefined>;
+    dbMapId?: string;
+    fieldType?: "array" | "subObject";
+    subObjectLabelField?: string;
   }
 }

@@ -12,7 +12,6 @@ import {
 } from "@/components/ui/select";
 import { Icons } from "@/components/shared/icons";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
 import {
   Popover,
   PopoverContent,
@@ -38,8 +37,10 @@ function generateFilterOptions(filterOptions?: Option[]) {
 
 export default function DataTableColumnFilter({
   column,
+  debounce = 1000,
 }: {
   column: Column<any, unknown>;
+  debounce?: number;
 }) {
   const columnFilterValue = column.getFilterValue();
 
@@ -72,6 +73,7 @@ export default function DataTableColumnFilter({
       return (
         <div className="flex space-x-2">
           <DebouncedInput
+            debounce={debounce}
             type="text"
             inputMode="numeric"
             value={rangeValue?.[0] ?? ""}
@@ -85,6 +87,7 @@ export default function DataTableColumnFilter({
             className="w-16 flex-1 rounded border shadow"
           />
           <DebouncedInput
+            debounce={debounce}
             type="text"
             inputMode="numeric"
             value={rangeValue?.[1] ?? ""}
@@ -236,6 +239,7 @@ export default function DataTableColumnFilter({
       return (
         <div className="flex w-full flex-row items-center justify-between gap-1">
           <DebouncedInput
+            debounce={debounce}
             className="w-full rounded border shadow"
             onChange={(value) => column.setFilterValue(value)}
             placeholder={`Search...`}

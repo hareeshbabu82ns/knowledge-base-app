@@ -58,7 +58,7 @@ export function DataTable() {
       fetchTransactions({ pagination, sorting, filters: columnFilters }),
     placeholderData: keepPreviousData,
   });
-  const { isFetching, isLoading } = dataQuery;
+  const { isFetching, isLoading, refetch } = dataQuery;
 
   const defaultData = useMemo(() => [], []);
 
@@ -97,6 +97,7 @@ export function DataTable() {
           title="Transactions"
           resetFilters={resetFilters}
           isFiltersOpen={true}
+          refetch={() => refetch()}
         />
         <Table>
           <TableHeader>

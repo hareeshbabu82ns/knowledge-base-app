@@ -3,7 +3,6 @@
 import { Table } from "@tanstack/react-table";
 
 import { cn } from "@/lib/utils";
-import DebouncedInput from "../DebouncedInput";
 import React from "react";
 import {
   Collapsible,
@@ -11,7 +10,6 @@ import {
   CollapsibleTrigger,
 } from "../ui/collapsible";
 import { Button } from "../ui/button";
-import { ChevronsUpDown } from "lucide-react";
 import { DataTableFilters } from "./datatable-filters";
 import { Icons } from "../shared/icons";
 
@@ -21,7 +19,9 @@ interface DataTableHeaderProps<TData> {
   actions?: React.ReactNode;
   className?: string;
   resetFilters?: () => void;
+  refetch?: () => void;
   isFiltersOpen?: boolean;
+  debounce?: number;
 }
 
 export function DataTableHeader<TData>({
@@ -30,7 +30,9 @@ export function DataTableHeader<TData>({
   actions,
   className,
   resetFilters,
+  refetch,
   isFiltersOpen: _isFiltersOpen,
+  debounce = 1000,
 }: DataTableHeaderProps<TData>) {
   const [isFiltersOpen, setIsFiltersOpen] = React.useState(_isFiltersOpen);
 
@@ -45,6 +47,12 @@ export function DataTableHeader<TData>({
           <div>{title}</div>
           <div className="flex items-center gap-2">
             {actions}
+            {refetch && (
+              <Button onClick={() => refetch()} variant="ghost" size="icon">
+                <Icons.refresh className="size-4" />
+                <span className="sr-only">Refresh</span>
+              </Button>
+            )}
             <CollapsibleTrigger asChild>
               <Button variant="ghost" size="sm" className="w-9 p-0">
                 <Icons.settingsSliders className="size-4" />
@@ -54,7 +62,11 @@ export function DataTableHeader<TData>({
           </div>
         </div>
         <CollapsibleContent className="space-y-2 border-b-2">
-          <DataTableFilters table={table} resetFilters={resetFilters} />
+          <DataTableFilters
+            table={table}
+            resetFilters={resetFilters}
+            debounce={debounce}
+          />
         </CollapsibleContent>
       </div>
     </Collapsible>

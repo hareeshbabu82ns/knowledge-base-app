@@ -2,7 +2,6 @@
 
 import {
   ColumnFiltersState,
-  flexRender,
   PaginationState,
   SortingState,
   Table,
@@ -34,23 +33,18 @@ import { Badge } from "../ui/badge";
 export const DEFAULT_PAGE_INDEX = 0;
 export const DEFAULT_PAGE_SIZE = 20;
 
-export interface DataTableFiltersAtomProps {
-  filter: ColumnFiltersState;
-  pagination: PaginationState;
-  sorting: SortingState;
-  visibility: VisibilityState;
-}
-
 interface DataTableFiltersProps<TData> {
   table: Table<TData>;
   className?: string;
   resetFilters?: () => void;
+  debounce?: number;
 }
 
 export function DataTableFilters<TData>({
   table,
   className,
   resetFilters,
+  debounce = 1000,
 }: DataTableFiltersProps<TData>) {
   return (
     <div
@@ -129,6 +123,7 @@ export function DataTableFilters<TData>({
         <div className="grid w-full max-w-sm items-center gap-1.5">
           <Label htmlFor="gotoPage">Goto Page</Label>
           <DebouncedInput
+            debounce={debounce}
             id="gotoPage"
             type="text"
             inputMode="numeric"
@@ -169,7 +164,7 @@ export function DataTableFilters<TData>({
               <Label htmlFor={column.id}>
                 {(column.columnDef.header as any) || column.id}
               </Label>
-              <DataTableColumnFilter column={column} />
+              <DataTableColumnFilter column={column} debounce={debounce} />
             </div>
           );
         })}
