@@ -57,6 +57,7 @@ export const columns: ColumnDef<Partial<ExpenseTransaction>>[] = [
     accessorKey: "accountObj",
     header: "Account",
     size: 50,
+    // enableSorting: false,
     meta: {
       filterVariant: "multiSelect",
       filterOptionsFn: async () => {

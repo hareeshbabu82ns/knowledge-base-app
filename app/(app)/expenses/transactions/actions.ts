@@ -61,7 +61,11 @@ export const fetchTransactions = async ({
 
   // sorting [ { id: 'date', desc: true } ] to { date: 'desc' }
   const orderBy = sorting?.reduce((acc, { id, desc }) => {
-    acc[id] = desc ? "desc" : "asc";
+    if (id === "accountObj") {
+      acc["accountObj"] = { name: desc ? "desc" : "asc" };
+    } else {
+      acc[id] = desc ? "desc" : "asc";
+    }
     return acc;
   }, {} as any);
 

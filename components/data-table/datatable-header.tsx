@@ -42,7 +42,7 @@ export function DataTableHeader<TData>({
     <Collapsible open={isFiltersOpen} onOpenChange={setIsFiltersOpen} asChild>
       <div className={cn("@container/theader ", className)}>
         <div className="@xs/theader:flex-row bg-muted/50 flex flex-1 flex-col items-center justify-between gap-2 p-2">
-          {title}
+          <div>{title}</div>
           <div className="flex items-center gap-2">
             {actions}
             <CollapsibleTrigger asChild>
