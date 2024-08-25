@@ -5,44 +5,50 @@ import {
   ColumnFiltersState,
   flexRender,
   getCoreRowModel,
-  getFilteredRowModel,
-  getPaginationRowModel,
-  getSortedRowModel,
   PaginationState,
   SortingState,
   useReactTable,
   VisibilityState,
 } from "@tanstack/react-table";
-import React from "react";
-import { DEFAULT_PAGE_INDEX, DEFAULT_PAGE_SIZE } from "./datatable-filters";
-import { DataTableHeader } from "./datatable-header";
+
 import {
   Table,
   TableBody,
   TableCell,
   TableHeader,
   TableRow,
-} from "../ui/table";
-import { DataTableColumnHeader } from "./datatable-column-header";
-import { DataTablePagination } from "./datatable-pagination";
+} from "@/components/ui/table";
+import React from "react";
+import { DataTablePagination } from "@/components/data-table/datatable-pagination";
+import { DataTableHeader } from "@/components/data-table/datatable-header";
+import { DataTableColumnHeader } from "@/components/data-table/datatable-column-header";
+import {
+  DEFAULT_PAGE_INDEX,
+  DEFAULT_PAGE_SIZE,
+} from "@/components/data-table/datatable-filters";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import Loader from "../shared/loader";
 import { cn } from "@/lib/utils";
 
 interface DataTableProps<TData, TValue> {
-  data: TData[];
-  columns: ColumnDef<TData, TValue>[];
   title?: React.ReactNode;
+  columns: ColumnDef<TData, any>[];
   defaultSorting?: SortingState;
   defaultPagination?: PaginationState;
   defaultColumnFilters?: ColumnFiltersState;
   defaultColumnVisibility?: VisibilityState;
   className?: string;
-  refetch?: () => void;
+  queryKey: string;
+  queryFn: (params: {
+    pagination: PaginationState;
+    sorting: SortingState;
+    filters: ColumnFiltersState;
+  }) => Promise<{ rowCount: number; rows: TData[] }>;
   isFiltersOpen?: boolean;
 }
 
-export function DataTableBasic<TData, TValue>({
+export function DataTableQuery<TData, TValue>({
   title,
-  data: tableData,
   columns,
   defaultSorting = [{ id: "name", desc: false }],
   defaultPagination = {
@@ -52,15 +58,10 @@ export function DataTableBasic<TData, TValue>({
   defaultColumnFilters = [],
   defaultColumnVisibility = { id: false },
   className,
-  refetch = () => {},
+  queryKey,
+  queryFn,
   isFiltersOpen = false,
 }: DataTableProps<TData, TValue>) {
-  const [data, _setData] = React.useState(() => [...tableData]);
-
-  React.useEffect(() => {
-    _setData([...tableData]);
-  }, [tableData]);
-
   const [sorting, setSorting] = React.useState(defaultSorting);
   const [pagination, setPagination] = React.useState(defaultPagination);
   const [columnFilters, setColumnFilters] =
@@ -69,24 +70,14 @@ export function DataTableBasic<TData, TValue>({
     defaultColumnVisibility,
   );
 
-  const table = useReactTable({
-    data,
-    columns,
-    state: {
-      sorting,
-      pagination,
-      columnFilters,
-      columnVisibility,
-    },
-    onSortingChange: setSorting,
-    onPaginationChange: setPagination,
-    onColumnFiltersChange: setColumnFilters,
-    onColumnVisibilityChange: setColumnVisibility,
-    getCoreRowModel: getCoreRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
+  const dataQuery = useQuery({
+    queryKey: [queryKey, pagination, sorting, columnFilters],
+    queryFn: () => queryFn({ pagination, sorting, filters: columnFilters }),
+    placeholderData: keepPreviousData,
   });
+  const { data, isFetching, isLoading, refetch } = dataQuery;
+
+  const defaultData = React.useMemo(() => [], []);
 
   const resetFilters = React.useCallback(() => {
     setSorting(defaultSorting);
@@ -99,6 +90,26 @@ export function DataTableBasic<TData, TValue>({
     defaultPagination,
     defaultSorting,
   ]);
+
+  const table = useReactTable({
+    data: data?.rows ?? defaultData,
+    rowCount: data?.rowCount,
+    columns,
+    state: {
+      sorting,
+      pagination,
+      columnFilters,
+      columnVisibility,
+    },
+    onSortingChange: setSorting,
+    onPaginationChange: setPagination,
+    onColumnFiltersChange: setColumnFilters,
+    onColumnVisibilityChange: setColumnVisibility,
+    getCoreRowModel: getCoreRowModel(),
+    manualPagination: true,
+    manualSorting: true,
+    manualFiltering: true,
+  });
 
   return (
     <div className={cn("rounded-md border", className)}>
@@ -139,7 +150,7 @@ export function DataTableBasic<TData, TValue>({
           ) : (
             <TableRow>
               <TableCell colSpan={columns.length} className="h-24 text-center">
-                No results
+                {isFetching || isLoading ? <Loader /> : "No results"}
               </TableCell>
             </TableRow>
           )}
