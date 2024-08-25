@@ -12,6 +12,7 @@ import {
 import { Button } from "../ui/button";
 import { DataTableFilters } from "./datatable-filters";
 import { Icons } from "../shared/icons";
+import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 
 interface DataTableHeaderProps<TData> {
   table: Table<TData>;
@@ -48,10 +49,15 @@ export function DataTableHeader<TData>({
           <div className="flex items-center gap-2">
             {actions}
             {refetch && (
-              <Button onClick={() => refetch()} variant="ghost" size="icon">
-                <Icons.refresh className="size-4" />
-                <span className="sr-only">Refresh</span>
-              </Button>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button onClick={() => refetch()} variant="ghost" size="icon">
+                    <Icons.refresh className="size-4" />
+                    <span className="sr-only">Refetch Data</span>
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>Refetch Data</TooltipContent>
+              </Tooltip>
             )}
             <CollapsibleTrigger asChild>
               <Button variant="ghost" size="sm" className="w-9 p-0">
