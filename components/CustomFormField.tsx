@@ -16,6 +16,11 @@ import { Input } from "./ui/input";
 import { Select, SelectContent, SelectTrigger, SelectValue } from "./ui/select";
 import { Textarea } from "./ui/textarea";
 import { cn } from "@/lib/utils";
+import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
+import { Button } from "./ui/button";
+import { Icons } from "./shared/icons";
+import { format } from "date-fns";
+import { Calendar } from "./ui/calendar";
 
 export enum FormFieldType {
   INPUT = "input",
@@ -42,6 +47,17 @@ interface CustomProps {
   fieldType: FormFieldType;
   className?: string;
   fieldClassName?: string;
+  inputType?: React.HTMLInputTypeAttribute;
+  inputMode?:
+    | "search"
+    | "text"
+    | "email"
+    | "tel"
+    | "url"
+    | "none"
+    | "numeric"
+    | "decimal"
+    | undefined;
 }
 
 const RenderInput = ({ field, props }: { field: any; props: CustomProps }) => {
@@ -58,6 +74,15 @@ const RenderInput = ({ field, props }: { field: any; props: CustomProps }) => {
             <Input
               placeholder={props.placeholder}
               {...field}
+              onChange={(e) =>
+                field.onChange(
+                  props.inputType === "number"
+                    ? Number(e.target.value)
+                    : e.target.value,
+                )
+              }
+              type={props.inputType}
+              inputMode={props.inputMode}
               required={props.required}
               disabled={props.disabled}
               className={cn(
@@ -113,28 +138,55 @@ const RenderInput = ({ field, props }: { field: any; props: CustomProps }) => {
       );
     case FormFieldType.DATE_PICKER:
       return (
-        <div className="flex rounded-md border">
-          <Image
-            src="/assets/icons/calendar.svg"
-            height={24}
-            width={24}
-            alt="user"
-            className="ml-2"
-          />
-          <FormControl>
-            <ReactDatePicker
-              showTimeSelect={props.showTimeSelect ?? false}
-              selected={field.value}
-              onChange={(date: Date | null) => field.onChange(date)}
-              timeInputLabel="Time:"
-              dateFormat={props.dateFormat ?? "MM/dd/yyyy"}
-              wrapperClassName="date-picker"
-              disabled={props.disabled}
-              required={props.required}
-              className={props.fieldClassName}
-            />
-          </FormControl>
+        <div className="flex w-full flex-row items-center justify-between gap-1">
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                variant={"outline"}
+                className={cn(
+                  "w-full justify-start text-left font-normal",
+                  !field.value && "text-muted-foreground",
+                )}
+              >
+                <Icons.calendar className="mr-2 size-4" />
+                {field.value ? (
+                  format(field.value, "PP")
+                ) : (
+                  <span>{props.placeholder || "Pick a date"}</span>
+                )}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0">
+              <Calendar
+                mode="single"
+                selected={field.value}
+                onSelect={(date?: Date) => field.onChange(date)}
+              />
+            </PopoverContent>
+          </Popover>
         </div>
+        // <div className="flex rounded-md border">
+        //   <Image
+        //     src="/assets/icons/calendar.svg"
+        //     height={24}
+        //     width={24}
+        //     alt="user"
+        //     className="ml-2"
+        //   />
+        //   <FormControl>
+        //     <ReactDatePicker
+        //       showTimeSelect={props.showTimeSelect ?? false}
+        //       selected={field.value}
+        //       onChange={(date: Date | null) => field.onChange(date)}
+        //       timeInputLabel="Time:"
+        //       dateFormat={props.dateFormat ?? "MM/dd/yyyy"}
+        //       wrapperClassName="date-picker"
+        //       disabled={props.disabled}
+        //       required={props.required}
+        //       className={props.fieldClassName}
+        //     />
+        //   </FormControl>
+        // </div>
       );
     case FormFieldType.SELECT:
       return (

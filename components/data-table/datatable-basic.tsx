@@ -38,6 +38,7 @@ interface DataTableProps<TData> {
   className?: string;
   refetch?: () => void;
   isFiltersOpen?: boolean;
+  actions?: React.ReactNode;
 }
 
 export function DataTableBasic<TData>({
@@ -54,6 +55,7 @@ export function DataTableBasic<TData>({
   className,
   refetch = () => {},
   isFiltersOpen = false,
+  actions,
 }: DataTableProps<TData>) {
   const [data, _setData] = React.useState(() => [...tableData]);
 
@@ -108,6 +110,7 @@ export function DataTableBasic<TData>({
         resetFilters={resetFilters}
         isFiltersOpen={isFiltersOpen}
         refetch={() => refetch()}
+        actions={actions}
       />
       <Table>
         <TableHeader>

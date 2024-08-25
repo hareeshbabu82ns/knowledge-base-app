@@ -29,6 +29,7 @@ model User {
   ExpenseAccount     ExpenseAccount[]
   ExpenseTransaction ExpenseTransaction[]
   ExpenseTags        ExpenseTags[]
+  Loan               Loan[]
 }
 
 model Account {
@@ -142,3 +143,57 @@ model ExpenseTags {
 }
 
 /// **** Expenses  ****
+
+/// **** Loans ****
+
+enum PaymentFrequency {
+  BIWEEKLY
+  MONTHLY
+}
+
+model Loan {
+  id             String           @id @default(auto()) @map("_id") @db.ObjectId
+  userId         String           @db.ObjectId
+  name           String
+  description    String           @default("")
+  amount         Float
+  interestRate   Float
+  emi            Float
+  durationMonths Int
+  startDate      DateTime
+  frequency      PaymentFrequency @default(MONTHLY)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  loanRates         LoanRates[]
+  loanExtraPayments LoanExtraPayments[]
+
+  @@map("loans")
+}
+
+model LoanRates {
+  id     String   @id @default(auto()) @map("_id") @db.ObjectId
+  loanId String   @db.ObjectId
+  rate   Float
+  date   DateTime
+
+  loan Loan @relation(fields: [loanId], references: [id], onDelete: Cascade)
+
+  @@map("loan_rates")
+}
+
+model LoanExtraPayments {
+  id       String   @id @default(auto()) @map("_id") @db.ObjectId
+  loanId   String   @db.ObjectId
+  amount   Float
+  date     DateTime
+  continue Boolean  @default(false)
+
+  loan Loan @relation(fields: [loanId], references: [id], onDelete: Cascade)
+
+  @@map("loan_extra_payments")
+}
+
+/// **** Loans ****

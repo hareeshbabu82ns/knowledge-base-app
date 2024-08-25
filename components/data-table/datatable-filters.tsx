@@ -1,12 +1,6 @@
 "use client";
 
-import {
-  ColumnFiltersState,
-  PaginationState,
-  SortingState,
-  Table,
-  VisibilityState,
-} from "@tanstack/react-table";
+import { Table } from "@tanstack/react-table";
 
 import { cn } from "@/lib/utils";
 import DebouncedInput from "@/components/DebouncedInput";

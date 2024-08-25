@@ -22,3 +22,8 @@ export const accountTypes = [
     name: "Vehicle Loan",
   },
 ];
+
+export const loanFrequency = [
+  { label: "Monthly", value: "MONTHLY" },
+  { label: "Bi-Weekly", value: "BIWEEKLY" },
+];
