@@ -23,8 +23,14 @@ export function formatPhoneNumber(phoneNumberString: string) {
   return phoneNumberString;
 }
 
+const CURR_FORMATTER = new Intl.NumberFormat("en-CA", {
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2,
+});
 export function formatCurrency(amount: number) {
-  return amount.toFixed(2);
+  // return amount.toFixed(2);
+  // const amount = parseFloat(amount);
+  return CURR_FORMATTER.format(amount);
 }
 
 export function formatDuration(duration?: number) {

@@ -49,6 +49,28 @@ export const routes: IRoute[] = [
     ],
   },
   {
+    name: "Loans",
+    path: "/loans",
+    icon: <Icons.expenses className="size-4 stroke-2 text-inherit" />,
+    collapse: false,
+    items: [
+      {
+        name: "Dashboard",
+        layout: "/loans",
+        path: "/dashboard",
+        icon: <Icons.accounts className="size-4 stroke-2 text-inherit" />,
+        collapse: false,
+      },
+      {
+        name: "Accounts",
+        layout: "/loans",
+        path: "/accounts",
+        icon: <Icons.transactions className="size-4 stroke-2 text-inherit" />,
+        collapse: false,
+      },
+    ],
+  },
+  {
     name: "AI Chat",
     path: "/dashboard/ai-chat",
     icon: <HiOutlineCpuChip className="size-4 stroke-2 text-inherit" />,

@@ -27,9 +27,9 @@ import { DataTableColumnHeader } from "./datatable-column-header";
 import { DataTablePagination } from "./datatable-pagination";
 import { cn } from "@/lib/utils";
 
-interface DataTableProps<TData, TValue> {
+interface DataTableProps<TData> {
   data: TData[];
-  columns: ColumnDef<TData, TValue>[];
+  columns: ColumnDef<TData, any>[];
   title?: React.ReactNode;
   defaultSorting?: SortingState;
   defaultPagination?: PaginationState;
@@ -40,7 +40,7 @@ interface DataTableProps<TData, TValue> {
   isFiltersOpen?: boolean;
 }
 
-export function DataTableBasic<TData, TValue>({
+export function DataTableBasic<TData>({
   title,
   data: tableData,
   columns,
@@ -54,7 +54,7 @@ export function DataTableBasic<TData, TValue>({
   className,
   refetch = () => {},
   isFiltersOpen = false,
-}: DataTableProps<TData, TValue>) {
+}: DataTableProps<TData>) {
   const [data, _setData] = React.useState(() => [...tableData]);
 
   React.useEffect(() => {
