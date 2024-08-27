@@ -19,7 +19,7 @@ import { cn } from "@/lib/utils";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 import { Button } from "./ui/button";
 import { Icons } from "./shared/icons";
-import { format } from "date-fns";
+import { add, addYears, format, subYears } from "date-fns";
 import { Calendar } from "./ui/calendar";
 
 export enum FormFieldType {
@@ -41,6 +41,8 @@ interface CustomProps {
   iconSrc?: React.ReactNode;
   disabled?: boolean;
   dateFormat?: string;
+  fromMonth?: Date;
+  toMonth?: Date;
   showTimeSelect?: boolean;
   children?: React.ReactNode;
   renderSkeleton?: (field: any) => React.ReactNode;
@@ -159,34 +161,13 @@ const RenderInput = ({ field, props }: { field: any; props: CustomProps }) => {
             <PopoverContent className="w-auto p-0">
               <Calendar
                 mode="single"
+                captionLayout="dropdown-buttons"
                 selected={field.value}
                 onSelect={(date?: Date) => field.onChange(date)}
               />
             </PopoverContent>
           </Popover>
         </div>
-        // <div className="flex rounded-md border">
-        //   <Image
-        //     src="/assets/icons/calendar.svg"
-        //     height={24}
-        //     width={24}
-        //     alt="user"
-        //     className="ml-2"
-        //   />
-        //   <FormControl>
-        //     <ReactDatePicker
-        //       showTimeSelect={props.showTimeSelect ?? false}
-        //       selected={field.value}
-        //       onChange={(date: Date | null) => field.onChange(date)}
-        //       timeInputLabel="Time:"
-        //       dateFormat={props.dateFormat ?? "MM/dd/yyyy"}
-        //       wrapperClassName="date-picker"
-        //       disabled={props.disabled}
-        //       required={props.required}
-        //       className={props.fieldClassName}
-        //     />
-        //   </FormControl>
-        // </div>
       );
     case FormFieldType.SELECT:
       return (

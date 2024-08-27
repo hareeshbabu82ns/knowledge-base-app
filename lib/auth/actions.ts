@@ -35,7 +35,7 @@ export const signInEmail = async (email: string) => {
     const diffMins = differenceInMinutes(new Date(), tokenGenDate);
     if (dbToken && diffMins < siteConfig.emailVerificationDuration)
       throw new Error(
-        `Token generated for ${email} at ${format(tokenGenDate, "PPP p")}. Try after ${siteConfig.emailVerificationDuration} mins`,
+        `Token generated for ${email} at ${format(tokenGenDate, "PP p")}. Try after ${siteConfig.emailVerificationDuration} mins`,
       );
   }
   return naSignIn("resend", { email, redirect: false });

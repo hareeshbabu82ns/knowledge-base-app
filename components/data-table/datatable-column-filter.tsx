@@ -171,7 +171,7 @@ export default function DataTableColumnFilter({
               >
                 <Icons.calendar className="mr-2 size-4" />
                 {columnFilterValue ? (
-                  format(dateValue, "PPP")
+                  format(dateValue, "PP")
                 ) : (
                   <span>Pick a date</span>
                 )}
@@ -180,6 +180,7 @@ export default function DataTableColumnFilter({
             <PopoverContent className="w-auto p-0">
               <Calendar
                 mode="single"
+                captionLayout="dropdown-buttons"
                 selected={dateValue}
                 onSelect={(date?: Date) => {
                   column.setFilterValue(date);

@@ -52,6 +52,7 @@ const CellDateHandler = ({
       <PopoverContent className="w-auto p-0">
         <Calendar
           mode="single"
+          captionLayout="dropdown-buttons"
           selected={initialValue}
           onSelect={(date?: Date) => {
             setInitialValue(date);
