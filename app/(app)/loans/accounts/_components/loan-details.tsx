@@ -2,7 +2,8 @@
 
 import { Loan } from "@prisma/client";
 import { LoanForm } from "./loan-form";
-import RoiCrud from "./roi-crud";
+import RoiTable from "./roi-table";
+import ExtraPaymentsTable from "./extra-payments-table";
 
 const LoanDetails = ({ loan }: { loan: Loan }) => {
   return (
@@ -13,7 +14,8 @@ const LoanDetails = ({ loan }: { loan: Loan }) => {
         type={loan.id === "" ? "create" : "update"}
       />
 
-      {loan.id !== "" && <RoiCrud loanId={loan.id} />}
+      {loan.id !== "" && <RoiTable loanId={loan.id} />}
+      {loan.id !== "" && <ExtraPaymentsTable loanId={loan.id} />}
     </div>
   );
 };

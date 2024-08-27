@@ -4,15 +4,15 @@ import { cn } from "@/lib/utils";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import React, { useState } from "react";
 import {
-  createLoanRates,
-  deleteLoanRates,
-  fetchLoanRates,
-  updateLoanRates,
+  createLoanExtraPayments,
+  deleteLoanExtraPayments,
+  fetchLoanExtraPayments,
+  updateLoanExtraPayments,
 } from "../actions";
 import { DataTableBasic } from "@/components/data-table/datatable-basic";
 import Loader from "@/components/shared/loader";
 import { createColumnHelper } from "@tanstack/react-table";
-import { LoanRates, Prisma } from "@prisma/client";
+import { LoanExtraPayments, Prisma } from "@prisma/client";
 import { filterFnDateRange } from "@/components/data-table/utils";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -63,7 +63,46 @@ const CellDateHandler = ({
   );
 };
 
-const columnHelper = createColumnHelper<LoanRates>();
+interface CellValueHandlerProps
+  extends React.InputHTMLAttributes<HTMLInputElement> {
+  onValueChange?: (value: string | number) => void;
+}
+const CellValueHandler = ({
+  value,
+  onValueChange,
+  type,
+}: CellValueHandlerProps) => {
+  const [initialValue, setInitialValue] = useState<string | number>(
+    type === "number" ? Number(value) : (value as string),
+  );
+
+  return (
+    <Input
+      type="number"
+      value={initialValue}
+      onChange={(e) => {
+        const value =
+          type === "number" ? Number(e.target.value) : e.target.value;
+        setInitialValue(value);
+      }}
+      onBlur={() => (onValueChange ? onValueChange(initialValue) : undefined)}
+      // table.options.meta?.updateData
+      //   ? (e) => {
+      //       const value = Number(e.target.value);
+      //       if (value !== initialValue) {
+      //         table.options.meta?.updateData!({
+      //           rowIndex: index,
+      //           columnId: id,
+      //           value,
+      //         });
+      //       }
+      //     }
+      //   : undefined
+    />
+  );
+};
+
+const columnHelper = createColumnHelper<LoanExtraPayments>();
 const columns = [
   columnHelper.accessor("id", {
     id: "id",
@@ -94,29 +133,21 @@ const columns = [
       filterVariant: "dateRange",
     },
   }),
-  columnHelper.accessor("rate", {
-    id: "rate",
-    header: "Interest Rate (%)",
+  columnHelper.accessor("amount", {
+    id: "amount",
+    header: "Amount",
     cell: ({ getValue, row: { index }, column: { id }, table }) => {
-      const initialValue = Number(getValue());
       return (
-        <Input
+        <CellValueHandler
+          value={getValue()}
           type="number"
-          defaultValue={initialValue}
-          onBlur={
-            table.options.meta?.updateData
-              ? (e) => {
-                  const value = Number(e.target.value);
-                  if (value !== initialValue) {
-                    table.options.meta?.updateData!({
-                      rowIndex: index,
-                      columnId: id,
-                      value,
-                    });
-                  }
-                }
-              : undefined
-          }
+          onValueChange={(value) => {
+            table.options.meta?.updateData!({
+              rowIndex: index,
+              columnId: id,
+              value,
+            });
+          }}
         />
       );
     },
@@ -143,31 +174,31 @@ const columns = [
   }),
 ];
 
-interface RoiCrudProps {
+interface ExtraPaymentsTableProps {
   className?: string;
   loanId: string;
 }
 
-const RoiCrud = ({ className, loanId }: RoiCrudProps) => {
+const ExtraPaymentsTable = ({ className, loanId }: ExtraPaymentsTableProps) => {
   const {
-    data: rois,
+    data: extraPayments,
     isFetching,
     isLoading,
     refetch,
   } = useQuery({
-    queryKey: ["rois", loanId],
+    queryKey: ["extraPayments", loanId],
     queryFn: async () => {
-      const rates = await fetchLoanRates(loanId);
-      return rates;
+      const extraPayments = await fetchLoanExtraPayments(loanId);
+      return extraPayments;
     },
     enabled: loanId !== "new" && loanId !== "",
   });
 
   const { mutate: addRoi, isPending } = useMutation({
     mutationFn: async () => {
-      await createLoanRates({
+      await createLoanExtraPayments({
         date: new Date(),
-        rate: 0,
+        amount: 0,
         loan: { connect: { id: loanId } },
       });
     },
@@ -181,10 +212,10 @@ const RoiCrud = ({ className, loanId }: RoiCrudProps) => {
       id,
       data,
     }: {
-      id: LoanRates["id"];
-      data: Prisma.LoanRatesUpdateInput;
+      id: LoanExtraPayments["id"];
+      data: Prisma.LoanExtraPaymentsUpdateInput;
     }) => {
-      await updateLoanRates(id, data);
+      await updateLoanExtraPayments(id, data);
     },
     onSuccess: () => {
       // refetch();
@@ -192,8 +223,8 @@ const RoiCrud = ({ className, loanId }: RoiCrudProps) => {
   });
 
   const { mutate: deleteRoi, isPending: isDeletePending } = useMutation({
-    mutationFn: async (id: LoanRates["id"]) => {
-      await deleteLoanRates(id);
+    mutationFn: async (id: LoanExtraPayments["id"]) => {
+      await deleteLoanExtraPayments(id);
     },
     onSuccess: () => {
       refetch();
@@ -205,8 +236,8 @@ const RoiCrud = ({ className, loanId }: RoiCrudProps) => {
   return (
     <div className={cn("mt-2 flex flex-1 flex-col", className)}>
       <DataTableBasic
-        title="Anual Interest Rates"
-        data={rois || []}
+        title="Extra Payments"
+        data={extraPayments || []}
         columns={columns}
         defaultSorting={[{ id: "date", desc: true }]}
         defaultColumnVisibility={{ id: false }}
@@ -225,7 +256,7 @@ const RoiCrud = ({ className, loanId }: RoiCrudProps) => {
         }
         updateData={({ rowIndex, columnId, value }) => {
           // console.log("updateData", { rowIndex, columnId, value });
-          const id = rois ? rois[rowIndex]?.id : undefined;
+          const id = extraPayments ? extraPayments[rowIndex]?.id : undefined;
           if (id) updateRoi({ id, data: { [columnId]: value } });
         }}
         deleteData={(rowIndex, rowData) => {
@@ -238,4 +269,4 @@ const RoiCrud = ({ className, loanId }: RoiCrudProps) => {
   );
 };
 
-export default RoiCrud;
+export default ExtraPaymentsTable;

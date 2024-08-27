@@ -17,6 +17,16 @@ const calculateSplits = ({
   loanData: LoanDetails;
   withExtraPayments?: boolean;
 }) => {
+  const interestRateChanges =
+    loanData.loanRates?.map((rate) => ({
+      date: rate.date,
+      rate: rate.rate,
+    })) || [];
+  const extraPayments =
+    loanData.loanExtraPayments?.map((payment) => ({
+      date: payment.date,
+      amount: payment.amount,
+    })) || [];
   const schedule = calculateEMISplits({
     principal: loanData.amount,
     annualInterestRate: loanData.interestRate,
@@ -24,8 +34,8 @@ const calculateSplits = ({
     paymentFrequency: loanData.frequency,
     startDate: loanData.startDate,
     emiPaid: loanData.emi,
-    extraPayments: withExtraPayments ? loanData.loanExtraPayments : [],
-    interestRateChanges: loanData.loanRates,
+    extraPayments: withExtraPayments ? extraPayments : [],
+    interestRateChanges,
   });
   return schedule;
 };
@@ -39,7 +49,10 @@ const LoanDash = ({
   showYearlySplits?: boolean;
   showAllSplits?: boolean;
 }) => {
-  const calc = React.useMemo(() => calculateSplits({ loanData }), [loanData]);
+  const calc = React.useMemo(
+    () => calculateSplits({ loanData, withExtraPayments: true }),
+    [loanData],
+  );
   const calcWithoutExtras = React.useMemo(
     () => calculateSplits({ loanData, withExtraPayments: false }),
     [loanData],
