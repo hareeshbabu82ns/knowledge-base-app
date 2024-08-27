@@ -45,7 +45,9 @@ export function DataTableColumnHeader<TData, TValue>({
             {{
               asc: <ArrowUpIcon className="size-4" />,
               desc: <ArrowDownIcon className="size-4" />,
-              false: <FaSort className="size-4" />,
+              false: header.column.getCanSort() ? (
+                <FaSort className="size-4" />
+              ) : null,
             }[header.column.getIsSorted() as string] ?? null}
           </div>
           {withFilter && header.column.getCanFilter() ? (

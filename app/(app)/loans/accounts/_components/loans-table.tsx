@@ -11,6 +11,13 @@ import React from "react";
 
 const columnHelper = createColumnHelper<Loan>();
 const columns = [
+  columnHelper.accessor("id", {
+    id: "id",
+    header: "id",
+    meta: {
+      filterVariant: "text",
+    },
+  }),
   columnHelper.accessor("name", {
     id: "name",
     header: "Name",

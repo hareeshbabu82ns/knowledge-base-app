@@ -28,6 +28,15 @@ declare global {
 }
 
 declare module "@tanstack/react-table" {
+  interface TableMeta<TData extends RowData> {
+    deleteData?: (rowIndex: number, rowData: TData) => void;
+    updateData?: (data: {
+      rowIndex: number;
+      columnId: string;
+      value: unknown;
+    }) => void;
+  }
+
   //allows us to define custom properties for our columns
   interface ColumnMeta<TData extends RowData, TValue> {
     filterVariant?:

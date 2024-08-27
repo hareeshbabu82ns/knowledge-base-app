@@ -39,6 +39,12 @@ interface DataTableProps<TData> {
   refetch?: () => void;
   isFiltersOpen?: boolean;
   actions?: React.ReactNode;
+  updateData?: (data: {
+    rowIndex: number;
+    columnId: string;
+    value: unknown;
+  }) => void;
+  deleteData?: (rowIndex: number, rowData: TData) => void;
 }
 
 export function DataTableBasic<TData>({
@@ -53,9 +59,11 @@ export function DataTableBasic<TData>({
   defaultColumnFilters = [],
   defaultColumnVisibility = { id: false },
   className,
-  refetch = () => {},
+  refetch,
   isFiltersOpen = false,
   actions,
+  updateData,
+  deleteData,
 }: DataTableProps<TData>) {
   const [data, _setData] = React.useState(() => [...tableData]);
 
@@ -74,6 +82,10 @@ export function DataTableBasic<TData>({
   const table = useReactTable({
     data,
     columns,
+    meta: {
+      updateData,
+      deleteData,
+    },
     state: {
       sorting,
       pagination,
@@ -109,7 +121,7 @@ export function DataTableBasic<TData>({
         title={title}
         resetFilters={resetFilters}
         isFiltersOpen={isFiltersOpen}
-        refetch={() => refetch()}
+        refetch={refetch}
         actions={actions}
       />
       <Table>

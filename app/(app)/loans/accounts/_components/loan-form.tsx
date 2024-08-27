@@ -22,7 +22,6 @@ import { Button } from "@/components/ui/button";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { loanFrequency } from "@/variables/loans";
 import { SelectItem } from "@/components/ui/select";
-import { Icons } from "@/components/shared/icons";
 import { calculateEMI } from "../../utils";
 
 interface LoanFormProps {

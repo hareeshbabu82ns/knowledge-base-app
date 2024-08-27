@@ -93,8 +93,8 @@ export const deleteLoanExtraPayments = async (id: LoanExtraPayments["id"]) => {
 };
 
 // LoanRates
-export const fetchLoanRates = async () => {
-  const rates = await db.loanRates.findMany();
+export const fetchLoanRates = async (loanId: string) => {
+  const rates = await db.loanRates.findMany({ where: { loanId } });
   return rates;
 };
 

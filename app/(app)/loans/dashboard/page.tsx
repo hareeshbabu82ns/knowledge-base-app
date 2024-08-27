@@ -10,10 +10,12 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useQuery } from "@tanstack/react-query";
-import { fetchLoansDDLB, getLoanDetails } from "../accounts/actions";
+import { fetchLoansDDLB } from "../accounts/actions";
 import Loader from "@/components/shared/loader";
 import { useState } from "react";
 import LoanDash from "./loan-dash";
+import { getLoanDetailsWithSub } from "./actions";
+import { LoanDetails } from "@/types/loans";
 
 const LoansPage = () => {
   const [selectedLoan, setSelectedLoan] = useState<string>("");
@@ -33,7 +35,8 @@ const LoansPage = () => {
     isFetching: isFetchingLoan,
   } = useQuery({
     queryKey: ["loanDetails", selectedLoan],
-    queryFn: async () => await getLoanDetails(selectedLoan),
+    queryFn: async () =>
+      (await getLoanDetailsWithSub(selectedLoan)) as LoanDetails,
     enabled: !!selectedLoan,
   });
 

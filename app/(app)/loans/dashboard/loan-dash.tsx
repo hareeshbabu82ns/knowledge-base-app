@@ -5,7 +5,7 @@ import { columns, columnsYear } from "./columns";
 import { SortingState } from "@tanstack/react-table";
 import { ScheduleYearsBarChart } from "../_components/schedule-years-bars";
 import { ScheduleYearsPieChart } from "../_components/schedule-stats-pie";
-import { Loan } from "@prisma/client";
+import { LoanDetails } from "@/types/loans";
 
 const defaultSorting: SortingState = [{ id: "date", desc: true }];
 const defaultYearSorting: SortingState = [{ id: "year", desc: false }];
@@ -14,7 +14,7 @@ const calculateSplits = ({
   loanData,
   withExtraPayments = false,
 }: {
-  loanData: Loan;
+  loanData: LoanDetails;
   withExtraPayments?: boolean;
 }) => {
   const schedule = calculateEMISplits({
@@ -24,8 +24,8 @@ const calculateSplits = ({
     paymentFrequency: loanData.frequency,
     startDate: loanData.startDate,
     emiPaid: loanData.emi,
-    extraPayments: withExtraPayments ? [] : [],
-    interestRateChanges: [],
+    extraPayments: withExtraPayments ? loanData.loanExtraPayments : [],
+    interestRateChanges: loanData.loanRates,
   });
   return schedule;
 };
@@ -35,7 +35,7 @@ const LoanDash = ({
   showAllSplits = false,
   showYearlySplits = false,
 }: {
-  loanData: Loan;
+  loanData: LoanDetails;
   showYearlySplits?: boolean;
   showAllSplits?: boolean;
 }) => {
