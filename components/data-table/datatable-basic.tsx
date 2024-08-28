@@ -26,6 +26,7 @@ import {
 import { DataTableColumnHeader } from "./datatable-column-header";
 import { DataTablePagination } from "./datatable-pagination";
 import { cn } from "@/lib/utils";
+import DataTableCellInput from "./datatable-cell-input";
 
 interface DataTableProps<TData> {
   data: TData[];
@@ -144,9 +145,18 @@ export function DataTableBasic<TData>({
                 {row.getVisibleCells().map((cell) => (
                   <TableCell
                     key={cell.id}
-                    className="hover:bg-black/5 dark:hover:bg-white/5"
+                    className={cn(
+                      "hover:bg-black/5 dark:hover:bg-white/5",
+                      cell.column.columnDef.size !== 150
+                        ? `w-[${cell.column.columnDef.size}px]`
+                        : "",
+                    )}
                   >
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                    {cell.column.columnDef.meta?.cellInputVariant ? (
+                      <DataTableCellInput {...cell.getContext()} />
+                    ) : (
+                      flexRender(cell.column.columnDef.cell, cell.getContext())
+                    )}
                   </TableCell>
                 ))}
               </TableRow>

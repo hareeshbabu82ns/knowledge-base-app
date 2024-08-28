@@ -34,16 +34,7 @@ export const fetchTransactions = async ({
     take: pagination.pageSize,
     orderBy: sorting?.length ? (orderBy as any) : { id: "desc" },
     where,
-    select: {
-      id: true,
-      account: true,
-      amount: true,
-      description: true,
-      type: true,
-      tags: true,
-      date: true,
-      accountObj: true,
-    },
+    include: { accountObj: true },
   });
   return { rowCount: expenseTransactionCount, rows: transactions };
 };

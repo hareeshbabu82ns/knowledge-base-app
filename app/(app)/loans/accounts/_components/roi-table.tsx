@@ -2,7 +2,7 @@
 
 import { cn } from "@/lib/utils";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import React, { useState } from "react";
+import React from "react";
 import {
   createLoanRates,
   deleteLoanRates,
@@ -14,55 +14,9 @@ import Loader from "@/components/shared/loader";
 import { createColumnHelper } from "@tanstack/react-table";
 import { LoanRates, Prisma } from "@prisma/client";
 import { filterFnDateRange } from "@/components/data-table/utils";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Icons } from "@/components/shared/icons";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 import { format } from "date-fns";
-import { Calendar } from "@/components/ui/calendar";
-
-const CellDateHandler = ({
-  initialDate,
-  onSelect,
-}: {
-  initialDate: Date;
-  onSelect: (date?: Date) => void;
-}) => {
-  const [initialValue, setInitialValue] = useState<Date | undefined>(
-    initialDate,
-  );
-  return (
-    <Popover>
-      <PopoverTrigger asChild>
-        <Button
-          variant={"outline"}
-          className={cn(
-            "w-full justify-start text-left font-normal",
-            !initialValue && "text-muted-foreground",
-          )}
-        >
-          <Icons.calendar className="mr-2 size-4" />
-          {initialValue ? format(initialValue, "PP") : <span>Pick a date</span>}
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent className="w-auto p-0">
-        <Calendar
-          mode="single"
-          captionLayout="dropdown-buttons"
-          selected={initialValue}
-          onSelect={(date?: Date) => {
-            setInitialValue(date);
-            onSelect(date);
-          }}
-        />
-      </PopoverContent>
-    </Popover>
-  );
-};
 
 const columnHelper = createColumnHelper<LoanRates>();
 const columns = [
@@ -73,59 +27,27 @@ const columns = [
   columnHelper.accessor("date", {
     id: "date",
     header: "Date",
-    cell: ({ getValue, row: { index }, column: { id }, table }) => {
-      const initialValue = getValue();
-      return (
-        <CellDateHandler
-          initialDate={initialValue}
-          onSelect={(date) => {
-            if (date) {
-              table.options.meta?.updateData!({
-                rowIndex: index,
-                columnId: id,
-                value: date,
-              });
-            }
-          }}
-        />
-      );
-    },
+    cell: (info: any) => (
+      <p className="text-sm font-medium">{format(info.getValue(), "PP")}</p>
+    ),
     filterFn: filterFnDateRange,
     meta: {
+      cellInputVariant: "date",
       filterVariant: "dateRange",
     },
   }),
   columnHelper.accessor("rate", {
     id: "rate",
     header: "Interest Rate (%)",
-    cell: ({ getValue, row: { index }, column: { id }, table }) => {
-      const initialValue = Number(getValue());
-      return (
-        <Input
-          type="number"
-          defaultValue={initialValue}
-          onBlur={
-            table.options.meta?.updateData
-              ? (e) => {
-                  const value = Number(e.target.value);
-                  if (value !== initialValue) {
-                    table.options.meta?.updateData!({
-                      rowIndex: index,
-                      columnId: id,
-                      value,
-                    });
-                  }
-                }
-              : undefined
-          }
-        />
-      );
+    meta: {
+      cellInputVariant: "number",
     },
   }),
   columnHelper.display({
     id: "actions",
     header: "Actions",
-    cell: ({ row, table }) => (
+    size: 50,
+    cell: ({ row, table, column }) => (
       <div className="flex flex-row gap-1">
         <Button
           variant="ghost"

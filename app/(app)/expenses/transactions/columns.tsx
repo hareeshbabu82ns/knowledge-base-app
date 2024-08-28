@@ -3,6 +3,7 @@ import { ExpenseAccount, ExpenseTransaction } from "@prisma/client";
 import { createColumnHelper } from "@tanstack/react-table";
 import { fetchAccounts, fetchTags } from "../accounts/actions";
 import { cn } from "@/lib/utils";
+import { format } from "date-fns";
 
 export type ExpenseTransactionWithAccount = ExpenseTransaction & {
   accountObj: ExpenseAccount;
@@ -21,9 +22,7 @@ export const columns = [
     header: "Date",
     meta: { filterVariant: "dateRange" },
     cell: (info: any) => (
-      <p className="text-sm font-medium">
-        {info.getValue().toLocaleDateString()}
-      </p>
+      <p className="text-sm font-medium">{format(info.getValue(), "PP")}</p>
     ),
   }),
   columnHelper.accessor("description", {

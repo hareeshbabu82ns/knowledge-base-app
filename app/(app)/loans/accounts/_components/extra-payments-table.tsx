@@ -2,7 +2,7 @@
 
 import { cn } from "@/lib/utils";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import React, { useState } from "react";
+import React from "react";
 import {
   createLoanExtraPayments,
   deleteLoanExtraPayments,
@@ -14,94 +14,9 @@ import Loader from "@/components/shared/loader";
 import { createColumnHelper } from "@tanstack/react-table";
 import { LoanExtraPayments, Prisma } from "@prisma/client";
 import { filterFnDateRange } from "@/components/data-table/utils";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Icons } from "@/components/shared/icons";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 import { format } from "date-fns";
-import { Calendar } from "@/components/ui/calendar";
-
-const CellDateHandler = ({
-  initialDate,
-  onSelect,
-}: {
-  initialDate: Date;
-  onSelect: (date?: Date) => void;
-}) => {
-  const [initialValue, setInitialValue] = useState<Date | undefined>(
-    initialDate,
-  );
-  return (
-    <Popover>
-      <PopoverTrigger asChild>
-        <Button
-          variant={"outline"}
-          className={cn(
-            "w-full justify-start text-left font-normal",
-            !initialValue && "text-muted-foreground",
-          )}
-        >
-          <Icons.calendar className="mr-2 size-4" />
-          {initialValue ? format(initialValue, "PP") : <span>Pick a date</span>}
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent className="w-auto p-0">
-        <Calendar
-          mode="single"
-          captionLayout="dropdown-buttons"
-          selected={initialValue}
-          onSelect={(date?: Date) => {
-            setInitialValue(date);
-            onSelect(date);
-          }}
-        />
-      </PopoverContent>
-    </Popover>
-  );
-};
-
-interface CellValueHandlerProps
-  extends React.InputHTMLAttributes<HTMLInputElement> {
-  onValueChange?: (value: string | number) => void;
-}
-const CellValueHandler = ({
-  value,
-  onValueChange,
-  type,
-}: CellValueHandlerProps) => {
-  const [initialValue, setInitialValue] = useState<string | number>(
-    type === "number" ? Number(value) : (value as string),
-  );
-
-  return (
-    <Input
-      type="number"
-      value={initialValue}
-      onChange={(e) => {
-        const value =
-          type === "number" ? Number(e.target.value) : e.target.value;
-        setInitialValue(value);
-      }}
-      onBlur={() => (onValueChange ? onValueChange(initialValue) : undefined)}
-      // table.options.meta?.updateData
-      //   ? (e) => {
-      //       const value = Number(e.target.value);
-      //       if (value !== initialValue) {
-      //         table.options.meta?.updateData!({
-      //           rowIndex: index,
-      //           columnId: id,
-      //           value,
-      //         });
-      //       }
-      //     }
-      //   : undefined
-    />
-  );
-};
 
 const columnHelper = createColumnHelper<LoanExtraPayments>();
 const columns = [
@@ -112,50 +27,34 @@ const columns = [
   columnHelper.accessor("date", {
     id: "date",
     header: "Date",
-    cell: ({ getValue, row: { index }, column: { id }, table }) => {
-      const initialValue = getValue();
-      return (
-        <CellDateHandler
-          initialDate={initialValue}
-          onSelect={(date) => {
-            if (date) {
-              table.options.meta?.updateData!({
-                rowIndex: index,
-                columnId: id,
-                value: date,
-              });
-            }
-          }}
-        />
-      );
-    },
+    cell: (info: any) => (
+      <p className="text-sm font-medium">{format(info.getValue(), "PP")}</p>
+    ),
     filterFn: filterFnDateRange,
     meta: {
+      cellInputVariant: "date",
       filterVariant: "dateRange",
     },
   }),
   columnHelper.accessor("amount", {
     id: "amount",
     header: "Amount",
-    cell: ({ getValue, row: { index }, column: { id }, table }) => {
-      return (
-        <CellValueHandler
-          value={getValue()}
-          type="number"
-          onValueChange={(value) => {
-            table.options.meta?.updateData!({
-              rowIndex: index,
-              columnId: id,
-              value,
-            });
-          }}
-        />
-      );
+    meta: {
+      cellInputVariant: "number",
+    },
+  }),
+  columnHelper.accessor("continue", {
+    id: "continue",
+    header: "Continuous",
+    size: 50,
+    meta: {
+      cellInputVariant: "switch",
     },
   }),
   columnHelper.display({
     id: "actions",
     header: "Actions",
+    size: 50,
     cell: ({ row, table }) => (
       <div className="flex flex-row gap-1">
         <Button

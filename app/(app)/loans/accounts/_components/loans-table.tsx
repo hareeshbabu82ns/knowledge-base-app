@@ -6,6 +6,7 @@ import { Icons } from "@/components/shared/icons";
 import { Button } from "@/components/ui/button";
 import { Loan } from "@prisma/client";
 import { createColumnHelper } from "@tanstack/react-table";
+import { format } from "date-fns";
 import Link from "next/link";
 import React from "react";
 
@@ -41,9 +42,7 @@ const columns = [
     id: "startDate",
     header: "Date",
     cell: (info: any) => (
-      <p className="text-sm font-medium">
-        {info.getValue().toLocaleDateString()}
-      </p>
+      <p className="text-sm font-medium">{format(info.getValue(), "PP")}</p>
     ),
     filterFn: filterFnDateRange,
     meta: {

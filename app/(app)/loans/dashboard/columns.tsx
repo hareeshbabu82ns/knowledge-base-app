@@ -4,6 +4,7 @@ import { createColumnHelper } from "@tanstack/react-table";
 import { PaymentSchedule, PaymentScheduleYear } from "../utils";
 import { formatCurrency } from "@/lib/utils";
 import { filterFnDateRange } from "@/components/data-table/utils";
+import { format } from "date-fns";
 
 const columnHelper = createColumnHelper<PaymentSchedule>();
 
@@ -12,9 +13,7 @@ export const columns = [
     id: "date",
     header: "Date",
     cell: (info: any) => (
-      <p className="text-sm font-medium">
-        {info.getValue().toLocaleDateString()}
-      </p>
+      <p className="text-sm font-medium">{format(info.getValue(), "PP")}</p>
     ),
     filterFn: filterFnDateRange,
     meta: {
