@@ -45,6 +45,7 @@ interface DataTableProps<TData, TValue> {
     filters: ColumnFiltersState;
   }) => Promise<{ rowCount: number; rows: TData[] }>;
   isFiltersOpen?: boolean;
+  beforeTable?: React.ReactNode | React.ComponentType;
 }
 
 export function DataTableQuery<TData, TValue>({
@@ -61,6 +62,7 @@ export function DataTableQuery<TData, TValue>({
   queryKey,
   queryFn,
   isFiltersOpen = false,
+  beforeTable,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = React.useState(defaultSorting);
   const [pagination, setPagination] = React.useState(defaultPagination);
@@ -120,6 +122,7 @@ export function DataTableQuery<TData, TValue>({
         isFiltersOpen={isFiltersOpen}
         refetch={() => refetch()}
       />
+      {beforeTable && flexRender(beforeTable, { table })}
       <Table>
         <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (

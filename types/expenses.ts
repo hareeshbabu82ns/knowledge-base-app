@@ -56,3 +56,25 @@ export interface IConfig {
   tagOps?: IConfigTagOptions[];
   fileFields: IConfigFileFields[];
 }
+
+export interface IExpTransStatsEntry {
+  date: Date;
+  account?: string;
+  type?: string;
+  tag?: string;
+  amount: number;
+}
+
+export interface IExpTransByAttrStats {
+  [key: string]: IExpTransStatsEntry[];
+}
+
+// for (single) line, bar, pie charts
+export interface IExpTransAmountByAttrStats {
+  attr: string;
+  amount: number;
+  fill?: string;
+}
+export interface IExpTransAmountByAttrStatsArray {
+  [key: string]: IExpTransAmountByAttrStats[];
+}
