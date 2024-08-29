@@ -27,6 +27,7 @@ import { DataTableColumnHeader } from "./datatable-column-header";
 import { DataTablePagination } from "./datatable-pagination";
 import { cn } from "@/lib/utils";
 import DataTableCellInput from "./datatable-cell-input";
+import { RowEditFeature, RowEditState } from "./datatable-feature-row-editing";
 
 interface DataTableProps<TData> {
   data: TData[];
@@ -42,10 +43,12 @@ interface DataTableProps<TData> {
   actions?: React.ReactNode;
   updateData?: (data: {
     rowIndex: number;
+    rowData: TData;
     columnId: string;
     value: unknown;
   }) => void;
   deleteData?: (rowIndex: number, rowData: TData) => void;
+  enableMultiRowEdit?: boolean;
 }
 
 export function DataTableBasic<TData>({
@@ -65,6 +68,7 @@ export function DataTableBasic<TData>({
   actions,
   updateData,
   deleteData,
+  enableMultiRowEdit = true,
 }: DataTableProps<TData>) {
   const [data, _setData] = React.useState(() => [...tableData]);
 
@@ -79,8 +83,10 @@ export function DataTableBasic<TData>({
   const [columnVisibility, setColumnVisibility] = React.useState(
     defaultColumnVisibility,
   );
+  const [editingRows, setEditingRows] = React.useState<RowEditState>({});
 
   const table = useReactTable({
+    _features: [RowEditFeature],
     data,
     columns,
     meta: {
@@ -92,8 +98,10 @@ export function DataTableBasic<TData>({
       pagination,
       columnFilters,
       columnVisibility,
+      rowEdit: editingRows,
     },
     onSortingChange: setSorting,
+    onRowEditChange: setEditingRows,
     onPaginationChange: setPagination,
     onColumnFiltersChange: setColumnFilters,
     onColumnVisibilityChange: setColumnVisibility,
@@ -101,6 +109,7 @@ export function DataTableBasic<TData>({
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
+    enableMultiRowEdit,
   });
 
   const resetFilters = React.useCallback(() => {
@@ -152,7 +161,9 @@ export function DataTableBasic<TData>({
                         : "",
                     )}
                   >
-                    {cell.column.columnDef.meta?.cellInputVariant ? (
+                    {cell.column.columnDef.meta?.cellInputVariant &&
+                    (table.options.enableMultiRowEdit ||
+                      cell.row.getIsEditing()) ? (
                       <DataTableCellInput {...cell.getContext()} />
                     ) : (
                       flexRender(cell.column.columnDef.cell, cell.getContext())

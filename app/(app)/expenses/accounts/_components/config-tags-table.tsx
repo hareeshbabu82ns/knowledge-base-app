@@ -1,0 +1,276 @@
+"use client";
+
+import { cn } from "@/lib/utils";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import React from "react";
+import { fetchTags, getAccountDetails, updateAccount } from "../actions";
+import { DataTableBasic } from "@/components/data-table/datatable-basic";
+import Loader from "@/components/shared/loader";
+import { createColumnHelper, filterFns } from "@tanstack/react-table";
+import { Prisma } from "@prisma/client";
+import { Button } from "@/components/ui/button";
+import { Icons } from "@/components/shared/icons";
+import { IConfig, IConfigTagOptions } from "@/types/expenses";
+import {
+  configComparisionOptions,
+  configTanNameOptions,
+} from "@/variables/expenses";
+import { Badge } from "@/components/ui/badge";
+
+const columnHelper = createColumnHelper<IConfigTagOptions>();
+const columns = [
+  columnHelper.accessor("comparision", {
+    id: "comparision",
+    header: "Comparision",
+    meta: {
+      cellInputVariant: "select",
+      filterVariant: "select",
+      filterOptions: configComparisionOptions,
+    },
+    cell: (info: any) => {
+      const value = info.getValue();
+      if (!value) return null;
+      const option = configComparisionOptions.find((o) => o.value === value);
+      return option?.label || value;
+    },
+  }),
+  columnHelper.accessor("name", {
+    id: "name",
+    header: "Name",
+    meta: {
+      cellInputVariant: "select",
+      filterOptions: configTanNameOptions,
+    },
+    cell: (info: any) => {
+      const value = info.getValue();
+      if (!value) return null;
+      const option = configTanNameOptions.find((o) => o.value === value);
+      return option?.label || value;
+    },
+  }),
+  columnHelper.accessor("value", {
+    id: "value",
+    header: "Value",
+    meta: {
+      cellInputVariant: "text",
+      filterVariant: "text",
+    },
+  }),
+  columnHelper.accessor("tags", {
+    id: "tags",
+    header: "Tags",
+    filterFn: filterFns.arrIncludes,
+    meta: {
+      cellInputVariant: "text",
+      filterVariant: "select",
+      fieldType: "array",
+      filterOptionsFn: async () => {
+        const tags = await fetchTags();
+        return tags.map((tag) => ({
+          label: tag.tag,
+          value: tag.tag,
+        }));
+      },
+    },
+    cell: (info: any) => {
+      const value = info.getValue();
+      const tags = Array.isArray(value)
+        ? value
+        : value
+          ? (value as string).split(",")
+          : [];
+      return (
+        <div className="flex flex-row gap-1 text-sm font-medium">
+          {tags.map((tag: string, i: number) => (
+            <Badge variant="outline" key={`${tag}-${i}`}>
+              {tag}
+            </Badge>
+          ))}
+        </div>
+      );
+    },
+  }),
+  columnHelper.display({
+    id: "actions",
+    header: "Actions",
+    size: 50,
+    cell: ({ row, table, column }) => (
+      <div className="flex flex-row gap-1">
+        {row.getIsEditing() && (
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => {
+              row.toggleEditing();
+            }}
+          >
+            <Icons.close className="size-4" />
+          </Button>
+        )}
+        {row.getCanEdit() && !row.getIsEditing() && (
+          <Button
+            variant="ghost"
+            size="icon"
+            className="text-destructive"
+            disabled={row.getIsEditing()}
+            onClick={() => {
+              row.toggleEditing();
+            }}
+          >
+            <Icons.edit className="size-4" />
+          </Button>
+        )}
+        <Button
+          variant="ghost"
+          size="icon"
+          className="text-destructive"
+          disabled={!table.options.meta?.deleteData}
+          onClick={() => {
+            table.options.meta?.deleteData!(row.index, row.original);
+          }}
+        >
+          <Icons.trash className="size-4" />
+        </Button>
+      </div>
+    ),
+    enableSorting: false,
+  }),
+];
+
+interface AccountTagFieldsTableProps {
+  className?: string;
+  accountId: string;
+}
+
+const AccountTagFieldsTable = ({
+  className,
+  accountId,
+}: AccountTagFieldsTableProps) => {
+  const {
+    data: account,
+    isFetching,
+    isLoading,
+    refetch,
+  } = useQuery({
+    queryKey: ["account", accountId],
+    queryFn: async () => {
+      const account = await getAccountDetails(accountId);
+      return account;
+    },
+    enabled: accountId !== "new" && accountId !== "",
+  });
+
+  const { mutate: addAccountTagFields, isPending } = useMutation({
+    mutationFn: async () => {
+      const config = account?.config as unknown as IConfig;
+      const newTagOps = [
+        ...(config.tagOps || []),
+        {
+          comparision: "STARTS_WITH",
+          name: "description",
+          value: "",
+          tags: [],
+        },
+      ];
+      const newConfig = { ...config, tagOps: newTagOps };
+      await updateAccount(accountId, {
+        config: (newConfig as unknown as Prisma.JsonValue) || {},
+      });
+    },
+    onSuccess: () => {
+      refetch();
+    },
+  });
+
+  const { mutate: updateAccountTagFields, isPending: isUpdatePending } =
+    useMutation({
+      mutationFn: async ({
+        index,
+        data,
+      }: {
+        index: number;
+        data: IConfigTagOptions;
+      }) => {
+        const config = account?.config as unknown as IConfig;
+        const tagOpts = config?.tagOps || [];
+        const newTagOpt = { ...(tagOpts[index] || {}), ...data };
+        const newTagOps = [
+          ...tagOpts.slice(0, index),
+          newTagOpt,
+          ...tagOpts.slice(index + 1),
+        ];
+        // console.log("newTagOps", newTagOps);
+        const newConfig = { ...config, tagOps: newTagOps };
+        await updateAccount(accountId, {
+          config: (newConfig as unknown as Prisma.JsonValue) || {},
+        });
+      },
+      onSuccess: () => {
+        // refetch();
+      },
+    });
+
+  const { mutate: deleteAccountTagFields, isPending: isDeletePending } =
+    useMutation({
+      mutationFn: async (index: number) => {
+        const config = account?.config as unknown as IConfig;
+        const tagOpts = config?.tagOps || [];
+        const newTagOps = [
+          ...tagOpts.slice(0, index),
+          ...tagOpts.slice(index + 1),
+        ];
+        const newConfig = { ...config, tagOps: newTagOps };
+        await updateAccount(accountId, {
+          config: (newConfig as unknown as Prisma.JsonValue) || {},
+        });
+      },
+      onSuccess: () => {
+        refetch();
+      },
+    });
+
+  if (isLoading || isFetching) return <Loader />;
+
+  const config = account?.config as unknown as IConfig;
+
+  return (
+    <div className={cn("mt-2 flex flex-1 flex-col", className)}>
+      <DataTableBasic
+        title="Tag Fields"
+        data={config.tagOps || []}
+        columns={columns}
+        enableMultiRowEdit={false}
+        defaultPagination={{ pageSize: 10, pageIndex: 0 }}
+        defaultSorting={[{ id: "value", desc: false }]}
+        defaultColumnVisibility={{}}
+        refetch={() => refetch()}
+        actions={
+          <>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => addAccountTagFields()}
+              disabled={isPending}
+            >
+              <Icons.add className="size-5" />
+            </Button>
+          </>
+        }
+        updateData={({ rowIndex, rowData, columnId, value }) => {
+          console.log("updateData", { rowIndex, columnId, value, rowData });
+          const newTagOpt = {
+            ...rowData,
+            ...{ [columnId]: value },
+          };
+          updateAccountTagFields({ index: rowIndex, data: newTagOpt });
+        }}
+        deleteData={(rowIndex, rowData) => {
+          // console.log("deleteData", { rowIndex, rowData });
+          deleteAccountTagFields(rowIndex);
+        }}
+      />
+    </div>
+  );
+};
+
+export default AccountTagFieldsTable;

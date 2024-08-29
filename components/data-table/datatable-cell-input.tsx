@@ -97,6 +97,7 @@ export default function DataTableCellInput<TData>({
                     if (numVal !== numValue) {
                       table.options.meta?.updateData!({
                         rowIndex: row.index,
+                        rowData: row.original,
                         columnId: column.id,
                         value: numVal,
                       });
@@ -119,6 +120,7 @@ export default function DataTableCellInput<TData>({
               setCellValue(value);
               table.options.meta?.updateData!({
                 rowIndex: row.index,
+                rowData: row.original,
                 columnId: column.id,
                 value,
               });
@@ -130,8 +132,14 @@ export default function DataTableCellInput<TData>({
       return (
         <div className="flex w-full flex-row items-center justify-between gap-1">
           <Select
-            onValueChange={(e) => {
-              setCellValue(e);
+            onValueChange={(value) => {
+              setCellValue(value);
+              table.options.meta?.updateData!({
+                rowIndex: row.index,
+                rowData: row.original,
+                columnId: column.id,
+                value,
+              });
             }}
             value={cellValue?.toString()}
           >
@@ -206,6 +214,7 @@ export default function DataTableCellInput<TData>({
                   setCellValue(date);
                   table.options.meta?.updateData!({
                     rowIndex: row.index,
+                    rowData: row.original,
                     columnId: column.id,
                     value: date,
                   });
@@ -262,6 +271,7 @@ export default function DataTableCellInput<TData>({
       );
     default:
       const value = (cellValue ?? "") as string;
+      const oldValue = getValue() as string;
       return (
         <div className="flex w-full flex-row items-center justify-between gap-1">
           <Input
@@ -270,12 +280,17 @@ export default function DataTableCellInput<TData>({
             onBlur={
               table.options.meta?.updateData
                 ? (e) => {
-                    const value = e.target.value;
-                    if (value !== cellValue) {
+                    // const inValue = e.target.value;
+                    if (value !== oldValue) {
+                      const fieldTypeValue =
+                        column.columnDef.meta?.fieldType === "array"
+                          ? value.split(",")
+                          : value;
                       table.options.meta?.updateData!({
                         rowIndex: row.index,
+                        rowData: row.original,
                         columnId: column.id,
-                        value,
+                        value: fieldTypeValue,
                       });
                     }
                   }
