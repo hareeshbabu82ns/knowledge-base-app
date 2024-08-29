@@ -137,7 +137,7 @@ export function DataTableBasic<TData>({
       <Table>
         <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (
-            <TableRow key={headerGroup.id}>
+            <TableRow key={headerGroup.id} className="hover:bg-inherit">
               {headerGroup.headers.map((header) => (
                 <DataTableColumnHeader key={header.id} header={header} />
               ))}
@@ -155,7 +155,7 @@ export function DataTableBasic<TData>({
                   <TableCell
                     key={cell.id}
                     className={cn(
-                      "hover:bg-black/5 dark:hover:bg-white/5",
+                      "p-2 hover:bg-black/5 dark:hover:bg-white/5",
                       cell.column.columnDef.size !== 150
                         ? `w-[${cell.column.columnDef.size}px]`
                         : "",

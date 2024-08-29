@@ -25,7 +25,29 @@ export const accountTypes = [
   },
 ];
 
-export const configTanNameOptions: Option[] = [
+export const configFieldExpenseTypeOptions: Option[] = [
+  { label: "Exp >0", value: "EXPENSE_IF_GT_0" },
+  { label: "Exp >0< Inc", value: "EXPENSE_IF_GT_0_EL_INCOME" },
+  { label: "Inc >0", value: "INCOME_IF_GT_0" },
+  { label: "Inc >0< Exp", value: "INCOME_IF_GT_0_EL_EXPENSE" },
+];
+
+export const configFieldExpenseColumnOptions: Option[] = [
+  { label: "None", value: "none" },
+  { label: "Date", value: "date" },
+  { label: "Description", value: "description" },
+];
+
+export const configFieldTypeOptions: Option[] = [
+  { label: "String", value: "string" },
+  { label: "Amount", value: "amount" },
+  { label: "Number", value: "number" },
+  { label: "Date", value: "date" },
+  { label: "Time", value: "time" },
+  { label: "DateTime", value: "dateTime" },
+];
+
+export const configTagNameOptions: Option[] = [
   { label: "Description", value: "description" },
 ];
 

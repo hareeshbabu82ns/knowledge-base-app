@@ -3,91 +3,121 @@
 import { cn } from "@/lib/utils";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import React from "react";
-import { fetchTags, getAccountDetails, updateAccount } from "../actions";
+import { getAccountDetails, updateAccount } from "../actions";
 import { DataTableBasic } from "@/components/data-table/datatable-basic";
 import Loader from "@/components/shared/loader";
-import { createColumnHelper, filterFns } from "@tanstack/react-table";
+import { createColumnHelper } from "@tanstack/react-table";
 import { Prisma } from "@prisma/client";
 import { Button } from "@/components/ui/button";
 import { Icons } from "@/components/shared/icons";
-import { IConfig, IConfigTagOptions } from "@/types/expenses";
+import { IConfig, IConfigFileFields } from "@/types/expenses";
 import {
-  configComparisionOptions,
-  configTagNameOptions,
+  configFieldExpenseColumnOptions,
+  configFieldExpenseTypeOptions,
+  configFieldTypeOptions,
 } from "@/variables/expenses";
-import { Badge } from "@/components/ui/badge";
 
-const columnHelper = createColumnHelper<IConfigTagOptions>();
+const columnHelper = createColumnHelper<IConfigFileFields>();
 const columns = [
-  columnHelper.accessor("comparision", {
-    id: "comparision",
-    header: "Comparision",
-    meta: {
-      cellInputVariant: "select",
-      filterVariant: "select",
-      filterOptions: configComparisionOptions,
-    },
-    cell: (info: any) => {
-      const value = info.getValue();
-      if (!value) return null;
-      const option = configComparisionOptions.find((o) => o.value === value);
-      return option?.label || value;
-    },
-  }),
   columnHelper.accessor("name", {
     id: "name",
     header: "Name",
-    meta: {
-      cellInputVariant: "select",
-      filterOptions: configTagNameOptions,
-    },
-    cell: (info: any) => {
-      const value = info.getValue();
-      if (!value) return null;
-      const option = configTagNameOptions.find((o) => o.value === value);
-      return option?.label || value;
-    },
-  }),
-  columnHelper.accessor("value", {
-    id: "value",
-    header: "Value",
     meta: {
       cellInputVariant: "text",
       filterVariant: "text",
     },
   }),
-  columnHelper.accessor("tags", {
-    id: "tags",
-    header: "Tags",
-    filterFn: filterFns.arrIncludes,
+  columnHelper.accessor("type", {
+    id: "type",
+    header: "Type",
     meta: {
-      cellInputVariant: "text",
+      cellInputVariant: "select",
       filterVariant: "select",
-      fieldType: "array",
-      filterOptionsFn: async () => {
-        const tags = await fetchTags();
-        return tags.map((tag) => ({
-          label: tag.tag,
-          value: tag.tag,
-        }));
-      },
+      filterOptions: configFieldTypeOptions,
     },
     cell: (info: any) => {
       const value = info.getValue();
-      const tags = Array.isArray(value)
-        ? value
-        : value
-          ? (value as string).split(",")
-          : [];
-      return (
-        <div className="flex flex-row gap-1 text-sm font-medium">
-          {tags.map((tag: string, i: number) => (
-            <Badge variant="outline" key={`${tag}-${i}`}>
-              {tag}
-            </Badge>
-          ))}
-        </div>
+      if (!value) return null;
+      const option = configFieldTypeOptions.find((o) => o.value === value);
+      return option?.label || value;
+    },
+  }),
+  columnHelper.accessor("format", {
+    id: "format",
+    header: "Format",
+    meta: {
+      cellInputVariant: "text",
+    },
+  }),
+  columnHelper.accessor("expenseColumn", {
+    id: "expenseColumn",
+    header: "Expense Column",
+    meta: {
+      cellInputVariant: "select",
+      filterVariant: "select",
+      filterOptions: configFieldExpenseColumnOptions,
+    },
+    cell: (info: any) => {
+      const value = info.getValue();
+      if (!value) return null;
+      const option = configFieldExpenseColumnOptions.find(
+        (o) => o.value === value,
       );
+      return option?.label || value;
+    },
+  }),
+  columnHelper.accessor("expenseType", {
+    id: "expenseType",
+    header: "Expense Type",
+    meta: {
+      cellInputVariant: "select",
+      filterVariant: "select",
+      filterOptions: configFieldExpenseTypeOptions,
+    },
+    cell: (info: any) => {
+      const value = info.getValue();
+      if (!value) return null;
+      const option = configFieldExpenseTypeOptions.find(
+        (o) => o.value === value,
+      );
+      return option?.label || value;
+    },
+  }),
+  columnHelper.accessor("ignore", {
+    id: "ignore",
+    header: "Ignore",
+    meta: {
+      cellInputVariant: "switch",
+    },
+    cell: (info: any) => {
+      const value = info.getValue() as boolean;
+      return value ? (
+        <Icons.check className="size-4" />
+      ) : (
+        <Icons.close className="size-4" />
+      );
+    },
+  }),
+  columnHelper.accessor("negated", {
+    id: "negated",
+    header: "Negated",
+    meta: {
+      cellInputVariant: "switch",
+    },
+    cell: (info: any) => {
+      const value = info.getValue() as boolean;
+      return value ? (
+        <Icons.check className="size-4" />
+      ) : (
+        <Icons.close className="size-4" />
+      );
+    },
+  }),
+  columnHelper.accessor("timeColumnIndex", {
+    id: "timeColumnIndex",
+    header: "Time Column Index",
+    meta: {
+      cellInputVariant: "number",
     },
   }),
   columnHelper.display({
@@ -137,15 +167,15 @@ const columns = [
   }),
 ];
 
-interface AccountTagFieldsTableProps {
+interface AccountFileFieldsTableProps {
   className?: string;
   accountId: string;
 }
 
-const AccountTagFieldsTable = ({
+const AccountFileFieldsTable = ({
   className,
   accountId,
-}: AccountTagFieldsTableProps) => {
+}: AccountFileFieldsTableProps) => {
   const {
     data: account,
     isFetching,
@@ -160,19 +190,23 @@ const AccountTagFieldsTable = ({
     enabled: accountId !== "new" && accountId !== "",
   });
 
-  const { mutate: addAccountTagFields, isPending } = useMutation({
+  const { mutate: addAccountFileFields, isPending } = useMutation({
     mutationFn: async () => {
       const config = account?.config as unknown as IConfig;
-      const newTagOps = [
-        ...(config.tagOps || []),
+      const newFileFields = [
+        ...(config.fileFields || []),
         {
-          comparision: "STARTS_WITH",
-          name: "description",
-          value: "",
-          tags: [],
+          name: "",
+          type: "string",
+          format: "",
+          expenseColumn: "",
+          expenseType: "",
+          ignore: false,
+          negated: false,
+          timeColumnIndex: 0,
         },
       ];
-      const newConfig = { ...config, tagOps: newTagOps };
+      const newConfig = { ...config, fileFields: newFileFields };
       await updateAccount(accountId, {
         config: (newConfig as unknown as Prisma.JsonValue) || {},
       });
@@ -182,25 +216,25 @@ const AccountTagFieldsTable = ({
     },
   });
 
-  const { mutate: updateAccountTagFields, isPending: isUpdatePending } =
+  const { mutate: updateAccountFileFields, isPending: isUpdatePending } =
     useMutation({
       mutationFn: async ({
         index,
         data,
       }: {
         index: number;
-        data: IConfigTagOptions;
+        data: IConfigFileFields;
       }) => {
         const config = account?.config as unknown as IConfig;
-        const tagOpts = config?.tagOps || [];
-        const newTagOpt = { ...(tagOpts[index] || {}), ...data };
-        const newTagOps = [
-          ...tagOpts.slice(0, index),
-          newTagOpt,
-          ...tagOpts.slice(index + 1),
+        const fileFields = config?.fileFields || [];
+        const newFileField = { ...(fileFields[index] || {}), ...data };
+        const newFileFields = [
+          ...fileFields.slice(0, index),
+          newFileField,
+          ...fileFields.slice(index + 1),
         ];
-        // console.log("newTagOps", newTagOps);
-        const newConfig = { ...config, tagOps: newTagOps };
+        // console.log("newFileFields", newFileFields);
+        const newConfig = { ...config, fileFields: newFileFields };
         await updateAccount(accountId, {
           config: (newConfig as unknown as Prisma.JsonValue) || {},
         });
@@ -210,16 +244,16 @@ const AccountTagFieldsTable = ({
       },
     });
 
-  const { mutate: deleteAccountTagFields, isPending: isDeletePending } =
+  const { mutate: deleteAccountFileFields, isPending: isDeletePending } =
     useMutation({
       mutationFn: async (index: number) => {
         const config = account?.config as unknown as IConfig;
-        const tagOpts = config?.tagOps || [];
-        const newTagOps = [
-          ...tagOpts.slice(0, index),
-          ...tagOpts.slice(index + 1),
+        const fileFields = config?.fileFields || [];
+        const newFileFields = [
+          ...fileFields.slice(0, index),
+          ...fileFields.slice(index + 1),
         ];
-        const newConfig = { ...config, tagOps: newTagOps };
+        const newConfig = { ...config, fileFields: newFileFields };
         await updateAccount(accountId, {
           config: (newConfig as unknown as Prisma.JsonValue) || {},
         });
@@ -236,12 +270,12 @@ const AccountTagFieldsTable = ({
   return (
     <div className={cn("mt-2 flex flex-1 flex-col", className)}>
       <DataTableBasic
-        title="Tag Fields"
-        data={config.tagOps || []}
+        title="Input File Fields"
+        data={config.fileFields || []}
         columns={columns}
         enableMultiRowEdit={false}
         defaultPagination={{ pageSize: 10, pageIndex: 0 }}
-        defaultSorting={[{ id: "value", desc: false }]}
+        defaultSorting={[{ id: "name", desc: false }]}
         defaultColumnVisibility={{}}
         refetch={() => refetch()}
         actions={
@@ -249,7 +283,7 @@ const AccountTagFieldsTable = ({
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => addAccountTagFields()}
+              onClick={() => addAccountFileFields()}
               disabled={isPending}
             >
               <Icons.add className="size-5" />
@@ -258,19 +292,19 @@ const AccountTagFieldsTable = ({
         }
         updateData={({ rowIndex, rowData, columnId, value }) => {
           // console.log("updateData", { rowIndex, columnId, value, rowData });
-          const newTagOpt = {
+          const newFileField = {
             ...rowData,
             ...{ [columnId]: value },
           };
-          updateAccountTagFields({ index: rowIndex, data: newTagOpt });
+          updateAccountFileFields({ index: rowIndex, data: newFileField });
         }}
         deleteData={(rowIndex, rowData) => {
           // console.log("deleteData", { rowIndex, rowData });
-          deleteAccountTagFields(rowIndex);
+          deleteAccountFileFields(rowIndex);
         }}
       />
     </div>
   );
 };
 
-export default AccountTagFieldsTable;
+export default AccountFileFieldsTable;
