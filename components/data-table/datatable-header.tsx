@@ -23,6 +23,7 @@ interface DataTableHeaderProps<TData> {
   refetch?: () => void;
   isFiltersOpen?: boolean;
   debounce?: number;
+  onRowEditFormOpen?: (isOpen: boolean) => void;
 }
 
 export function DataTableHeader<TData>({
@@ -34,6 +35,7 @@ export function DataTableHeader<TData>({
   refetch,
   isFiltersOpen: _isFiltersOpen,
   debounce = 1000,
+  onRowEditFormOpen,
 }: DataTableHeaderProps<TData>) {
   const [isFiltersOpen, setIsFiltersOpen] = React.useState(_isFiltersOpen);
 
@@ -48,6 +50,21 @@ export function DataTableHeader<TData>({
           <div>{title}</div>
           <div className="flex items-center gap-2">
             {actions}
+            {onRowEditFormOpen && (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    onClick={() => onRowEditFormOpen(true)}
+                    variant="ghost"
+                    size="icon"
+                  >
+                    <Icons.add className="size-4" />
+                    <span className="sr-only">Show Edit Form</span>
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>Show Edit Form</TooltipContent>
+              </Tooltip>
+            )}
             {refetch && (
               <Tooltip>
                 <TooltipTrigger asChild>

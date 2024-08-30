@@ -21,6 +21,7 @@ import {
 } from "@/variables/expenses";
 import { Badge } from "@/components/ui/badge";
 import DataTableRowSelectionForm from "@/components/data-table/datatable-row-selection-form";
+import { Dialog, DialogTrigger } from "@/components/ui/dialog";
 
 const columnHelper = createColumnHelper<IConfigTagOptions>();
 const columns = [
@@ -253,19 +254,20 @@ const AccountTagFieldsTable = ({
         defaultSorting={[{ id: "value", desc: false }]}
         defaultColumnVisibility={{}}
         refetch={() => refetch()}
-        rowSelectionForm={(props) => (
+        rowEditFormaAsDialog
+        rowEditForm={(props) => (
           <DataTableRowSelectionForm {...props} defaultData={defaultTagOpt} />
         )}
         actions={
           <>
-            <Button
+            {/* <Button
               variant="ghost"
               size="icon"
               onClick={() => addAccountTagFields(defaultTagOpt)}
               disabled={isPending}
             >
               <Icons.add className="size-5" />
-            </Button>
+            </Button> */}
           </>
         }
         updateData={({ rowIndex, rowData }) => {

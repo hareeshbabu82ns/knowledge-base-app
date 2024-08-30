@@ -1,19 +1,22 @@
 "use client";
 
 import React, { useEffect } from "react";
-import { RowSelectionFormProps } from "./datatable-basic";
 import DataTableFormInput from "./datatable-form-input";
 import { Button } from "../ui/button";
+import { RowSelectionFormProps } from "./types";
+import { cn } from "@/lib/utils";
 
 interface DataTableRowSelectionFormProps<TData>
   extends RowSelectionFormProps<TData> {
   defaultData: TData;
+  className?: string;
 }
 
 export default function DataTableRowSelectionForm<TData>({
   table,
   editingRows,
   defaultData,
+  className,
 }: DataTableRowSelectionFormProps<TData>) {
   const [rowData, setRowData] = React.useState<TData>(defaultData);
   useEffect(() => {
@@ -26,7 +29,7 @@ export default function DataTableRowSelectionForm<TData>({
   const rowId = Object.keys(editingRows)[0] || null;
 
   return (
-    <div className="grid grid-cols-2 gap-4 border-b p-2">
+    <div className={cn("grid grid-cols-2 gap-4 p-2", className)}>
       {table.getAllLeafColumns().map((column) => {
         return column.columnDef.meta?.cellInputVariant ? (
           <DataTableFormInput
@@ -42,6 +45,8 @@ export default function DataTableRowSelectionForm<TData>({
       <div className="col-span-2 flex justify-end gap-4">
         {table.options.meta?.updateData && (
           <Button
+            variant="outline"
+            size="sm"
             onClick={() => {
               console.log({ rowId, rowData });
               // table.updateRow(rowId, rowData);
@@ -55,6 +60,8 @@ export default function DataTableRowSelectionForm<TData>({
           </Button>
         )}
         <Button
+          variant="outline"
+          size="sm"
           onClick={() => {
             table.resetRowEdit();
           }}

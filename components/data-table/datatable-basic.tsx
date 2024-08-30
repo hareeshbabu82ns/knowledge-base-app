@@ -9,6 +9,7 @@ import {
   getFilteredRowModel,
   getPaginationRowModel,
   getSortedRowModel,
+  OnChangeFn,
   PaginationState,
   SortingState,
   Table as TableType,
@@ -30,11 +31,15 @@ import { DataTablePagination } from "./datatable-pagination";
 import { cn } from "@/lib/utils";
 import DataTableCellInput from "./datatable-cell-input";
 import { RowEditFeature, RowEditState } from "./datatable-feature-row-editing";
-
-export interface RowSelectionFormProps<TData> {
-  table: TableType<TData>;
-  editingRows: RowEditState;
-}
+import { RowSelectionFormProps } from "./types";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "../ui/dialog";
 
 interface DataTableProps<TData> {
   data: TData[];
@@ -57,7 +62,8 @@ interface DataTableProps<TData> {
   }) => void;
   deleteData?: (rowIndex: number, rowData: TData) => void;
   enableMultiRowEdit?: boolean;
-  rowSelectionForm?: ColumnDefTemplate<RowSelectionFormProps<TData>>;
+  rowEditForm?: ColumnDefTemplate<RowSelectionFormProps<TData>>;
+  rowEditFormaAsDialog?: boolean;
 }
 
 export function DataTableBasic<TData>({
@@ -78,7 +84,8 @@ export function DataTableBasic<TData>({
   updateData,
   deleteData,
   enableMultiRowEdit = true,
-  rowSelectionForm,
+  rowEditForm,
+  rowEditFormaAsDialog = false,
 }: DataTableProps<TData>) {
   const [data, _setData] = React.useState(() => [...tableData]);
 
@@ -94,6 +101,23 @@ export function DataTableBasic<TData>({
     defaultColumnVisibility,
   );
   const [editingRows, setEditingRows] = React.useState<RowEditState>({});
+  const [isRowEditFormOpen, setIsRowEditFormOpen] = React.useState(false);
+
+  const onRowEditChange = React.useCallback<OnChangeFn<RowEditState>>(
+    (editingRowsUpdater) => {
+      const newEditingRows =
+        typeof editingRowsUpdater === "function"
+          ? editingRowsUpdater(editingRows)
+          : editingRowsUpdater;
+      setEditingRows(newEditingRows);
+      if (Object.keys(newEditingRows).length) {
+        setIsRowEditFormOpen(true);
+      } else {
+        setIsRowEditFormOpen(false);
+      }
+    },
+    [editingRows],
+  );
 
   const table = useReactTable({
     _features: [RowEditFeature],
@@ -111,7 +135,7 @@ export function DataTableBasic<TData>({
       rowEdit: editingRows,
     },
     onSortingChange: setSorting,
-    onRowEditChange: setEditingRows,
+    onRowEditChange,
     onPaginationChange: setPagination,
     onColumnFiltersChange: setColumnFilters,
     onColumnVisibilityChange: setColumnVisibility,
@@ -143,8 +167,31 @@ export function DataTableBasic<TData>({
         isFiltersOpen={isFiltersOpen}
         refetch={refetch}
         actions={actions}
+        onRowEditFormOpen={
+          rowEditForm && rowEditFormaAsDialog ? setIsRowEditFormOpen : undefined
+        }
       />
-      {rowSelectionForm && flexRender(rowSelectionForm, { table, editingRows })}
+      {rowEditForm &&
+        !rowEditFormaAsDialog &&
+        flexRender(rowEditForm, { table, editingRows })}
+      {rowEditForm && rowEditFormaAsDialog && (
+        <Dialog
+          open={isRowEditFormOpen}
+          onOpenChange={(open) => {
+            if (!open) {
+              table.resetRowEdit();
+            }
+            setIsRowEditFormOpen(open);
+          }}
+        >
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Form</DialogTitle>
+            </DialogHeader>
+            {flexRender(rowEditForm, { table, editingRows })}
+          </DialogContent>
+        </Dialog>
+      )}
       <Table>
         <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (
@@ -172,7 +219,7 @@ export function DataTableBasic<TData>({
                         : "",
                     )}
                   >
-                    {!rowSelectionForm &&
+                    {!rowEditForm &&
                     cell.column.columnDef.meta?.cellInputVariant &&
                     (table.options.enableMultiRowEdit ||
                       cell.row.getIsEditing()) ? (

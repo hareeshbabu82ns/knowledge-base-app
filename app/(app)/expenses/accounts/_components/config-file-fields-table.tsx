@@ -16,6 +16,7 @@ import {
   configFieldExpenseTypeOptions,
   configFieldTypeOptions,
 } from "@/variables/expenses";
+import DataTableRowSelectionForm from "@/components/data-table/datatable-row-selection-form";
 
 const columnHelper = createColumnHelper<IConfigFileFields>();
 const columns = [
@@ -172,6 +173,17 @@ interface AccountFileFieldsTableProps {
   accountId: string;
 }
 
+const defaultFileField: IConfigFileFields = {
+  name: "",
+  type: "string",
+  format: "",
+  expenseColumn: "",
+  expenseType: "",
+  ignore: false,
+  negated: false,
+  timeColumnIndex: 0,
+};
+
 const AccountFileFieldsTable = ({
   className,
   accountId,
@@ -191,19 +203,12 @@ const AccountFileFieldsTable = ({
   });
 
   const { mutate: addAccountFileFields, isPending } = useMutation({
-    mutationFn: async () => {
+    mutationFn: async (data: IConfigFileFields) => {
       const config = account?.config as unknown as IConfig;
       const newFileFields = [
         ...(config.fileFields || []),
         {
-          name: "",
-          type: "string",
-          format: "",
-          expenseColumn: "",
-          expenseType: "",
-          ignore: false,
-          negated: false,
-          timeColumnIndex: 0,
+          ...data,
         },
       ];
       const newConfig = { ...config, fileFields: newFileFields };
@@ -240,7 +245,7 @@ const AccountFileFieldsTable = ({
         });
       },
       onSuccess: () => {
-        // refetch();
+        refetch();
       },
     });
 
@@ -278,19 +283,32 @@ const AccountFileFieldsTable = ({
         defaultSorting={[{ id: "name", desc: false }]}
         defaultColumnVisibility={{}}
         refetch={() => refetch()}
+        rowEditFormaAsDialog
+        rowEditForm={(props) => (
+          <DataTableRowSelectionForm
+            {...props}
+            defaultData={defaultFileField}
+          />
+        )}
         actions={
           <>
-            <Button
+            {/* <Button
               variant="ghost"
               size="icon"
               onClick={() => addAccountFileFields()}
               disabled={isPending}
             >
               <Icons.add className="size-5" />
-            </Button>
+            </Button> */}
           </>
         }
-        updateData={({ rowIndex, rowData, columnId, value }) => {
+        updateData={({ rowIndex, rowData }) => {
+          // console.log("updateData", { rowIndex, columnId, value, rowData });
+          rowIndex < 0
+            ? addAccountFileFields(rowData)
+            : updateAccountFileFields({ index: rowIndex, data: rowData });
+        }}
+        updateCellData={({ rowIndex, rowData, columnId, value }) => {
           // console.log("updateData", { rowIndex, columnId, value, rowData });
           const newFileField = {
             ...rowData,
