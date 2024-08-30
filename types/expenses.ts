@@ -1,4 +1,4 @@
-enum ConfigComparision {
+export enum ConfigComparisionEnum {
   EQUALS = "EQ",
   NOT_EQUALS = "NE",
   GREATER_THAN = "GT",
@@ -25,13 +25,13 @@ export interface IConfigText {
 
 export interface IConfigIgnoreOptions {
   name: string;
-  comparision: ConfigComparision;
+  comparision: ConfigComparisionEnum;
   value: string;
 }
 
 export interface IConfigTagOptions {
   name: string;
-  comparision: ConfigComparision;
+  comparision: ConfigComparisionEnum;
   value: string;
   tags: string[];
 }

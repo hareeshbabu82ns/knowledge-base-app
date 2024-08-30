@@ -1,6 +1,6 @@
 "use client";
 
-import { CellContext } from "@tanstack/react-table";
+import { CellContext, Column, Table } from "@tanstack/react-table";
 import { useQuery } from "@tanstack/react-query";
 import {
   Select,
@@ -22,7 +22,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { DateRange } from "react-day-picker";
 import MultipleSelector, { Option } from "@/components/ui/multi-select";
 import { Input } from "../ui/input";
-import { useState } from "react";
+import { use, useEffect, useState } from "react";
 import { Switch } from "../ui/switch";
 
 function generateFilterOptions(filterOptions?: Option[]) {
@@ -37,18 +37,27 @@ function generateFilterOptions(filterOptions?: Option[]) {
   ));
 }
 
-interface DataTableCellInputProps<TData> extends CellContext<TData, unknown> {
+interface DataTableFormInputProps<TData> {
+  table: Table<TData>;
+  value: any;
+  rowData: TData;
   debounce?: number;
+  column: Column<TData, unknown>;
+  onChange: (value: any) => void;
 }
 
-export default function DataTableCellInput<TData>({
-  getValue,
+export default function DataTableFormInput<TData>({
+  value: originalValue,
   table,
-  row,
+  rowData,
   column,
   debounce = 1000,
-}: DataTableCellInputProps<TData>) {
-  const [cellValue, setCellValue] = useState(getValue());
+  onChange,
+}: DataTableFormInputProps<TData>) {
+  const [cellValue, setCellValue] = useState(originalValue);
+  useEffect(() => {
+    setCellValue(originalValue);
+  }, [originalValue]);
 
   const {
     cellInputVariant: filterVariant,
@@ -88,23 +97,8 @@ export default function DataTableCellInput<TData>({
             onChange={(e) => {
               if (isNaN(Number(e.target.value))) return;
               setCellValue(e.target.value);
+              onChange({ [column.id]: e.target.value });
             }}
-            onBlur={
-              table.options.meta?.updateCellData
-                ? (e) => {
-                    if (isNaN(Number(e.target.value))) return;
-                    const numVal = Number(e.target.value);
-                    if (numVal !== numValue) {
-                      table.options.meta?.updateCellData!({
-                        rowIndex: row.index,
-                        rowData: row.original,
-                        columnId: column.id,
-                        value: numVal,
-                      });
-                    }
-                  }
-                : undefined
-            }
             placeholder={`Enter ${column.id}`}
             className="w-16 flex-1 rounded border shadow"
           />
@@ -118,12 +112,7 @@ export default function DataTableCellInput<TData>({
             checked={boolValue}
             onCheckedChange={(value) => {
               setCellValue(value);
-              table.options.meta?.updateCellData!({
-                rowIndex: row.index,
-                rowData: row.original,
-                columnId: column.id,
-                value,
-              });
+              onChange({ [column.id]: value });
             }}
           />
         </div>
@@ -134,12 +123,7 @@ export default function DataTableCellInput<TData>({
           <Select
             onValueChange={(value) => {
               setCellValue(value);
-              table.options.meta?.updateCellData!({
-                rowIndex: row.index,
-                rowData: row.original,
-                columnId: column.id,
-                value,
-              });
+              onChange({ [column.id]: value });
             }}
             value={cellValue?.toString()}
           >
@@ -155,6 +139,7 @@ export default function DataTableCellInput<TData>({
               className="size-5"
               onClick={(e) => {
                 setCellValue(undefined);
+                onChange({ [column.id]: undefined });
               }}
             >
               <Icons.close className="size-4" />
@@ -170,6 +155,7 @@ export default function DataTableCellInput<TData>({
             className="w-full"
             onChange={(e) => {
               setCellValue(e);
+              onChange({ [column.id]: e });
             }}
             placeholder="multi select..."
             value={optionValue}
@@ -212,12 +198,7 @@ export default function DataTableCellInput<TData>({
                 selected={dateValue}
                 onSelect={(date?: Date) => {
                   setCellValue(date);
-                  table.options.meta?.updateCellData!({
-                    rowIndex: row.index,
-                    rowData: row.original,
-                    columnId: column.id,
-                    value: date,
-                  });
+                  onChange({ [column.id]: date });
                 }}
               />
             </PopoverContent>
@@ -262,6 +243,7 @@ export default function DataTableCellInput<TData>({
                 }}
                 onSelect={(dateRange?: DateRange) => {
                   setCellValue([dateRange?.from, dateRange?.to]);
+                  onChange({ [column.id]: [dateRange?.from, dateRange?.to] });
                 }}
                 numberOfMonths={2}
               />
@@ -271,31 +253,19 @@ export default function DataTableCellInput<TData>({
       );
     default:
       const value = (cellValue ?? "") as string;
-      const oldValue = getValue() as string;
+      // const oldValue = originalValue as string;
       return (
         <div className="flex w-full flex-row items-center justify-between gap-1">
           <Input
             className="w-full rounded border shadow"
-            onChange={(e) => setCellValue(e.target.value)}
-            onBlur={
-              table.options.meta?.updateCellData
-                ? (e) => {
-                    // const inValue = e.target.value;
-                    if (value !== oldValue) {
-                      const fieldTypeValue =
-                        column.columnDef.meta?.fieldType === "array"
-                          ? value.split(",")
-                          : value;
-                      table.options.meta?.updateCellData!({
-                        rowIndex: row.index,
-                        rowData: row.original,
-                        columnId: column.id,
-                        value: fieldTypeValue,
-                      });
-                    }
-                  }
-                : undefined
-            }
+            onChange={(e) => {
+              setCellValue(e.target.value);
+              const fieldTypeValue =
+                column.columnDef.meta?.fieldType === "array"
+                  ? e.target.value?.split(",")
+                  : e.target.value;
+              onChange({ [column.id]: fieldTypeValue });
+            }}
             placeholder={`Enter ${column.id}`}
             value={value}
           />

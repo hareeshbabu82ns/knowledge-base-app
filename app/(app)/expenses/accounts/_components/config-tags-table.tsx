@@ -6,16 +6,21 @@ import React from "react";
 import { fetchTags, getAccountDetails, updateAccount } from "../actions";
 import { DataTableBasic } from "@/components/data-table/datatable-basic";
 import Loader from "@/components/shared/loader";
-import { createColumnHelper, filterFns } from "@tanstack/react-table";
+import { createColumnHelper, filterFns, Table } from "@tanstack/react-table";
 import { Prisma } from "@prisma/client";
 import { Button } from "@/components/ui/button";
 import { Icons } from "@/components/shared/icons";
-import { IConfig, IConfigTagOptions } from "@/types/expenses";
+import {
+  ConfigComparisionEnum,
+  IConfig,
+  IConfigTagOptions,
+} from "@/types/expenses";
 import {
   configComparisionOptions,
   configTagNameOptions,
 } from "@/variables/expenses";
 import { Badge } from "@/components/ui/badge";
+import DataTableRowSelectionForm from "@/components/data-table/datatable-row-selection-form";
 
 const columnHelper = createColumnHelper<IConfigTagOptions>();
 const columns = [
@@ -142,6 +147,13 @@ interface AccountTagFieldsTableProps {
   accountId: string;
 }
 
+const defaultTagOpt: IConfigTagOptions = {
+  comparision: ConfigComparisionEnum.STARTS_WITH,
+  name: "description",
+  value: "",
+  tags: [],
+};
+
 const AccountTagFieldsTable = ({
   className,
   accountId,
@@ -161,15 +173,12 @@ const AccountTagFieldsTable = ({
   });
 
   const { mutate: addAccountTagFields, isPending } = useMutation({
-    mutationFn: async () => {
+    mutationFn: async (data: IConfigTagOptions) => {
       const config = account?.config as unknown as IConfig;
       const newTagOps = [
         ...(config.tagOps || []),
         {
-          comparision: "STARTS_WITH",
-          name: "description",
-          value: "",
-          tags: [],
+          ...data,
         },
       ];
       const newConfig = { ...config, tagOps: newTagOps };
@@ -206,7 +215,7 @@ const AccountTagFieldsTable = ({
         });
       },
       onSuccess: () => {
-        // refetch();
+        refetch();
       },
     });
 
@@ -244,27 +253,36 @@ const AccountTagFieldsTable = ({
         defaultSorting={[{ id: "value", desc: false }]}
         defaultColumnVisibility={{}}
         refetch={() => refetch()}
+        rowSelectionForm={(props) => (
+          <DataTableRowSelectionForm {...props} defaultData={defaultTagOpt} />
+        )}
         actions={
           <>
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => addAccountTagFields()}
+              onClick={() => addAccountTagFields(defaultTagOpt)}
               disabled={isPending}
             >
               <Icons.add className="size-5" />
             </Button>
           </>
         }
-        updateData={({ rowIndex, rowData, columnId, value }) => {
+        updateData={({ rowIndex, rowData }) => {
+          // console.log("updateData", { rowIndex, columnId, value, rowData });
+          rowIndex < 0
+            ? addAccountTagFields(rowData)
+            : updateAccountTagFields({ index: rowIndex, data: rowData });
+        }}
+        updateCellData={({ rowIndex, rowData, columnId, value }) => {
           // console.log("updateData", { rowIndex, columnId, value, rowData });
           const newTagOpt = {
             ...rowData,
             ...{ [columnId]: value },
           };
-          updateAccountTagFields({ index: rowIndex, data: newTagOpt });
+          updateAccountTagFields({ index: rowIndex, data: rowData });
         }}
-        deleteData={(rowIndex, rowData) => {
+        deleteData={(rowIndex) => {
           // console.log("deleteData", { rowIndex, rowData });
           deleteAccountTagFields(rowIndex);
         }}

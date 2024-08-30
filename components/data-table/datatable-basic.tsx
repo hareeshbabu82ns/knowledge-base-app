@@ -2,6 +2,7 @@
 
 import {
   ColumnDef,
+  ColumnDefTemplate,
   ColumnFiltersState,
   flexRender,
   getCoreRowModel,
@@ -10,6 +11,7 @@ import {
   getSortedRowModel,
   PaginationState,
   SortingState,
+  Table as TableType,
   useReactTable,
   VisibilityState,
 } from "@tanstack/react-table";
@@ -29,6 +31,11 @@ import { cn } from "@/lib/utils";
 import DataTableCellInput from "./datatable-cell-input";
 import { RowEditFeature, RowEditState } from "./datatable-feature-row-editing";
 
+export interface RowSelectionFormProps<TData> {
+  table: TableType<TData>;
+  editingRows: RowEditState;
+}
+
 interface DataTableProps<TData> {
   data: TData[];
   columns: ColumnDef<TData, any>[];
@@ -41,7 +48,8 @@ interface DataTableProps<TData> {
   refetch?: () => void;
   isFiltersOpen?: boolean;
   actions?: React.ReactNode;
-  updateData?: (data: {
+  updateData?: (data: { rowIndex: number; rowData: TData }) => void;
+  updateCellData?: (data: {
     rowIndex: number;
     rowData: TData;
     columnId: string;
@@ -49,6 +57,7 @@ interface DataTableProps<TData> {
   }) => void;
   deleteData?: (rowIndex: number, rowData: TData) => void;
   enableMultiRowEdit?: boolean;
+  rowSelectionForm?: ColumnDefTemplate<RowSelectionFormProps<TData>>;
 }
 
 export function DataTableBasic<TData>({
@@ -69,6 +78,7 @@ export function DataTableBasic<TData>({
   updateData,
   deleteData,
   enableMultiRowEdit = true,
+  rowSelectionForm,
 }: DataTableProps<TData>) {
   const [data, _setData] = React.useState(() => [...tableData]);
 
@@ -134,6 +144,7 @@ export function DataTableBasic<TData>({
         refetch={refetch}
         actions={actions}
       />
+      {rowSelectionForm && flexRender(rowSelectionForm, { table, editingRows })}
       <Table>
         <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (
@@ -161,7 +172,8 @@ export function DataTableBasic<TData>({
                         : "",
                     )}
                   >
-                    {cell.column.columnDef.meta?.cellInputVariant &&
+                    {!rowSelectionForm &&
+                    cell.column.columnDef.meta?.cellInputVariant &&
                     (table.options.enableMultiRowEdit ||
                       cell.row.getIsEditing()) ? (
                       <DataTableCellInput {...cell.getContext()} />

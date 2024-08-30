@@ -86,7 +86,7 @@ function prepareChartData(
   });
 
   const chartData = Object.values(chartDataByFreq);
-  console.log("chartData", chartData);
+  // console.log("chartData", chartData);
   return { data: chartData, config };
 }
 
