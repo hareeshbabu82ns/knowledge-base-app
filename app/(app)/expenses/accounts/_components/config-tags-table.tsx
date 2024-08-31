@@ -6,12 +6,12 @@ import React from "react";
 import { fetchTags, getAccountDetails, updateAccount } from "../actions";
 import { DataTableBasic } from "@/components/data-table/datatable-basic";
 import Loader from "@/components/shared/loader";
-import { createColumnHelper, filterFns, Table } from "@tanstack/react-table";
+import { createColumnHelper, filterFns } from "@tanstack/react-table";
 import { Prisma } from "@prisma/client";
 import { Button } from "@/components/ui/button";
 import { Icons } from "@/components/shared/icons";
 import {
-  ConfigComparisionEnum,
+  ConfigTagFieldsSchema,
   IConfig,
   IConfigTagOptions,
 } from "@/types/expenses";
@@ -20,11 +20,24 @@ import {
   configTagNameOptions,
 } from "@/variables/expenses";
 import { Badge } from "@/components/ui/badge";
-import DataTableRowSelectionForm from "@/components/data-table/datatable-row-selection-form";
-import { Dialog, DialogTrigger } from "@/components/ui/dialog";
+import DataTableRowEditForm from "@/components/data-table/datatable-row-edit-form";
 
 const columnHelper = createColumnHelper<IConfigTagOptions>();
 const columns = [
+  columnHelper.accessor("name", {
+    id: "name",
+    header: "Name",
+    meta: {
+      cellInputVariant: "select",
+      filterOptions: configTagNameOptions,
+    },
+    cell: (info: any) => {
+      const value = info.getValue();
+      if (!value) return null;
+      const option = configTagNameOptions.find((o) => o.value === value);
+      return option?.label || value;
+    },
+  }),
   columnHelper.accessor("comparision", {
     id: "comparision",
     header: "Comparision",
@@ -37,20 +50,6 @@ const columns = [
       const value = info.getValue();
       if (!value) return null;
       const option = configComparisionOptions.find((o) => o.value === value);
-      return option?.label || value;
-    },
-  }),
-  columnHelper.accessor("name", {
-    id: "name",
-    header: "Name",
-    meta: {
-      cellInputVariant: "select",
-      filterOptions: configTagNameOptions,
-    },
-    cell: (info: any) => {
-      const value = info.getValue();
-      if (!value) return null;
-      const option = configTagNameOptions.find((o) => o.value === value);
       return option?.label || value;
     },
   }),
@@ -149,7 +148,7 @@ interface AccountTagFieldsTableProps {
 }
 
 const defaultTagOpt: IConfigTagOptions = {
-  comparision: ConfigComparisionEnum.STARTS_WITH,
+  comparision: "STARTS_WITH",
   name: "description",
   value: "",
   tags: [],
@@ -209,7 +208,6 @@ const AccountTagFieldsTable = ({
           newTagOpt,
           ...tagOpts.slice(index + 1),
         ];
-        // console.log("newTagOps", newTagOps);
         const newConfig = { ...config, tagOps: newTagOps };
         await updateAccount(accountId, {
           config: (newConfig as unknown as Prisma.JsonValue) || {},
@@ -256,28 +254,18 @@ const AccountTagFieldsTable = ({
         refetch={() => refetch()}
         rowEditFormaAsDialog
         rowEditForm={(props) => (
-          <DataTableRowSelectionForm {...props} defaultData={defaultTagOpt} />
+          <DataTableRowEditForm
+            {...props}
+            defaultData={defaultTagOpt}
+            zodSchema={ConfigTagFieldsSchema}
+          />
         )}
-        actions={
-          <>
-            {/* <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => addAccountTagFields(defaultTagOpt)}
-              disabled={isPending}
-            >
-              <Icons.add className="size-5" />
-            </Button> */}
-          </>
-        }
         updateData={({ rowIndex, rowData }) => {
-          // console.log("updateData", { rowIndex, columnId, value, rowData });
           rowIndex < 0
             ? addAccountTagFields(rowData)
             : updateAccountTagFields({ index: rowIndex, data: rowData });
         }}
         updateCellData={({ rowIndex, rowData, columnId, value }) => {
-          // console.log("updateData", { rowIndex, columnId, value, rowData });
           const newTagOpt = {
             ...rowData,
             ...{ [columnId]: value },
@@ -285,7 +273,6 @@ const AccountTagFieldsTable = ({
           updateAccountTagFields({ index: rowIndex, data: rowData });
         }}
         deleteData={(rowIndex) => {
-          // console.log("deleteData", { rowIndex, rowData });
           deleteAccountTagFields(rowIndex);
         }}
       />

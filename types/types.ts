@@ -1,3 +1,4 @@
+import { FormFieldType } from "@/components/CustomFormField";
 import {
   RowEditInstance,
   RowEditOptions,
@@ -58,12 +59,15 @@ declare module "@tanstack/react-table" {
   interface ColumnMeta<TData extends RowData, TValue> {
     cellInputVariant?:
       | "text"
+      | "textArea"
       | "number"
       | "switch"
+      | "checkbox"
       | "select"
       | "multiSelect"
       | "date"
-      | "dateRange";
+      | "dateRange"
+      | "skeleton";
     filterVariant?:
       | "text"
       | "range"

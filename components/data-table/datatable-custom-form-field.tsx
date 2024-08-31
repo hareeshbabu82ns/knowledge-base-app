@@ -4,23 +4,34 @@ import ReactDatePicker from "react-datepicker";
 import { Control } from "react-hook-form";
 // import PhoneInput from "react-phone-number-input";
 
-import { Checkbox } from "./ui/checkbox";
+import { Checkbox } from "../ui/checkbox";
 import {
   FormControl,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
-} from "./ui/form";
-import { Input } from "./ui/input";
-import { Select, SelectContent, SelectTrigger, SelectValue } from "./ui/select";
-import { Textarea } from "./ui/textarea";
+} from "../ui/form";
+import { Input } from "../ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../ui/select";
+import { Textarea } from "../ui/textarea";
 import { cn } from "@/lib/utils";
-import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
-import { Button } from "./ui/button";
-import { Icons } from "./shared/icons";
+import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
+import { Button } from "../ui/button";
+import { Icons } from "../shared/icons";
 import { add, addYears, format, subYears } from "date-fns";
-import { Calendar } from "./ui/calendar";
+import { Calendar } from "../ui/calendar";
+import { Column } from "@tanstack/react-table";
+import { Switch } from "../ui/switch";
+import { useQuery } from "@tanstack/react-query";
+import { Option } from "../ui/multi-select";
+import Loader from "../shared/loader";
 
 export enum FormFieldType {
   INPUT = "input",
@@ -32,7 +43,20 @@ export enum FormFieldType {
   SKELETON = "skeleton",
 }
 
-interface CustomProps {
+function generateFilterOptions(filterOptions?: Option[]) {
+  if (!filterOptions) return null;
+
+  return filterOptions.map(({ value, label }) => (
+    <SelectItem key={value} value={value}>
+      <div className="flex cursor-pointer items-center gap-2">
+        <p>{label}</p>
+      </div>
+    </SelectItem>
+  ));
+}
+
+interface CustomProps<TData> {
+  column: Column<TData, unknown>;
   control: Control<any>;
   name: string;
   label?: string;
@@ -46,7 +70,6 @@ interface CustomProps {
   showTimeSelect?: boolean;
   children?: React.ReactNode;
   renderSkeleton?: (field: any) => React.ReactNode;
-  fieldType: FormFieldType;
   className?: string;
   fieldClassName?: string;
   inputType?: React.HTMLInputTypeAttribute;
@@ -62,9 +85,39 @@ interface CustomProps {
     | undefined;
 }
 
-const RenderInput = ({ field, props }: { field: any; props: CustomProps }) => {
-  switch (props.fieldType) {
-    case FormFieldType.INPUT:
+function RenderInput<TData>({
+  field,
+  props,
+}: {
+  field: any;
+  props: CustomProps<TData>;
+}) {
+  const { cellInputVariant, fieldType, filterOptions, filterOptionsFn } =
+    props.column.columnDef.meta ?? {};
+
+  const {
+    isLoading,
+    isPending,
+    isError,
+    data: options,
+    error,
+  } = useQuery({
+    queryKey: ["filters", props.column.id],
+    queryFn: async () => {
+      if (filterOptionsFn) {
+        return await filterOptionsFn();
+      } else if (filterOptions) {
+        return filterOptions;
+      } else {
+        return [];
+      }
+    },
+  });
+  if (isLoading || isPending) return <Loader />;
+
+  switch (cellInputVariant) {
+    case "number":
+    case "text":
       return (
         <FormControl>
           <div className="relative">
@@ -76,13 +129,17 @@ const RenderInput = ({ field, props }: { field: any; props: CustomProps }) => {
             <Input
               placeholder={props.placeholder}
               {...field}
-              onChange={(e) =>
-                field.onChange(
-                  props.inputType === "number"
-                    ? Number(e.target.value)
-                    : e.target.value,
-                )
-              }
+              onChange={(e) => {
+                if (cellInputVariant === "number") {
+                  const val = Number(e.target.value);
+                  if (isNaN(val)) return;
+                  field.onChange(val);
+                } else if (fieldType === "array") {
+                  field.onChange(e.target.value.split(","));
+                } else {
+                  field.onChange(e.target.value);
+                }
+              }}
               type={props.inputType}
               inputMode={props.inputMode}
               required={props.required}
@@ -96,7 +153,7 @@ const RenderInput = ({ field, props }: { field: any; props: CustomProps }) => {
           </div>
         </FormControl>
       );
-    case FormFieldType.TEXTAREA:
+    case "textArea":
       return (
         <FormControl>
           <Textarea
@@ -122,7 +179,7 @@ const RenderInput = ({ field, props }: { field: any; props: CustomProps }) => {
     //       />
     //     </FormControl>
     //   );
-    case FormFieldType.CHECKBOX:
+    case "checkbox":
       return (
         <FormControl>
           <div className="flex items-center gap-4">
@@ -138,7 +195,7 @@ const RenderInput = ({ field, props }: { field: any; props: CustomProps }) => {
           </div>
         </FormControl>
       );
-    case FormFieldType.DATE_PICKER:
+    case "date":
       return (
         <div className="flex w-full flex-row items-center justify-between gap-1">
           <Popover>
@@ -169,32 +226,38 @@ const RenderInput = ({ field, props }: { field: any; props: CustomProps }) => {
           </Popover>
         </div>
       );
-    case FormFieldType.SELECT:
+    case "switch":
+      return (
+        <FormItem className="flex h-10 flex-row items-center justify-center rounded-lg border">
+          <FormControl>
+            <Switch checked={field.value} onCheckedChange={field.onChange} />
+          </FormControl>
+        </FormItem>
+      );
+    case "select":
       return (
         <FormControl>
           <Select
             onValueChange={field.onChange}
-            defaultValue={field.value}
+            value={field.value || ""}
             required={props.required}
             disabled={props.disabled}
           >
-            <FormControl>
-              <SelectTrigger>
-                <SelectValue placeholder={props.placeholder} />
-              </SelectTrigger>
-            </FormControl>
-            <SelectContent>{props.children}</SelectContent>
+            <SelectTrigger>
+              <SelectValue placeholder={props.placeholder} />
+            </SelectTrigger>
+            <SelectContent>{generateFilterOptions(options)}</SelectContent>
           </Select>
         </FormControl>
       );
-    case FormFieldType.SKELETON:
+    case "skeleton":
       return props.renderSkeleton ? props.renderSkeleton(field) : null;
     default:
       return null;
   }
-};
+}
 
-const CustomFormField = (props: CustomProps) => {
+function DatatableCustomFormField<TData>(props: CustomProps<TData>) {
   const { control, name, label, className } = props;
 
   return (
@@ -204,21 +267,22 @@ const CustomFormField = (props: CustomProps) => {
       render={({ field }) => (
         <FormItem className={cn("relative flex-1", className)}>
           <RenderInput field={field} props={props} />
-          {props.fieldType !== FormFieldType.CHECKBOX && label && (
-            <FormLabel
-              className="bg-background absolute start-1 top-2 z-10 origin-[0] -translate-y-6 scale-90 px-1 duration-300"
-              htmlFor={name}
-            >
-              {/* {props.required ? `${label} *` : label} */}
-              {label}
-              {props.required && " *"}
-            </FormLabel>
-          )}
+          {props.column.columnDef.meta?.cellInputVariant !== "checkbox" &&
+            label && (
+              <FormLabel
+                className="bg-background absolute start-1 top-2 z-10 origin-[0] -translate-y-6 scale-90 px-1 duration-300"
+                htmlFor={name}
+              >
+                {/* {props.required ? `${label} *` : label} */}
+                {label}
+                {props.required && " *"}
+              </FormLabel>
+            )}
           <FormMessage />
         </FormItem>
       )}
     />
   );
-};
+}
 
-export default CustomFormField;
+export default DatatableCustomFormField;

@@ -10,13 +10,17 @@ import { createColumnHelper } from "@tanstack/react-table";
 import { Prisma } from "@prisma/client";
 import { Button } from "@/components/ui/button";
 import { Icons } from "@/components/shared/icons";
-import { IConfig, IConfigFileFields } from "@/types/expenses";
+import {
+  ConfigFileFieldsSchema,
+  IConfig,
+  IConfigFileFields,
+} from "@/types/expenses";
 import {
   configFieldExpenseColumnOptions,
   configFieldExpenseTypeOptions,
   configFieldTypeOptions,
 } from "@/variables/expenses";
-import DataTableRowSelectionForm from "@/components/data-table/datatable-row-selection-form";
+import DataTableRowEditForm from "@/components/data-table/datatable-row-edit-form";
 
 const columnHelper = createColumnHelper<IConfigFileFields>();
 const columns = [
@@ -285,23 +289,12 @@ const AccountFileFieldsTable = ({
         refetch={() => refetch()}
         rowEditFormaAsDialog
         rowEditForm={(props) => (
-          <DataTableRowSelectionForm
+          <DataTableRowEditForm
             {...props}
             defaultData={defaultFileField}
+            zodSchema={ConfigFileFieldsSchema}
           />
         )}
-        actions={
-          <>
-            {/* <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => addAccountFileFields()}
-              disabled={isPending}
-            >
-              <Icons.add className="size-5" />
-            </Button> */}
-          </>
-        }
         updateData={({ rowIndex, rowData }) => {
           // console.log("updateData", { rowIndex, columnId, value, rowData });
           rowIndex < 0

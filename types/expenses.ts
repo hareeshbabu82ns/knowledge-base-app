@@ -1,17 +1,32 @@
-export enum ConfigComparisionEnum {
-  EQUALS = "EQ",
-  NOT_EQUALS = "NE",
-  GREATER_THAN = "GT",
-  GREATER_THAN_OR_EQUAL = "GE",
-  LESS_THAN = "LT",
-  LESS_THAN_OR_EQUAL = "LE",
-  CONTAINS = "CONTAINS",
-  NOT_CONTAINS = "NOT_CONTAINS",
-  STARTS_WITH = "STARTS_WITH",
-  NOT_STARTS_WITH = "NOT_STARTS_WITH",
-  ENDS_WITH = "ENDS_WITH",
-  NOT_ENDS_WITH = "NOT_ENDS_WITH",
-}
+import { z } from "zod";
+
+// export enum ConfigComparisionEnum {
+//   EQUALS = "EQ",
+//   NOT_EQUALS = "NE",
+//   GREATER_THAN = "GT",
+//   GREATER_THAN_OR_EQUAL = "GE",
+//   LESS_THAN = "LT",
+//   LESS_THAN_OR_EQUAL = "LE",
+//   CONTAINS = "CONTAINS",
+//   NOT_CONTAINS = "NOT_CONTAINS",
+//   STARTS_WITH = "STARTS_WITH",
+//   NOT_STARTS_WITH = "NOT_STARTS_WITH",
+//   ENDS_WITH = "ENDS_WITH",
+//   NOT_ENDS_WITH = "NOT_ENDS_WITH",
+// }
+export type ConfigComparisionEnum =
+  | "EQ"
+  | "NE"
+  | "GT"
+  | "GE"
+  | "LT"
+  | "LE"
+  | "CONTAINS"
+  | "NOT_CONTAINS"
+  | "STARTS_WITH"
+  | "NOT_STARTS_WITH"
+  | "ENDS_WITH"
+  | "NOT_ENDS_WITH";
 
 enum ConfigTextAdjustScope {
   LINE = "line",
@@ -78,3 +93,46 @@ export interface IExpTransAmountByAttrStats {
 export interface IExpTransAmountByAttrStatsArray {
   [key: string]: IExpTransAmountByAttrStats[];
 }
+
+export const ConfigTagFieldsSchema = z.object({
+  comparision: z.enum([
+    "EQ",
+    "NE",
+    "GT",
+    "GE",
+    "LT",
+    "LE",
+    "CONTAINS",
+    "NOT_CONTAINS",
+    "STARTS_WITH",
+    "NOT_STARTS_WITH",
+    "ENDS_WITH",
+    "NOT_ENDS_WITH",
+  ]),
+  name: z.string().min(5).max(50),
+  value: z.string().min(1, "Value cannot be empty"),
+  tags: z.array(z.string()).min(1, "At least one tag is required"),
+});
+
+export const ConfigFileFieldsSchema = z.object({
+  name: z.string().min(5).max(50),
+  type: z.enum(["string", "amount", "number", "date", "time", "dateTime"], {
+    message: "Invalid type",
+  }),
+  format: z.string(),
+  expenseColumn: z.enum(["none", "date", "description"], {
+    message: "Invalid expense column",
+  }),
+  expenseType: z.enum(
+    [
+      "EXPENSE_IF_GT_0",
+      "EXPENSE_IF_GT_0_EL_INCOME",
+      "INCOME_IF_GT_0",
+      "INCOME_IF_GT_0_EL_EXPENSE",
+    ],
+    { message: "Invalid expense type" },
+  ),
+  ignore: z.boolean(),
+  negated: z.boolean(),
+  timeColumnIndex: z.number().int().min(0),
+});

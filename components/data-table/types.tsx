@@ -5,3 +5,9 @@ export interface RowSelectionFormProps<TData> {
   table: Table<TData>;
   editingRows: RowEditState;
 }
+export interface RowEditFormProps<TData> {
+  table: Table<TData>;
+  editingRows: RowEditState;
+  rowId?: string;
+  editingRowData?: TData;
+}

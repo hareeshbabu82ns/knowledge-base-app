@@ -158,6 +158,11 @@ export function DataTableBasic<TData>({
     defaultSorting,
   ]);
 
+  const editingRowId = Object.keys(editingRows)[0] || undefined;
+  const editingRowData = editingRowId
+    ? table.getRowModel().rowsById[editingRowId].original
+    : undefined;
+
   return (
     <div className={cn("rounded-md border", className)}>
       <DataTableHeader
@@ -173,7 +178,13 @@ export function DataTableBasic<TData>({
       />
       {rowEditForm &&
         !rowEditFormaAsDialog &&
-        flexRender(rowEditForm, { table, editingRows })}
+        flexRender(rowEditForm, {
+          key: editingRowId || "new",
+          table,
+          editingRows,
+          rowId: editingRowId,
+          editingRowData,
+        })}
       {rowEditForm && rowEditFormaAsDialog && (
         <Dialog
           open={isRowEditFormOpen}
@@ -188,7 +199,13 @@ export function DataTableBasic<TData>({
             <DialogHeader>
               <DialogTitle>Form</DialogTitle>
             </DialogHeader>
-            {flexRender(rowEditForm, { table, editingRows })}
+            {flexRender(rowEditForm, {
+              key: editingRowId || "new",
+              table,
+              editingRows,
+              rowId: editingRowId,
+              editingRowData,
+            })}
           </DialogContent>
         </Dialog>
       )}
