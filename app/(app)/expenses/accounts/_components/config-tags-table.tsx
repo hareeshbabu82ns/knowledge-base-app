@@ -101,18 +101,7 @@ const columns = [
     size: 50,
     cell: ({ row, table, column }) => (
       <div className="flex flex-row gap-1">
-        {row.getIsEditing() && (
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => {
-              row.toggleEditing();
-            }}
-          >
-            <Icons.close className="size-4" />
-          </Button>
-        )}
-        {row.getCanEdit() && !row.getIsEditing() && (
+        {row.getCanEdit() && (
           <Button
             variant="ghost"
             size="icon"
@@ -131,7 +120,7 @@ const columns = [
           className="text-destructive"
           disabled={!table.options.meta?.deleteData}
           onClick={() => {
-            table.options.meta?.deleteData!(row.index, row.original);
+            table.options.meta?.deleteData!(row.id, row.original);
           }}
         >
           <Icons.trash className="size-4" />
@@ -260,19 +249,22 @@ const AccountTagFieldsTable = ({
             zodSchema={ConfigTagFieldsSchema}
           />
         )}
-        updateData={({ rowIndex, rowData }) => {
+        updateData={({ rowId, rowData }) => {
+          const rowIndex = Number(rowId);
           rowIndex < 0
             ? addAccountTagFields(rowData)
             : updateAccountTagFields({ index: rowIndex, data: rowData });
         }}
-        updateCellData={({ rowIndex, rowData, columnId, value }) => {
+        updateCellData={({ rowId, rowData, columnId, value }) => {
+          const rowIndex = Number(rowId);
           const newTagOpt = {
             ...rowData,
             ...{ [columnId]: value },
           };
           updateAccountTagFields({ index: rowIndex, data: rowData });
         }}
-        deleteData={(rowIndex) => {
+        deleteData={(rowId) => {
+          const rowIndex = Number(rowId);
           deleteAccountTagFields(rowIndex);
         }}
       />

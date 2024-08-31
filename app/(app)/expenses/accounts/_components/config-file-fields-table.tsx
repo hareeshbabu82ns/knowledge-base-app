@@ -161,7 +161,7 @@ const columns = [
           className="text-destructive"
           disabled={!table.options.meta?.deleteData}
           onClick={() => {
-            table.options.meta?.deleteData!(row.index, row.original);
+            table.options.meta?.deleteData!(row.id, row.original);
           }}
         >
           <Icons.trash className="size-4" />
@@ -295,13 +295,15 @@ const AccountFileFieldsTable = ({
             zodSchema={ConfigFileFieldsSchema}
           />
         )}
-        updateData={({ rowIndex, rowData }) => {
+        updateData={({ rowId, rowData }) => {
+          const rowIndex = Number(rowId);
           // console.log("updateData", { rowIndex, columnId, value, rowData });
           rowIndex < 0
             ? addAccountFileFields(rowData)
             : updateAccountFileFields({ index: rowIndex, data: rowData });
         }}
-        updateCellData={({ rowIndex, rowData, columnId, value }) => {
+        updateCellData={({ rowId, rowData, columnId, value }) => {
+          const rowIndex = Number(rowId);
           // console.log("updateData", { rowIndex, columnId, value, rowData });
           const newFileField = {
             ...rowData,
@@ -309,7 +311,8 @@ const AccountFileFieldsTable = ({
           };
           updateAccountFileFields({ index: rowIndex, data: newFileField });
         }}
-        deleteData={(rowIndex, rowData) => {
+        deleteData={(rowId, rowData) => {
+          const rowIndex = Number(rowId);
           // console.log("deleteData", { rowIndex, rowData });
           deleteAccountFileFields(rowIndex);
         }}

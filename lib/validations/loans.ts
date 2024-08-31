@@ -27,3 +27,14 @@ export function getLoanSchema(type: "create" | "update") {
       return LoanSchema;
   }
 }
+
+export const LoanRoiSchema = z.object({
+  date: z.date(),
+  rate: z.number().min(1),
+});
+
+export const LoanExtraPaymentSchema = z.object({
+  date: z.date(),
+  amount: z.number().min(1),
+  continue: z.boolean(),
+});

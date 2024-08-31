@@ -38,12 +38,12 @@ export default function DataTableRowEditForm<TData>({
   const onSubmit = (values: any) => {
     if (rowId) {
       table.options.meta?.updateData!({
-        rowIndex: Number(rowId),
+        rowId,
         rowData: values,
       });
     } else {
       table.options.meta?.updateData!({
-        rowIndex: -1,
+        rowId: "-1",
         rowData: values,
       });
     }

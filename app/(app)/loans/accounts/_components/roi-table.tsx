@@ -17,7 +17,15 @@ import { filterFnDateRange } from "@/components/data-table/utils";
 import { Button } from "@/components/ui/button";
 import { Icons } from "@/components/shared/icons";
 import { format } from "date-fns";
+import DataTableRowEditForm from "@/components/data-table/datatable-row-edit-form";
+import { LoanRoiSchema } from "@/lib/validations/loans";
 
+const defaultRoi: LoanRates = {
+  id: "",
+  date: new Date(),
+  rate: 0,
+  loanId: "",
+};
 const columnHelper = createColumnHelper<LoanRates>();
 const columns = [
   columnHelper.accessor("id", {
@@ -49,13 +57,26 @@ const columns = [
     size: 50,
     cell: ({ row, table, column }) => (
       <div className="flex flex-row gap-1">
+        {row.getCanEdit() && (
+          <Button
+            variant="ghost"
+            size="icon"
+            className="text-destructive"
+            disabled={row.getIsEditing()}
+            onClick={() => {
+              row.toggleEditing();
+            }}
+          >
+            <Icons.edit className="size-4" />
+          </Button>
+        )}
         <Button
           variant="ghost"
           size="icon"
           className="text-destructive"
           disabled={!table.options.meta?.deleteData}
           onClick={() => {
-            table.options.meta?.deleteData!(row.index, row.original);
+            table.options.meta?.deleteData!(row.id, row.original);
           }}
         >
           <Icons.trash className="size-4" />
@@ -87,11 +108,9 @@ const RoiTable = ({ className, loanId }: RoiTableProps) => {
   });
 
   const { mutate: addRoi, isPending } = useMutation({
-    mutationFn: async () => {
+    mutationFn: async (data: Prisma.LoanRatesCreateInput) => {
       await createLoanRates({
-        date: new Date(),
-        rate: 0,
-        loan: { connect: { id: loanId } },
+        ...data,
       });
     },
     onSuccess: () => {
@@ -110,7 +129,7 @@ const RoiTable = ({ className, loanId }: RoiTableProps) => {
       await updateLoanRates(id, data);
     },
     onSuccess: () => {
-      // refetch();
+      refetch();
     },
   });
 
@@ -130,26 +149,24 @@ const RoiTable = ({ className, loanId }: RoiTableProps) => {
       <DataTableBasic
         title="Anual Interest Rates"
         data={rois || []}
+        getRowId={(row) => row.id}
         columns={columns}
         defaultSorting={[{ id: "date", desc: true }]}
         defaultColumnVisibility={{ id: false }}
         refetch={() => refetch()}
-        actions={
-          <>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => addRoi()}
-              disabled={isPending}
-            >
-              <Icons.add className="size-5" />
-            </Button>
-          </>
-        }
-        updateData={({ rowIndex, columnId, value }) => {
-          // console.log("updateData", { rowIndex, columnId, value });
-          const id = rois ? rois[rowIndex]?.id : undefined;
-          if (id) updateRoi({ id, data: { [columnId]: value } });
+        rowEditFormaAsDialog
+        rowEditForm={(props) => (
+          <DataTableRowEditForm
+            {...props}
+            defaultData={defaultRoi}
+            zodSchema={LoanRoiSchema}
+          />
+        )}
+        updateData={({ rowId, rowData }) => {
+          // console.log("updateData", { rowId, rowData });
+          if (rowId === "-1")
+            addRoi({ ...rowData, loan: { connect: { id: loanId } } });
+          else updateRoi({ id: rowId, data: rowData });
         }}
         deleteData={(rowIndex, rowData) => {
           // console.log("deleteData", { rowIndex, rowData });

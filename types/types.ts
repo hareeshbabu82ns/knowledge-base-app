@@ -1,4 +1,3 @@
-import { FormFieldType } from "@/components/CustomFormField";
 import {
   RowEditInstance,
   RowEditOptions,
@@ -7,7 +6,7 @@ import {
 } from "@/components/data-table/datatable-feature-row-editing";
 import { Option } from "@/components/ui/multi-select";
 import { RowData } from "@tanstack/react-table";
-import { ComponentType, ReactNode } from "react";
+import { ComponentType } from "react";
 
 export interface PageMeta {
   title: string;
@@ -45,10 +44,10 @@ declare module "@tanstack/react-table" {
   interface Row<TData extends RowData> extends RowEditRow {}
 
   interface TableMeta<TData extends RowData> {
-    deleteData?: (rowIndex: number, rowData: TData) => void;
-    updateData?: (data: { rowIndex: number; rowData: TData }) => void;
+    deleteData?: (rowId: string, rowData: TData) => void;
+    updateData?: (data: { rowId: string; rowData: TData }) => void;
     updateCellData?: (data: {
-      rowIndex: number;
+      rowId: string;
       rowData: TData;
       columnId: string;
       value: unknown;

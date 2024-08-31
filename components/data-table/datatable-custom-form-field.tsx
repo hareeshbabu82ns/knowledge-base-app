@@ -228,11 +228,11 @@ function RenderInput<TData>({
       );
     case "switch":
       return (
-        <FormItem className="flex h-10 flex-row items-center justify-center rounded-lg border">
+        <div className="flex h-10 flex-row items-center justify-center rounded-lg border">
           <FormControl>
             <Switch checked={field.value} onCheckedChange={field.onChange} />
           </FormControl>
-        </FormItem>
+        </div>
       );
     case "select":
       return (

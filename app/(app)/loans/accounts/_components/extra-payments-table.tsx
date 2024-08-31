@@ -17,6 +17,16 @@ import { filterFnDateRange } from "@/components/data-table/utils";
 import { Button } from "@/components/ui/button";
 import { Icons } from "@/components/shared/icons";
 import { format } from "date-fns";
+import DataTableRowEditForm from "@/components/data-table/datatable-row-edit-form";
+import { LoanExtraPaymentSchema } from "@/lib/validations/loans";
+
+const defaultData: LoanExtraPayments = {
+  id: "",
+  date: new Date(),
+  amount: 0,
+  continue: false,
+  loanId: "",
+};
 
 const columnHelper = createColumnHelper<LoanExtraPayments>();
 const columns = [
@@ -57,13 +67,26 @@ const columns = [
     size: 50,
     cell: ({ row, table }) => (
       <div className="flex flex-row gap-1">
+        {row.getCanEdit() && (
+          <Button
+            variant="ghost"
+            size="icon"
+            className="text-destructive"
+            disabled={row.getIsEditing()}
+            onClick={() => {
+              row.toggleEditing();
+            }}
+          >
+            <Icons.edit className="size-4" />
+          </Button>
+        )}
         <Button
           variant="ghost"
           size="icon"
           className="text-destructive"
           disabled={!table.options.meta?.deleteData}
           onClick={() => {
-            table.options.meta?.deleteData!(row.index, row.original);
+            table.options.meta?.deleteData!(row.id, row.original);
           }}
         >
           <Icons.trash className="size-4" />
@@ -94,12 +117,10 @@ const ExtraPaymentsTable = ({ className, loanId }: ExtraPaymentsTableProps) => {
     enabled: loanId !== "new" && loanId !== "",
   });
 
-  const { mutate: addRoi, isPending } = useMutation({
-    mutationFn: async () => {
+  const { mutate: addExtraPayment, isPending } = useMutation({
+    mutationFn: async (data: Prisma.LoanExtraPaymentsCreateInput) => {
       await createLoanExtraPayments({
-        date: new Date(),
-        amount: 0,
-        loan: { connect: { id: loanId } },
+        ...data,
       });
     },
     onSuccess: () => {
@@ -107,29 +128,31 @@ const ExtraPaymentsTable = ({ className, loanId }: ExtraPaymentsTableProps) => {
     },
   });
 
-  const { mutate: updateRoi, isPending: isUpdatePending } = useMutation({
-    mutationFn: async ({
-      id,
-      data,
-    }: {
-      id: LoanExtraPayments["id"];
-      data: Prisma.LoanExtraPaymentsUpdateInput;
-    }) => {
-      await updateLoanExtraPayments(id, data);
-    },
-    onSuccess: () => {
-      // refetch();
-    },
-  });
+  const { mutate: updateExtraPayment, isPending: isUpdatePending } =
+    useMutation({
+      mutationFn: async ({
+        id,
+        data,
+      }: {
+        id: LoanExtraPayments["id"];
+        data: Prisma.LoanExtraPaymentsUpdateInput;
+      }) => {
+        await updateLoanExtraPayments(id, data);
+      },
+      onSuccess: () => {
+        refetch();
+      },
+    });
 
-  const { mutate: deleteRoi, isPending: isDeletePending } = useMutation({
-    mutationFn: async (id: LoanExtraPayments["id"]) => {
-      await deleteLoanExtraPayments(id);
-    },
-    onSuccess: () => {
-      refetch();
-    },
-  });
+  const { mutate: deleteExtraPayment, isPending: isDeletePending } =
+    useMutation({
+      mutationFn: async (id: LoanExtraPayments["id"]) => {
+        await deleteLoanExtraPayments(id);
+      },
+      onSuccess: () => {
+        refetch();
+      },
+    });
 
   if (isLoading || isFetching) return <Loader />;
 
@@ -142,27 +165,24 @@ const ExtraPaymentsTable = ({ className, loanId }: ExtraPaymentsTableProps) => {
         defaultSorting={[{ id: "date", desc: true }]}
         defaultColumnVisibility={{ id: false }}
         refetch={() => refetch()}
-        actions={
-          <>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => addRoi()}
-              disabled={isPending}
-            >
-              <Icons.add className="size-5" />
-            </Button>
-          </>
-        }
-        updateData={({ rowIndex, columnId, value }) => {
-          // console.log("updateData", { rowIndex, columnId, value });
-          const id = extraPayments ? extraPayments[rowIndex]?.id : undefined;
-          if (id) updateRoi({ id, data: { [columnId]: value } });
+        rowEditFormaAsDialog
+        rowEditForm={(props) => (
+          <DataTableRowEditForm
+            {...props}
+            defaultData={defaultData}
+            zodSchema={LoanExtraPaymentSchema}
+          />
+        )}
+        updateData={({ rowId, rowData }) => {
+          // console.log("updateData", { rowId, rowData });
+          if (rowId === "-1")
+            addExtraPayment({ ...rowData, loan: { connect: { id: loanId } } });
+          else updateExtraPayment({ id: rowId, data: rowData });
         }}
-        deleteData={(rowIndex, rowData) => {
-          // console.log("deleteData", { rowIndex, rowData });
+        deleteData={(rowId, rowData) => {
+          // console.log("deleteData", { rowId, rowData });
           const id = rowData.id;
-          if (id) deleteRoi(id);
+          if (id) deleteExtraPayment(id);
         }}
       />
     </div>

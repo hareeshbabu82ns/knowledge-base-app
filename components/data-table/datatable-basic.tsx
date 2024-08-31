@@ -11,8 +11,8 @@ import {
   getSortedRowModel,
   OnChangeFn,
   PaginationState,
+  Row,
   SortingState,
-  Table as TableType,
   useReactTable,
   VisibilityState,
 } from "@tanstack/react-table";
@@ -32,14 +32,7 @@ import { cn } from "@/lib/utils";
 import DataTableCellInput from "./datatable-cell-input";
 import { RowEditFeature, RowEditState } from "./datatable-feature-row-editing";
 import { RowSelectionFormProps } from "./types";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "../ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
 
 interface DataTableProps<TData> {
   data: TData[];
@@ -53,17 +46,24 @@ interface DataTableProps<TData> {
   refetch?: () => void;
   isFiltersOpen?: boolean;
   actions?: React.ReactNode;
-  updateData?: (data: { rowIndex: number; rowData: TData }) => void;
+  updateData?: (data: { rowId: string; rowData: TData }) => void;
   updateCellData?: (data: {
-    rowIndex: number;
+    rowId: string;
     rowData: TData;
     columnId: string;
     value: unknown;
   }) => void;
-  deleteData?: (rowIndex: number, rowData: TData) => void;
+  deleteData?: (rowId: string, rowData: TData) => void;
   enableMultiRowEdit?: boolean;
   rowEditForm?: ColumnDefTemplate<RowSelectionFormProps<TData>>;
   rowEditFormaAsDialog?: boolean;
+  getRowId?:
+    | ((
+        originalRow: TData,
+        index: number,
+        parent?: Row<TData> | undefined,
+      ) => string)
+    | undefined;
 }
 
 export function DataTableBasic<TData>({
@@ -86,6 +86,7 @@ export function DataTableBasic<TData>({
   enableMultiRowEdit = true,
   rowEditForm,
   rowEditFormaAsDialog = false,
+  getRowId,
 }: DataTableProps<TData>) {
   const [data, _setData] = React.useState(() => [...tableData]);
 
@@ -134,6 +135,7 @@ export function DataTableBasic<TData>({
       columnVisibility,
       rowEdit: editingRows,
     },
+    getRowId,
     onSortingChange: setSorting,
     onRowEditChange,
     onPaginationChange: setPagination,
@@ -195,7 +197,7 @@ export function DataTableBasic<TData>({
             setIsRowEditFormOpen(open);
           }}
         >
-          <DialogContent>
+          <DialogContent className="min-w-[90%] md:min-w-[75%] lg:min-w-[60%]">
             <DialogHeader>
               <DialogTitle>Form</DialogTitle>
             </DialogHeader>
