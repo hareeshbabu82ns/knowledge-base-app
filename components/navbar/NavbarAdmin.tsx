@@ -31,9 +31,10 @@ export default function AdminNavbar(props: {
 
   return (
     <nav
-      className={`bg-muted fixed left-0 top-0 z-50 flex w-svw flex-row items-center justify-between px-4 py-2 backdrop-blur-sm transition-all xl:left-[300px] xl:w-[calc(100vw_-_300px)]`}
+      className={`bg-muted flex flex-row items-center justify-between px-4 py-2 backdrop-blur-sm transition-all`}
+      // className={`bg-muted fixed left-0 top-0 z-50 flex w-svw flex-row items-center justify-between px-4 py-2 backdrop-blur-sm transition-all xl:left-[300px] xl:w-[calc(100vw_-_300px)]`}
     >
-      <div className="ml-[6px]">
+      <div className="ml-1">
         <div className="h-6 md:mb-2 md:w-[224px] md:pt-1">
           <a
             className="hidden text-xs font-normal text-zinc-950 hover:underline md:inline dark:text-white dark:hover:text-white"

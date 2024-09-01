@@ -70,8 +70,7 @@ const columns = [
         {row.getCanEdit() && (
           <Button
             variant="ghost"
-            size="icon"
-            className="text-destructive"
+            className="text-destructive size-8 p-2"
             disabled={row.getIsEditing()}
             onClick={() => {
               row.toggleEditing();
@@ -82,8 +81,7 @@ const columns = [
         )}
         <Button
           variant="ghost"
-          size="icon"
-          className="text-destructive"
+          className="text-destructive size-8 p-2"
           disabled={!table.options.meta?.deleteData}
           onClick={() => {
             table.options.meta?.deleteData!(row.id, row.original);

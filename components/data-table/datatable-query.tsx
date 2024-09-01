@@ -143,7 +143,13 @@ export function DataTableQuery<TData, TValue>({
                 {row.getVisibleCells().map((cell) => (
                   <TableCell
                     key={cell.id}
-                    className="hover:bg-black/5 dark:hover:bg-white/5"
+                    // className="hover:bg-black/5 dark:hover:bg-white/5"
+                    className={cn(
+                      "p-2 hover:bg-black/5 dark:hover:bg-white/5",
+                      cell.column.columnDef.size !== 150
+                        ? `w-[${cell.column.columnDef.size}px]`
+                        : "",
+                    )}
                   >
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </TableCell>
