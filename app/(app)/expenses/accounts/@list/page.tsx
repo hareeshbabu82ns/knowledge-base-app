@@ -2,8 +2,9 @@
 
 import { useQuery } from "@tanstack/react-query";
 import AccountsTable from "../_components/accounts-table";
-import { fetchAccounts } from "../actions";
+import { fetchAccounts, uploadAccounts } from "../actions";
 import SingleFileUploadForm from "@/components/shared/single-file-upload-form";
+import { toast } from "sonner";
 
 function Page() {
   const { isPending, isError, data, error, refetch } = useQuery({
@@ -25,8 +26,13 @@ function Page() {
       <AccountsTable tableData={data} refetch={() => refetch()} />
       <SingleFileUploadForm
         label="Upload CSV file"
-        allowedTypes={["text/csv"]}
+        allowedTypes={["application/json"]}
         showPreviews={false}
+        onUploadSuccess={async (url) => {
+          await uploadAccounts(url[0]);
+          await refetch();
+          toast.success("Accounts uploaded successfully!");
+        }}
       />
       {/* <MultipleFileUploadForm
         allowedTypes={["all", "application/pdf", "image"]}

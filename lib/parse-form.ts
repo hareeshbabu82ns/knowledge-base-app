@@ -17,7 +17,7 @@ export const parseForm = async (
 ): Promise<ParsedFile[]> => {
   const uploadDir = join(
     process.env.ROOT_DIR || process.cwd(),
-    `${config.dataFolder}/uploads/${dateFn.format(Date.now(), "dd-MM-Y")}`,
+    `${config.dataFolder}/uploads/${dateFn.format(Date.now(), "y-MM-dd")}`,
   );
 
   try {
@@ -38,12 +38,13 @@ export const parseForm = async (
 
   for (const file of files) {
     const mimetype = file.type;
-    const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
-    const filename = `${file.name || "unknown"}-${uniqueSuffix}.${
+    const datePrefix = `${dateFn.format(Date.now(), "y-MM-dd")}`;
+    const uniqueSuffix = `${Math.round(Math.random() * 1e9)}`;
+    const filename = `${datePrefix}-${file.name?.replace(/\s+/g, "-") || "unknown"}-${uniqueSuffix}.${
       mime.getExtension(mimetype || "") || "unknown"
     }`;
     const filepath = join(uploadDir, filename);
-    const url = `/uploads/${dateFn.format(Date.now(), "dd-MM-Y")}/${filename}`;
+    const url = `/uploads/${dateFn.format(Date.now(), "y-MM-dd")}/${filename}`;
     fileRes.push({ filename, mimetype, filepath, url });
 
     const data = await file.arrayBuffer();

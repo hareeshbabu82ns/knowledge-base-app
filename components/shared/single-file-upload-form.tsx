@@ -1,6 +1,5 @@
 "use client";
 
-import { Mime } from "mime";
 import Image from "next/image";
 import { ChangeEvent, MouseEvent, useState } from "react";
 import { Button } from "../ui/button";

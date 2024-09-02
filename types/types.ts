@@ -84,6 +84,7 @@ declare module "@tanstack/react-table" {
 
 export type UploadFileType =
   | "application/pdf"
+  | "application/json"
   | "text/csv"
   | "text/plain"
   | "image"
