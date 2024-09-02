@@ -1,6 +1,4 @@
 // import { E164Number } from "libphonenumber-js/core";
-import Image from "next/image";
-import ReactDatePicker from "react-datepicker";
 import { Control } from "react-hook-form";
 // import PhoneInput from "react-phone-number-input";
 
@@ -19,13 +17,15 @@ import { cn } from "@/lib/utils";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 import { Button } from "./ui/button";
 import { Icons } from "./shared/icons";
-import { add, addYears, format, subYears } from "date-fns";
+import { format } from "date-fns";
 import { Calendar } from "./ui/calendar";
+import { Switch } from "./ui/switch";
 
 export enum FormFieldType {
   INPUT = "input",
   TEXTAREA = "textarea",
   // PHONE_INPUT = "phoneInput",
+  SWITCH = "switch",
   CHECKBOX = "checkbox",
   DATE_PICKER = "datePicker",
   SELECT = "select",
@@ -78,7 +78,7 @@ const RenderInput = ({ field, props }: { field: any; props: CustomProps }) => {
               {...field}
               onChange={(e) =>
                 field.onChange(
-                  props.inputType === "number"
+                  props.inputMode === "numeric"
                     ? Number(e.target.value)
                     : e.target.value,
                 )
@@ -137,6 +137,14 @@ const RenderInput = ({ field, props }: { field: any; props: CustomProps }) => {
             </label>
           </div>
         </FormControl>
+      );
+    case FormFieldType.SWITCH:
+      return (
+        <div className="flex h-10 flex-row items-center justify-center rounded-lg border px-2">
+          <FormControl>
+            <Switch checked={field.value} onCheckedChange={field.onChange} />
+          </FormControl>
+        </div>
       );
     case FormFieldType.DATE_PICKER:
       return (

@@ -22,7 +22,6 @@ import { Button } from "@/components/ui/button";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { accountTypes } from "@/variables/expenses";
 import { SelectItem } from "@/components/ui/select";
-import { Icons } from "@/components/shared/icons";
 
 interface AccountFormProps {
   id: ExpenseAccount["id"];
@@ -45,6 +44,11 @@ export const AccountForm = ({ id, data, type }: AccountFormProps) => {
       name: data.name ? data.name : "",
       type: data?.type || "",
       description: data?.description || "",
+      config: {
+        headerLines: data?.config?.headerLines || 0,
+        separator: data?.config?.separator || ",",
+        trimQuotes: data?.config?.trimQuotes || false,
+      },
     },
   });
 
@@ -61,9 +65,12 @@ export const AccountForm = ({ id, data, type }: AccountFormProps) => {
       id: ExpenseAccount["id"];
       values: z.infer<typeof FormValidation>;
     }) => {
+      console.log("values", values);
       const updateData = {
         name: values.name,
         description: values.description,
+        type: values.type,
+        config: { ...(data?.config as Object), ...values.config },
       } as Prisma.ExpenseAccountUpdateInput;
       const updatedData = await updateAction(id, updateData);
       return updatedData;
@@ -73,7 +80,7 @@ export const AccountForm = ({ id, data, type }: AccountFormProps) => {
     },
     onSuccess: (updatedData) => {
       queryClient.invalidateQueries({ queryKey: ["accounts", "account", id] });
-      form.reset(updatedData);
+      form.reset(updatedData as any);
       toast.success("Account updated successfully");
     },
     onError: (error) => {
@@ -203,6 +210,36 @@ export const AccountForm = ({ id, data, type }: AccountFormProps) => {
                 </SelectItem>
               ))}
             </CustomFormField>
+          </div>
+
+          <div className="@lg/details:flex-row @lg/details:gap-2 flex flex-col gap-6">
+            <CustomFormField
+              fieldType={FormFieldType.INPUT}
+              inputType="text"
+              inputMode="numeric"
+              control={form.control}
+              name="config.headerLines"
+              label="#Headers"
+              required
+              placeholder="Number of Header Lines"
+            />
+            <CustomFormField
+              fieldType={FormFieldType.INPUT}
+              control={form.control}
+              name="config.separator"
+              label="Separator"
+              required
+              placeholder="Separator"
+            />
+            <CustomFormField
+              className="flex-initial min-w-32"
+              fieldType={FormFieldType.SWITCH}
+              control={form.control}
+              name="config.trimQuotes"
+              label="Trim Quotes"
+              required
+              placeholder="Trim Quotes"
+            />
           </div>
 
           <CustomFormField

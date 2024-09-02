@@ -1,3 +1,4 @@
+import { ExpenseAccount } from "@prisma/client";
 import { z } from "zod";
 
 // export enum ConfigComparisionEnum {
@@ -14,6 +15,7 @@ import { z } from "zod";
 //   ENDS_WITH = "ENDS_WITH",
 //   NOT_ENDS_WITH = "NOT_ENDS_WITH",
 // }
+
 export type ConfigComparisionEnum =
   | "EQ"
   | "NE"
@@ -26,11 +28,10 @@ export type ConfigComparisionEnum =
   | "STARTS_WITH"
   | "NOT_STARTS_WITH"
   | "ENDS_WITH"
-  | "NOT_ENDS_WITH";
+  | "NOT_ENDS_WITH"
+  | "REGEX";
 
-enum ConfigTextAdjustScope {
-  LINE = "line",
-}
+export type ConfigTextAdjustScope = "line";
 
 export interface IConfigText {
   scope: ConfigTextAdjustScope;
@@ -95,20 +96,24 @@ export interface IExpTransAmountByAttrStatsArray {
 }
 
 export const ConfigTagFieldsSchema = z.object({
-  comparision: z.enum([
-    "EQ",
-    "NE",
-    "GT",
-    "GE",
-    "LT",
-    "LE",
-    "CONTAINS",
-    "NOT_CONTAINS",
-    "STARTS_WITH",
-    "NOT_STARTS_WITH",
-    "ENDS_WITH",
-    "NOT_ENDS_WITH",
-  ]),
+  comparision: z.enum(
+    [
+      "EQ",
+      "NE",
+      "GT",
+      "GE",
+      "LT",
+      "LE",
+      "REGEX",
+      "CONTAINS",
+      "NOT_CONTAINS",
+      "STARTS_WITH",
+      "NOT_STARTS_WITH",
+      "ENDS_WITH",
+      "NOT_ENDS_WITH",
+    ],
+    { message: "Invalid comparision" },
+  ),
   name: z.string().min(5).max(50),
   value: z.string().min(1, "Value cannot be empty"),
   tags: z.array(z.string()).min(1, "At least one tag is required"),
@@ -135,4 +140,33 @@ export const ConfigFileFieldsSchema = z.object({
   ignore: z.boolean(),
   negated: z.boolean(),
   timeColumnIndex: z.number().int().min(0),
+});
+
+export const ConfigIgnoreFieldsSchema = z.object({
+  name: z.enum(["description"], { message: "Invalid name" }),
+  comparision: z.enum(
+    [
+      "EQ",
+      "NE",
+      "GT",
+      "GE",
+      "LT",
+      "LE",
+      "REGEX",
+      "CONTAINS",
+      "NOT_CONTAINS",
+      "STARTS_WITH",
+      "NOT_STARTS_WITH",
+      "ENDS_WITH",
+      "NOT_ENDS_WITH",
+    ],
+    { message: "Invalid comparision" },
+  ),
+  value: z.string().min(1),
+});
+
+export const ConfigTextAdjustFieldsSchema = z.object({
+  scope: z.enum(["line"], { message: "Invalid scope" }),
+  source: z.string().min(1),
+  replaceWith: z.string().min(1),
 });

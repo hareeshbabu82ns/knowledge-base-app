@@ -4,6 +4,8 @@ import { ExpenseAccount, Prisma } from "@prisma/client";
 import { AccountForm } from "./account-form";
 import AccountTagFieldsTable from "./config-tags-table";
 import AccountFileFieldsTable from "./config-file-fields-table";
+import AccountIgnoreFieldsTable from "./config-ignore-fields-table";
+import AccountTextAdjustFieldsTable from "./config-text-adjust-fields-table";
 
 const AccountDetails = ({ account }: { account: ExpenseAccount }) => {
   return (
@@ -14,8 +16,12 @@ const AccountDetails = ({ account }: { account: ExpenseAccount }) => {
         type={account.id === "" ? "create" : "update"}
       />
 
-      {account.id !== "" && <AccountFileFieldsTable accountId={account.id} />}
       {account.id !== "" && <AccountTagFieldsTable accountId={account.id} />}
+      {account.id !== "" && <AccountFileFieldsTable accountId={account.id} />}
+      {account.id !== "" && <AccountIgnoreFieldsTable accountId={account.id} />}
+      {account.id !== "" && (
+        <AccountTextAdjustFieldsTable accountId={account.id} />
+      )}
     </div>
   );
 };
