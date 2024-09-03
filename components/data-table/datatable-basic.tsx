@@ -70,7 +70,8 @@ export function DataTableBasic<TData>({
   title,
   data: tableData,
   columns,
-  defaultSorting = [{ id: "name", desc: false }],
+  defaultSorting = [],
+  // defaultSorting = [{ id: "name", desc: false }],
   defaultPagination = {
     pageIndex: DEFAULT_PAGE_INDEX,
     pageSize: DEFAULT_PAGE_SIZE,

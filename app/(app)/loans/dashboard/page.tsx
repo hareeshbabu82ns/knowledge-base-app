@@ -46,7 +46,7 @@ const LoansPage = () => {
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-col items-end gap-4">
-        <Select onValueChange={setSelectedLoan} value={selectedLoan}>
+        <Select onValueChange={setSelectedLoan} value={selectedLoan || ""}>
           <SelectTrigger className="w-[180px]">
             <SelectValue placeholder="Select a Loan" />
           </SelectTrigger>
@@ -54,7 +54,9 @@ const LoansPage = () => {
             <SelectGroup>
               <SelectLabel>Loans</SelectLabel>
               {loansDDLB?.map((loan) => (
-                <SelectItem value={loan.value}>{loan.label}</SelectItem>
+                <SelectItem key={loan.value} value={loan.value}>
+                  {loan.label}
+                </SelectItem>
               ))}
             </SelectGroup>
           </SelectContent>

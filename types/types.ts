@@ -87,12 +87,15 @@ export type UploadFileType =
   | "application/json"
   | "text/csv"
   | "text/plain"
-  | "image"
+  | "image/png"
+  | "image/jpeg"
+  | "image/jpg"
   | "video"
   | "audio"
   | "all";
 export interface FileUploadProps {
   allowedTypes?: UploadFileType[];
+  disabled?: boolean;
   showPreviews?: boolean;
   label?: string;
   onUploadSuccess?: (url: string[]) => Promise<void>;

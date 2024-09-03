@@ -22,6 +22,7 @@ import { Button } from "@/components/ui/button";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { accountTypes } from "@/variables/expenses";
 import { SelectItem } from "@/components/ui/select";
+import { IConfig } from "@/types/expenses";
 
 interface AccountFormProps {
   id: ExpenseAccount["id"];
@@ -37,6 +38,8 @@ export const AccountForm = ({ id, data, type }: AccountFormProps) => {
 
   const FormValidation = getExpenseAccountSchema(type);
 
+  const accountConfig = data?.config as never as IConfig;
+
   const form = useForm<z.infer<typeof FormValidation>>({
     resolver: zodResolver(FormValidation),
     defaultValues: {
@@ -45,9 +48,9 @@ export const AccountForm = ({ id, data, type }: AccountFormProps) => {
       type: data?.type || "",
       description: data?.description || "",
       config: {
-        headerLines: data?.config?.headerLines || 0,
-        separator: data?.config?.separator || ",",
-        trimQuotes: data?.config?.trimQuotes || false,
+        headerLines: accountConfig?.headerLines || 0,
+        separator: accountConfig?.separator || ",",
+        trimQuotes: accountConfig?.trimQuotes || false,
       },
     },
   });
@@ -65,7 +68,6 @@ export const AccountForm = ({ id, data, type }: AccountFormProps) => {
       id: ExpenseAccount["id"];
       values: z.infer<typeof FormValidation>;
     }) => {
-      console.log("values", values);
       const updateData = {
         name: values.name,
         description: values.description,

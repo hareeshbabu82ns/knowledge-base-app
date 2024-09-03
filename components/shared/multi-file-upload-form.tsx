@@ -8,7 +8,7 @@ import { FileUploadProps } from "@/types/types";
 import { toast } from "sonner";
 
 const MultipleFileUploadForm = ({
-  allowedTypes = ["image"],
+  allowedTypes = ["all"],
   label,
   onUploadSuccess,
 }: FileUploadProps) => {

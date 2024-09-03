@@ -1,20 +1,34 @@
 "use client";
 
 import Image from "next/image";
-import { ChangeEvent, MouseEvent, useState } from "react";
+import mime from "mime";
+import { ChangeEvent, MouseEvent, useEffect, useState } from "react";
 import { Button } from "../ui/button";
 import { Icons } from "./icons";
 import { FileUploadProps } from "@/types/types";
 import { toast } from "sonner";
+import { cn } from "@/lib/utils";
+
+function getAcceptTypes(allowedTypes: string[]) {
+  // return allowedTypes.map((t) => mime.getAllExtensions(t)).join(",");
+  const exts: string[] = [];
+  for (const type of allowedTypes) {
+    mime.getAllExtensions(type)?.forEach((e) => exts.push(`.${e}`));
+  }
+  return exts.join(",");
+}
 
 const SingleFileUploadForm = ({
-  allowedTypes = ["image"],
+  allowedTypes = ["all"],
+  disabled = false,
   showPreviews = true,
   label,
   onUploadSuccess,
 }: FileUploadProps) => {
   const [file, setFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+
+  const acceptTypes = getAcceptTypes(allowedTypes);
 
   const onFileUploadChange = (e: ChangeEvent<HTMLInputElement>) => {
     const fileInput = e.target;
@@ -136,10 +150,15 @@ const SingleFileUploadForm = ({
             </div>
           )}
           {!previewUrl && (
-            <label className="flex flex-col items-center justify-center h-full py-3 transition-colors duration-150 cursor-pointer hover:text-gray-600">
+            <label
+              className={cn(
+                "flex flex-col items-center justify-center h-full py-3 transition-colors duration-150 cursor-pointer hover:text-muted-foreground",
+                disabled && "cursor-default",
+              )}
+            >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                className="w-14 h-14"
+                className={cn("w-14 h-14", disabled && "text-muted")}
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -151,21 +170,25 @@ const SingleFileUploadForm = ({
                   d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z"
                 />
               </svg>
-              <strong className="text-sm font-medium">
+              <strong
+                className={cn("text-sm font-medium", disabled && "text-muted")}
+              >
                 {label || "Select a File"}
               </strong>
               <input
+                disabled={disabled}
                 className="block w-0 h-0"
                 name="file"
                 type="file"
                 onChange={onFileUploadChange}
+                accept={acceptTypes}
               />
             </label>
           )}
         </div>
         <div className="flex mt-4 md:mt-0 md:flex-col justify-center gap-1.5">
           <Button
-            disabled={!previewUrl}
+            disabled={!previewUrl || disabled}
             onClick={onCancelFile}
             size="icon"
             variant="outline"
@@ -173,7 +196,7 @@ const SingleFileUploadForm = ({
             <Icons.close className="size-4" />
           </Button>
           <Button
-            disabled={!previewUrl}
+            disabled={!previewUrl || disabled}
             onClick={onUploadFile}
             size="icon"
             variant="outline"

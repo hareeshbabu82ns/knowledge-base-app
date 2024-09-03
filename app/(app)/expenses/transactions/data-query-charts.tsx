@@ -21,16 +21,19 @@ export function DataQueryCharts({ columnFilters }: DataQueryChartsProps) {
   return (
     <div className="grid grid-cols-2 gap-4 p-3 border-b">
       <ChartAttributeByFrequency
+        key="accountsMonthly"
         transactions={data}
         attribute="account"
         frequency="monthly"
       />
       <ChartAttributeByFrequency
+        key="tagsMonthly"
         transactions={data}
         attribute="tag"
         frequency="monthly"
       />
       <ChartAttributeByFrequency
+        key="typesMonthly"
         transactions={data}
         attribute="type"
         frequency="monthly"
