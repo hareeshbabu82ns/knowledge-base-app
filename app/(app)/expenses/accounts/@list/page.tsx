@@ -2,10 +2,11 @@
 
 import { useMutation, useQuery } from "@tanstack/react-query";
 import AccountsTable from "../_components/accounts-table";
-import { fetchAccounts, uploadAccounts } from "../actions";
+import { fetchAccounts, uploadAccounts, uploadTags } from "../actions";
 import SingleFileUploadForm from "@/components/shared/single-file-upload-form";
 import { toast } from "sonner";
 import Loader from "@/components/shared/loader";
+import TagsTable from "../_components/tags-table";
 
 function Page() {
   const { isPending, isError, data, error, refetch } = useQuery({
@@ -17,6 +18,11 @@ function Page() {
     useMutation({
       mutationFn: uploadAccounts,
       mutationKey: ["uploadAccounts"],
+    });
+  const { mutateAsync: uploadTagsFn, isPending: isPendingUploadTags } =
+    useMutation({
+      mutationFn: uploadTags,
+      mutationKey: ["uploadTags"],
     });
 
   if (isPending) {
@@ -32,7 +38,7 @@ function Page() {
     <div className="flex flex-col gap-2">
       <AccountsTable tableData={data} refetch={() => refetch()} />
       <SingleFileUploadForm
-        label="Upload CSV file"
+        label="Upload Accounts"
         allowedTypes={["application/json"]}
         disabled={isPendingUpload}
         loading={isPendingUpload}
@@ -42,6 +48,22 @@ function Page() {
             refetch();
             toast.success("Accounts uploaded successfully!", {
               id: "upload-accounts-success",
+            });
+          });
+        }}
+      />
+      <TagsTable />
+      <SingleFileUploadForm
+        label="Upload Tags"
+        allowedTypes={["application/json"]}
+        disabled={isPendingUploadTags}
+        loading={isPendingUploadTags}
+        showPreviews={false}
+        onUploadSuccess={async (url) => {
+          return uploadTagsFn(url[0]).then(() => {
+            refetch();
+            toast.success("Tags uploaded successfully!", {
+              id: "upload-tags-success",
             });
           });
         }}

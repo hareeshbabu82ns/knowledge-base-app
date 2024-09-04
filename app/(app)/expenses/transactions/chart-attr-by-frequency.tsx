@@ -187,7 +187,12 @@ export function ChartAttributeByFrequency({
               content={<ChartTooltipContent indicator="dashed" />}
             />
             {Object.keys(chartData.config).map((key) => (
-              <Bar dataKey={key} fill={`var(--color-${key})`} radius={4} />
+              <Bar
+                key={key}
+                dataKey={key}
+                fill={`var(--color-${key})`}
+                radius={4}
+              />
             ))}
           </BarChart>
         </ChartContainer>

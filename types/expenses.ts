@@ -95,6 +95,8 @@ export interface IExpTransAmountByAttrStatsArray {
   [key: string]: IExpTransAmountByAttrStats[];
 }
 
+export const TagSchema = z.object({ tag: z.string().min(3).max(50) });
+
 export const ConfigTagFieldsSchema = z.object({
   comparision: z.enum(
     [

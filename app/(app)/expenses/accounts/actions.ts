@@ -2,15 +2,84 @@
 import { auth } from "@/lib/auth";
 import config from "@/config/config";
 import { db } from "@/lib/db";
-import { ExpenseAccount, Prisma } from "@prisma/client";
+import { ExpenseAccount, ExpenseTags, Prisma } from "@prisma/client";
 import { join } from "path";
 import { readFile } from "fs/promises";
 
+///////////////////// Tags //////////////////////////
 export const fetchTags = async () => {
-  const tags = await db.expenseTags.findMany();
+  const session = await auth();
+  if (!session?.user?.id) throw new Error("not logged in");
+
+  const tags = await db.expenseTags.findMany({
+    where: { userId: session?.user?.id },
+  });
   return tags;
 };
 
+export const createTag = async (data: Prisma.ExpenseTagsCreateInput) => {
+  const session = await auth();
+  if (!session?.user?.id) throw new Error("not logged in");
+
+  const dbTag = await db.expenseTags.create({
+    data: { ...data, user: { connect: { id: session?.user?.id } } },
+  });
+  if (!dbTag) throw new Error("Tag not created");
+  return dbTag;
+};
+
+export const updateTag = async (
+  id: ExpenseTags["id"],
+  data: Prisma.ExpenseTagsUpdateInput,
+) => {
+  const session = await auth();
+  if (!session?.user?.id) throw new Error("not logged in");
+
+  const dbObj = await db.expenseTags.update({
+    data,
+    where: { id, userId: session?.user?.id },
+  });
+  if (!dbObj) throw new Error("Tag not found with " + id);
+  return dbObj;
+};
+
+export const uploadTags = async (url: string) => {
+  const session = await auth();
+  if (!session?.user?.id) throw new Error("not logged in");
+
+  const file = join(config.dataFolder, url);
+  const data = await readFile(file, "utf-8");
+  const jsonData = JSON.parse(data) as any;
+
+  const accounts: Prisma.ExpenseTagsCreateManyInput[] = jsonData.map(
+    (item: any) => {
+      const { id, userId, ...rest } = item;
+      return {
+        ...rest,
+        userId: session?.user?.id,
+      } as Prisma.ExpenseTagsCreateManyInput;
+    },
+  );
+
+  const res = await db.expenseTags.createMany({
+    data: accounts,
+  });
+
+  return res;
+};
+
+export const deleteTag = async (id: ExpenseTags["id"]) => {
+  const session = await auth();
+  if (!session?.user?.id) throw new Error("not logged in");
+
+  const dbTag = await db.expenseTags.delete({
+    where: { id, userId: session?.user?.id },
+  });
+  if (!dbTag) throw new Error("Tag not deleted");
+  return dbTag;
+};
+
+///////////////////// Accounts //////////////////////////
 export const fetchAccounts = async () => {
   const session = await auth();
   if (!session?.user?.id) throw new Error("not logged in");
@@ -50,7 +119,12 @@ export const createAccount = async (data: Prisma.ExpenseAccountCreateInput) => {
 };
 
 export const deleteAccount = async (id: ExpenseAccount["id"]) => {
-  const dbAccount = await db.expenseAccount.delete({ where: { id } });
+  const session = await auth();
+  if (!session?.user?.id) throw new Error("not logged in");
+
+  const dbAccount = await db.expenseAccount.delete({
+    where: { id, userId: session?.user?.id },
+  });
   if (!dbAccount) throw new Error("Account not deleted");
   return dbAccount;
 };

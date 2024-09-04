@@ -31,7 +31,7 @@ const TransactionFileEntriesTable = ({ data, config }: ComponentProps) => {
         {} as Record<string, boolean>,
       );
     return { columns, columnVisibility };
-  }, [data.headerLabels, data.allRecords]);
+  }, [config.fileFields, data.headerLabels]);
   return (
     <div>
       <DataTableBasic
