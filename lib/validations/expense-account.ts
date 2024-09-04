@@ -2,7 +2,7 @@ import * as z from "zod";
 
 const ExpenseAccountBaseSchema = z.object({
   name: z.string().min(5).max(100),
-  description: z.string().min(5).max(5000).optional(),
+  description: z.string().max(5000).optional(),
   type: z.string(),
   config: z
     .object({

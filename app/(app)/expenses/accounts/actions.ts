@@ -12,7 +12,12 @@ export const fetchTags = async () => {
 };
 
 export const fetchAccounts = async () => {
-  const accounts = await db.expenseAccount.findMany();
+  const session = await auth();
+  if (!session?.user?.id) throw new Error("not logged in");
+
+  const accounts = await db.expenseAccount.findMany({
+    where: { userId: session?.user?.id },
+  });
   return accounts;
 };
 
@@ -25,7 +30,14 @@ export const getAccountDetails = async (id: ExpenseAccount["id"]) => {
 export const updateAccount = async (
   id: ExpenseAccount["id"],
   data: Prisma.ExpenseAccountUpdateInput,
+  partialConfigFill = false,
 ) => {
+  if (partialConfigFill) {
+    const dbAccount = await db.expenseAccount.findUnique({ where: { id } });
+    if (!dbAccount) throw new Error("Account not found with " + id);
+    const config = (dbAccount.config as any) || {};
+    data.config = { ...config, ...(data.config as any) };
+  }
   const dbAccount = await db.expenseAccount.update({ data, where: { id } });
   if (!dbAccount) throw new Error("Account not found with " + id);
   return dbAccount;
@@ -45,6 +57,7 @@ export const deleteAccount = async (id: ExpenseAccount["id"]) => {
 
 export const uploadAccounts = async (url: string) => {
   const session = await auth();
+  if (!session?.user?.id) throw new Error("not logged in");
 
   const file = join(config.dataFolder, url);
   const data = await readFile(file, "utf-8");
@@ -55,6 +68,7 @@ export const uploadAccounts = async (url: string) => {
       return {
         ...item,
         id: item.id || item._id,
+        // id: `${session?.user?.id}-${Buffer.from(item.name).toString("base64")}`,
         _id: undefined,
         __v: undefined,
         userId: session?.user?.id,

@@ -94,36 +94,6 @@ export const convertColumnFiltersToPrisma = (
         break;
       }
     }
-    // if (typeof value === "string") {
-    //   if (id === "tags") {
-    //     acc[id] = { hasSome: value.split(",") };
-    //   } else if (id === "accountObj") {
-    //     acc["account"] = { equals: value };
-    //   } else acc[id] = { contains: value, mode: "insensitive" };
-    // } else if (Array.isArray(value)) {
-    //   if (value.length === 0) {
-    //   } else if (["date", "createdAt", "updatedAt"].includes(id)) {
-    //     acc[id] = {};
-    //     if (value[0]) acc[id] = { ...acc[id], gte: new Date(value[0]) };
-    //     if (value[1]) acc[id] = { ...acc[id], lte: new Date(value[1]) };
-    //   } else if (["amount"].includes(id)) {
-    //     acc[id] = {};
-    //     if (value[0]) acc[id] = { ...acc[id], gte: Number(value[0]) };
-    //     if (value[1]) acc[id] = { ...acc[id], lte: Number(value[1]) };
-    //   } else if (["accountObj"].includes(id)) {
-    //     const values = (value as Option[]).map((o) => o.value);
-    //     acc["account"] = { in: values };
-    //   } else if (["tags"].includes(id)) {
-    //     const values = (value as Option[]).map((o) => o.value);
-    //     acc[id] = { hasSome: values };
-    //   } else {
-    //     acc[id] = {};
-    //     if (value[0]) acc[id] = { ...acc[id], gte: value[0] };
-    //     if (value[1]) acc[id] = { ...acc[id], lte: value[1] };
-    //   }
-    // } else {
-    //   acc[id] = { equals: value };
-    // }
     return acc;
   }, {} as any);
 };

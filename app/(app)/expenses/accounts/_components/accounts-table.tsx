@@ -1,10 +1,15 @@
 "use client";
 
+import * as dateFn from "date-fns";
 import { DataTableBasic } from "@/components/data-table/datatable-basic";
 import { filterFnMultiSelect } from "@/components/data-table/utils";
+import { Icons } from "@/components/shared/icons";
+import { Button } from "@/components/ui/button";
+import { downloadFile } from "@/lib/utils";
 import { ExpenseAccount } from "@prisma/client";
 import { createColumnHelper } from "@tanstack/react-table";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import React from "react";
 
 const columnHelper = createColumnHelper<ExpenseAccount>();
@@ -35,45 +40,49 @@ const columns = [
     },
     filterFn: filterFnMultiSelect,
   }),
-  // columnHelper.accessor("type", {
-  //   id: "type",
-  //   header: "Type",
-  //   meta: {
-  //     filterVariant: "select",
-  //     filterOptions: [
-  //       "Saving Account",
-  //       "Checking Account",
-  //       "Credit Card",
-  //       "Home Loan",
-  //     ].map((t) => ({ label: t, value: t })),
-  //   },
-  // }),
-  // columnHelper.accessor("createdAt", {
-  //   id: "createdAt",
-  //   header: "Date Created",
-  //   cell: (info: any) => (
-  //     <p className="text-sm font-medium">
-  //       {info.getValue().toLocaleDateString()}
-  //     </p>
-  //   ),
-  //   filterFn: filterFnDateRange,
-  //   meta: {
-  //     filterVariant: "dateRange",
-  //   },
-  // }),
 ];
 
 export default function AccountsTable(props: {
   tableData: ExpenseAccount[];
   refetch: () => void;
 }) {
+  const router = useRouter();
   const { tableData, refetch } = props;
+
   return (
     <DataTableBasic
       title="Accounts"
       data={tableData}
       columns={columns}
       refetch={refetch}
+      actions={
+        <>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => {
+              router.push("/expenses/accounts/new");
+            }}
+          >
+            <Icons.add className="size-5" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => {
+              const datePrefix = `${dateFn.format(Date.now(), "y-MM-dd-HH-mm")}`;
+              const fileName = `${datePrefix}-accounts.json`;
+              downloadFile({
+                fileName,
+                data: JSON.stringify(tableData, null, 2),
+                fileType: "application/json",
+              });
+            }}
+          >
+            <Icons.download className="size-5" />
+          </Button>
+        </>
+      }
     />
   );
 }

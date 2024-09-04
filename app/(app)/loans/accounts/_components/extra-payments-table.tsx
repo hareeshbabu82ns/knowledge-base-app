@@ -19,6 +19,8 @@ import { Icons } from "@/components/shared/icons";
 import { format } from "date-fns";
 import DataTableRowEditForm from "@/components/data-table/datatable-row-edit-form";
 import { LoanExtraPaymentSchema } from "@/lib/validations/loans";
+import { toast } from "sonner";
+import { DeleteConfirmButton } from "@/components/DeleteConfirmButton";
 
 const defaultData: LoanExtraPayments = {
   id: "",
@@ -79,16 +81,16 @@ const columns = [
             <Icons.edit className="size-4" />
           </Button>
         )}
-        <Button
+        <DeleteConfirmButton
           variant="ghost"
           className="text-destructive size-8 p-2"
           disabled={!table.options.meta?.deleteData}
-          onClick={() => {
-            table.options.meta?.deleteData!(row.id, row.original);
-          }}
+          toastId={`loan-extra-payments-deletion-${row.id}`}
+          toastLabel={`Delete Extra Payment? ${row.original.amount}`}
+          onClick={() => table.options.meta?.deleteData!(row.id, row.original)}
         >
-          <Icons.trash className="size-4" />
-        </Button>
+          <Icons.trash className="size-8" />
+        </DeleteConfirmButton>
       </div>
     ),
     enableSorting: false,

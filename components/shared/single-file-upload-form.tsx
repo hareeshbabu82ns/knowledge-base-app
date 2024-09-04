@@ -23,6 +23,7 @@ const SingleFileUploadForm = ({
   disabled = false,
   showPreviews = true,
   label,
+  loading = false,
   onUploadSuccess,
 }: FileUploadProps) => {
   const [file, setFile] = useState<File | null>(null);
@@ -156,20 +157,10 @@ const SingleFileUploadForm = ({
                 disabled && "cursor-default",
               )}
             >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className={cn("w-14 h-14", disabled && "text-muted")}
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={2}
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z"
-                />
-              </svg>
+              <Icons.upload
+                className={cn("size-14", disabled && "text-muted")}
+              />
+
               <strong
                 className={cn("text-sm font-medium", disabled && "text-muted")}
               >
@@ -177,7 +168,7 @@ const SingleFileUploadForm = ({
               </strong>
               <input
                 disabled={disabled}
-                className="block w-0 h-0"
+                className="hidden"
                 name="file"
                 type="file"
                 onChange={onFileUploadChange}
@@ -201,7 +192,11 @@ const SingleFileUploadForm = ({
             size="icon"
             variant="outline"
           >
-            <Icons.upload className="size-4" />
+            {loading ? (
+              <Icons.loaderWheel className="size-14 animate-spin text-muted" />
+            ) : (
+              <Icons.upload className="size-4" />
+            )}
           </Button>
         </div>
       </div>

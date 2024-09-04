@@ -1,26 +1,46 @@
 "use server";
 
 import { Option } from "@/components/ui/multi-select";
+import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { Loan, LoanExtraPayments, LoanRates, Prisma } from "@prisma/client";
+import { connect } from "http2";
 
 // Loans
 export const fetchLoansDDLB = async () => {
+  const session = await auth();
+  if (!session) {
+    throw new Error("Unauthorized");
+  }
+
   const loans = await db.loan.findMany({
+    where: { userId: session.user.id },
     select: { id: true, name: true },
   });
   return loans.map((loan) => ({ value: loan.id, label: loan.name }) as Option);
 };
 
 export const fetchLoans = async () => {
+  const session = await auth();
+  if (!session) {
+    throw new Error("Unauthorized");
+  }
+
   const loans = await db.loan.findMany({
+    where: { userId: session.user.id },
     include: { loanRates: true, loanExtraPayments: true },
   });
   return loans;
 };
 
 export const getLoanDetails = async (id: Loan["id"]) => {
-  const dbLoan = await db.loan.findUnique({ where: { id } });
+  const session = await auth();
+  if (!session) {
+    throw new Error("Unauthorized");
+  }
+  const dbLoan = await db.loan.findUnique({
+    where: { id, userId: session.user.id },
+  });
   if (!dbLoan) throw new Error("Loan not found with " + id);
   return dbLoan;
 };
@@ -29,19 +49,37 @@ export const updateLoan = async (
   id: Loan["id"],
   data: Prisma.LoanUpdateInput,
 ) => {
+  const session = await auth();
+  if (!session) {
+    throw new Error("Unauthorized");
+  }
+
   const dbLoan = await db.loan.update({ data, where: { id } });
   if (!dbLoan) throw new Error("Loan not found with " + id);
   return dbLoan;
 };
 
 export const createLoan = async (data: Prisma.LoanCreateInput) => {
-  const dbLoan = await db.loan.create({ data });
+  const session = await auth();
+  if (!session) {
+    throw new Error("Unauthorized");
+  }
+  const dbLoan = await db.loan.create({
+    data: { ...data, user: { connect: { id: session.user.id } } },
+  });
   if (!dbLoan) throw new Error("Loan not created");
   return dbLoan;
 };
 
 export const deleteLoan = async (id: Loan["id"]) => {
-  const dbLoan = await db.loan.delete({ where: { id } });
+  const session = await auth();
+  if (!session) {
+    throw new Error("Unauthorized");
+  }
+
+  const dbLoan = await db.loan.delete({
+    where: { id, userId: session.user.id },
+  });
   if (!dbLoan) throw new Error("Loan not deleted");
   return dbLoan;
 };

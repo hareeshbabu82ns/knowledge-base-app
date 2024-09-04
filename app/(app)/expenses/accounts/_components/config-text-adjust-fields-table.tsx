@@ -17,6 +17,8 @@ import {
 } from "@/types/expenses";
 import DataTableRowEditForm from "@/components/data-table/datatable-row-edit-form";
 import { Option } from "@/components/ui/multi-select";
+import { toast } from "sonner";
+import { DeleteConfirmButton } from "@/components/DeleteConfirmButton";
 
 const columnHelper = createColumnHelper<IConfigText>();
 const columns = [
@@ -72,16 +74,16 @@ const columns = [
             <Icons.edit className="size-4" />
           </Button>
         )}
-        <Button
+        <DeleteConfirmButton
           variant="ghost"
           className="text-destructive size-8 p-2"
           disabled={!table.options.meta?.deleteData}
-          onClick={() => {
-            table.options.meta?.deleteData!(row.id, row.original);
-          }}
+          toastId={`config-text-adjust-deletion-${row.id}`}
+          toastLabel={`Delete Text Adjustment Config? ${row.original.source}`}
+          onClick={() => table.options.meta?.deleteData!(row.id, row.original)}
         >
-          <Icons.trash className="size-4" />
-        </Button>
+          <Icons.trash className="size-8" />
+        </DeleteConfirmButton>
       </div>
     ),
     enableSorting: false,

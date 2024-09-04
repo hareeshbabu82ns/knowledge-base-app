@@ -79,6 +79,7 @@ function ignoreTransaction(
   for (const ignoreOp of config.ignoreOps) {
     const ignoreFieldName =
       ignoreOp.name as keyof Prisma.ExpenseTransactionCreateManyInput;
+    const strValue = from[ignoreFieldName] as string;
     switch (ignoreOp.comparision) {
       case "EQ":
         if (from[ignoreFieldName] === ignoreOp.value) {
@@ -86,7 +87,62 @@ function ignoreTransaction(
         }
         break;
       case "CONTAINS":
-        if ((from[ignoreFieldName] as string).includes(ignoreOp.value)) {
+        if (strValue.includes(ignoreOp.value)) {
+          return true;
+        }
+        break;
+      case "STARTS_WITH":
+        if (strValue.startsWith(ignoreOp.value)) {
+          return true;
+        }
+        break;
+      case "REGEX":
+        if (new RegExp(ignoreOp.value).test(strValue)) {
+          return true;
+        }
+        break;
+      case "ENDS_WITH":
+        if (strValue.endsWith(ignoreOp.value)) {
+          return true;
+        }
+        break;
+      case "NOT_CONTAINS":
+        if (!strValue.includes(ignoreOp.value)) {
+          return true;
+        }
+        break;
+      case "NOT_STARTS_WITH":
+        if (!strValue.startsWith(ignoreOp.value)) {
+          return true;
+        }
+        break;
+      case "NOT_ENDS_WITH":
+        if (!strValue.endsWith(ignoreOp.value)) {
+          return true;
+        }
+        break;
+      case "NE":
+        if (from[ignoreFieldName] !== ignoreOp.value) {
+          return true;
+        }
+        break;
+      case "GT":
+        if ((from[ignoreFieldName] as number) > Number(ignoreOp.value)) {
+          return true;
+        }
+        break;
+      case "LT":
+        if ((from[ignoreFieldName] as number) < Number(ignoreOp.value)) {
+          return true;
+        }
+        break;
+      case "GE":
+        if ((from[ignoreFieldName] as number) >= Number(ignoreOp.value)) {
+          return true;
+        }
+        break;
+      case "LE":
+        if ((from[ignoreFieldName] as number) <= Number(ignoreOp.value)) {
           return true;
         }
         break;

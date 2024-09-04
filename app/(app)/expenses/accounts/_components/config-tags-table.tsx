@@ -21,6 +21,8 @@ import {
 } from "@/variables/expenses";
 import { Badge } from "@/components/ui/badge";
 import DataTableRowEditForm from "@/components/data-table/datatable-row-edit-form";
+import { toast } from "sonner";
+import { DeleteConfirmButton } from "@/components/DeleteConfirmButton";
 
 const columnHelper = createColumnHelper<IConfigTagOptions>();
 const columns = [
@@ -113,16 +115,16 @@ const columns = [
             <Icons.edit className="size-4" />
           </Button>
         )}
-        <Button
+        <DeleteConfirmButton
           variant="ghost"
           className="text-destructive size-8 p-2"
           disabled={!table.options.meta?.deleteData}
-          onClick={() => {
-            table.options.meta?.deleteData!(row.id, row.original);
-          }}
+          toastId={`config-tags-deletion-${row.id}`}
+          toastLabel={`Delete Tag Config? ${row.original.name}`}
+          onClick={() => table.options.meta?.deleteData!(row.id, row.original)}
         >
-          <Icons.trash className="size-4" />
-        </Button>
+          <Icons.trash className="size-8" />
+        </DeleteConfirmButton>
       </div>
     ),
     enableSorting: false,

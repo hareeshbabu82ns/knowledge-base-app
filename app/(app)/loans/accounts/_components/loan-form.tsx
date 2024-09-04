@@ -23,6 +23,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { loanFrequency } from "@/variables/loans";
 import { SelectItem } from "@/components/ui/select";
 import { calculateEMI } from "../../utils";
+import { DeleteConfirmButton } from "@/components/DeleteConfirmButton";
 
 interface LoanFormProps {
   id: Loan["id"];
@@ -302,14 +303,16 @@ export const LoanForm = ({ id, data, type }: LoanFormProps) => {
           >
             Reset
           </Button>
-          <Button
+          <DeleteConfirmButton
             variant="destructive"
             type="button"
+            toastId={`loan-deletion-${id}`}
+            toastLabel={`Delete Loan? ${data.name}`}
             onClick={() => deleteMutation.mutate(id)}
             disabled={type === "create" || isLoading}
           >
             Delete
-          </Button>
+          </DeleteConfirmButton>
           <SubmitButton isLoading={isLoading}>{buttonLabel}</SubmitButton>
         </div>
       </form>

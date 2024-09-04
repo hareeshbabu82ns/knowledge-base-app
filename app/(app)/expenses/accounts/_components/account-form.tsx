@@ -23,6 +23,8 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { accountTypes } from "@/variables/expenses";
 import { SelectItem } from "@/components/ui/select";
 import { IConfig } from "@/types/expenses";
+import { Icons } from "@/components/shared/icons";
+import { DeleteConfirmButton } from "@/components/DeleteConfirmButton";
 
 interface AccountFormProps {
   id: ExpenseAccount["id"];
@@ -261,14 +263,16 @@ export const AccountForm = ({ id, data, type }: AccountFormProps) => {
           >
             Reset
           </Button>
-          <Button
+          <DeleteConfirmButton
             variant="destructive"
             type="button"
-            onClick={() => deleteMutation.mutate(id)}
             disabled={type === "create" || isLoading}
+            toastId={`account-deletion-${id}`}
+            toastLabel={`Delete Account? ${data.name}`}
+            onClick={() => deleteMutation.mutate(id)}
           >
             Delete
-          </Button>
+          </DeleteConfirmButton>
           <SubmitButton isLoading={isLoading}>{buttonLabel}</SubmitButton>
         </div>
       </form>

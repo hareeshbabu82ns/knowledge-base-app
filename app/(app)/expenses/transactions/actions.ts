@@ -1,6 +1,7 @@
 "use server";
 
 import { db } from "@/lib/db";
+import { auth } from "@/lib/auth";
 import {
   ColumnFiltersState,
   PaginationState,
@@ -26,6 +27,11 @@ export const fetchTransactions = async ({
   sorting: SortingState;
   filters: ColumnFiltersState;
 }) => {
+  const session = await auth();
+  if (!session) {
+    throw new Error("Unauthorized");
+  }
+
   const where = convertColumnFiltersToPrisma(filters, columns);
   // console.dir({ filters, where }, { depth: 3 });
 
@@ -38,7 +44,7 @@ export const fetchTransactions = async ({
     skip: pagination.pageIndex * pagination.pageSize,
     take: pagination.pageSize,
     orderBy: sorting?.length ? (orderBy as any) : { id: "desc" },
-    where,
+    where: { ...where, userId: session.user.id },
     include: { accountObj: true },
   });
   return { rowCount: expenseTransactionCount, rows: transactions };
@@ -49,12 +55,17 @@ export const fetchChartAccountsByMonth = async ({
 }: {
   filters: ColumnFiltersState;
 }) => {
+  const session = await auth();
+  if (!session) {
+    throw new Error("Unauthorized");
+  }
+
   const where = convertColumnFiltersToPrisma(filters, columns);
-  console.dir({ filters, where }, { depth: 3 });
+  // console.dir({ filters, where }, { depth: 3 });
 
   const transactions = await db.expenseTransaction.findMany({
     orderBy: { date: "desc" },
-    where,
+    where: { ...where, userId: session.user.id },
     select: {
       id: true,
       amount: true,
@@ -70,12 +81,17 @@ export const fetchTransactionStats = async ({
 }: {
   filters: ColumnFiltersState;
 }) => {
+  const session = await auth();
+  if (!session) {
+    throw new Error("Unauthorized");
+  }
+
   const where = convertColumnFiltersToPrisma(filters, columns);
-  console.dir({ filters, where }, { depth: 3 });
+  // console.dir({ filters, where }, { depth: 3 });
 
   const transactions = await db.expenseTransaction.findMany({
     orderBy: { date: "asc" },
-    where,
+    where: { ...where, userId: session.user.id },
     select: {
       id: true,
       amount: true,

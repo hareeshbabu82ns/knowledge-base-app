@@ -1,10 +1,11 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import AccountsTable from "../_components/accounts-table";
 import { fetchAccounts, uploadAccounts } from "../actions";
 import SingleFileUploadForm from "@/components/shared/single-file-upload-form";
 import { toast } from "sonner";
+import Loader from "@/components/shared/loader";
 
 function Page() {
   const { isPending, isError, data, error, refetch } = useQuery({
@@ -12,8 +13,14 @@ function Page() {
     queryFn: async () => await fetchAccounts(),
   });
 
+  const { mutateAsync: uploadAccountsFn, isPending: isPendingUpload } =
+    useMutation({
+      mutationFn: uploadAccounts,
+      mutationKey: ["uploadAccounts"],
+    });
+
   if (isPending) {
-    return <span>Loading...</span>;
+    return <Loader />;
   }
 
   if (isError) {
@@ -27,11 +34,16 @@ function Page() {
       <SingleFileUploadForm
         label="Upload CSV file"
         allowedTypes={["application/json"]}
+        disabled={isPendingUpload}
+        loading={isPendingUpload}
         showPreviews={false}
         onUploadSuccess={async (url) => {
-          await uploadAccounts(url[0]);
-          await refetch();
-          toast.success("Accounts uploaded successfully!");
+          return uploadAccountsFn(url[0]).then(() => {
+            refetch();
+            toast.success("Accounts uploaded successfully!", {
+              id: "upload-accounts-success",
+            });
+          });
         }}
       />
       {/* <MultipleFileUploadForm
