@@ -53,7 +53,7 @@ interface DataTableProps<TData> {
     columnId: string;
     value: unknown;
   }) => void;
-  deleteData?: (rowId: string, rowData: TData) => void;
+  deleteData?: (data: { rowId: string; rowData?: TData }) => void;
   enableMultiRowEdit?: boolean;
   rowEditForm?: ColumnDefTemplate<RowSelectionFormProps<TData>>;
   rowEditFormaAsDialog?: boolean;

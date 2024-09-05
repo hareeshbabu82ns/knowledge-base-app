@@ -1,5 +1,10 @@
 import { Option } from "@/components/ui/multi-select";
 
+export const ExpenseTypeOptions: Option[] = [
+  { label: "Expense", value: "Expense" },
+  { label: "Income", value: "Income" },
+];
+
 export type ACCOUNT_TYPE =
   | "Checking Account"
   | "Saving Account"

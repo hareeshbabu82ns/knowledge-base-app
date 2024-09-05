@@ -50,7 +50,12 @@ const columns = [
           disabled={!table.options.meta?.deleteData}
           toastId={`config-tags-deletion-${row.id}`}
           toastLabel={`Delete Tag Config? ${row.original.tag}`}
-          onClick={() => table.options.meta?.deleteData!(row.id, row.original)}
+          onClick={() =>
+            table.options.meta?.deleteData!({
+              rowId: row.id,
+              rowData: row.original,
+            })
+          }
         >
           <Icons.trash className="size-8" />
         </DeleteConfirmButton>
@@ -150,7 +155,7 @@ const TagsTable = ({ className }: ExpenseTagsTableProps) => {
                 { onError: () => toast.error("Tag not updated") },
               );
         }}
-        deleteData={(rowId) => {
+        deleteData={({ rowId }) => {
           deleteTagFn(rowId);
         }}
         actions={

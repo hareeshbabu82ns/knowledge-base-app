@@ -44,7 +44,7 @@ declare module "@tanstack/react-table" {
   interface Row<TData extends RowData> extends RowEditRow {}
 
   interface TableMeta<TData extends RowData> {
-    deleteData?: (rowId: string, rowData: TData) => void;
+    deleteData?: (data: { rowId: string; rowData?: TData }) => void;
     updateData?: (data: { rowId: string; rowData: TData }) => void;
     updateCellData?: (data: {
       rowId: string;

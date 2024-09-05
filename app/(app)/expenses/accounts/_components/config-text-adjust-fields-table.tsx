@@ -80,7 +80,12 @@ const columns = [
           disabled={!table.options.meta?.deleteData}
           toastId={`config-text-adjust-deletion-${row.id}`}
           toastLabel={`Delete Text Adjustment Config? ${row.original.source}`}
-          onClick={() => table.options.meta?.deleteData!(row.id, row.original)}
+          onClick={() =>
+            table.options.meta?.deleteData!({
+              rowId: row.id,
+              rowData: row.original,
+            })
+          }
         >
           <Icons.trash className="size-8" />
         </DeleteConfirmButton>
@@ -227,7 +232,7 @@ const AccountTextAdjustFieldsTable = ({
             data: newFileField,
           });
         }}
-        deleteData={(rowId, rowData) => {
+        deleteData={({ rowId, rowData }) => {
           const rowIndex = Number(rowId);
           // console.log("deleteData", { rowIndex, rowData });
           deleteAccountTextAdjustFields(rowIndex);

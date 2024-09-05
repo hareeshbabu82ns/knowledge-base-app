@@ -90,7 +90,12 @@ const columns = [
           disabled={!table.options.meta?.deleteData}
           toastId={`config-ignore-fields-deletion-${row.id}`}
           toastLabel={`Delete Ignore Config? ${row.original.name}`}
-          onClick={() => table.options.meta?.deleteData!(row.id, row.original)}
+          onClick={() =>
+            table.options.meta?.deleteData!({
+              rowId: row.id,
+              rowData: row.original,
+            })
+          }
         >
           <Icons.trash className="size-8" />
         </DeleteConfirmButton>
@@ -234,7 +239,7 @@ const AccountIgnoreFieldsTable = ({
           };
           updateAccountIgnoreFields({ index: rowIndex, data: newFileField });
         }}
-        deleteData={(rowId, rowData) => {
+        deleteData={({ rowId, rowData }) => {
           const rowIndex = Number(rowId);
           // console.log("deleteData", { rowIndex, rowData });
           deleteAccountIgnoreFields(rowIndex);

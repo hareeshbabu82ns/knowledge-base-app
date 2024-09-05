@@ -1,6 +1,4 @@
 // import { E164Number } from "libphonenumber-js/core";
-import Image from "next/image";
-import ReactDatePicker from "react-datepicker";
 import { Control } from "react-hook-form";
 // import PhoneInput from "react-phone-number-input";
 
@@ -25,12 +23,12 @@ import { cn } from "@/lib/utils";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { Button } from "../ui/button";
 import { Icons } from "../shared/icons";
-import { add, addYears, format, subYears } from "date-fns";
+import { format } from "date-fns";
 import { Calendar } from "../ui/calendar";
 import { Column } from "@tanstack/react-table";
 import { Switch } from "../ui/switch";
 import { useQuery } from "@tanstack/react-query";
-import { Option } from "../ui/multi-select";
+import MultipleSelector, { Option } from "../ui/multi-select";
 import Loader from "../shared/loader";
 
 export enum FormFieldType {
@@ -248,6 +246,34 @@ function RenderInput<TData>({
             </SelectTrigger>
             <SelectContent>{generateFilterOptions(options)}</SelectContent>
           </Select>
+        </FormControl>
+      );
+    case "multiSelect":
+      return (
+        <FormControl>
+          <MultipleSelector
+            className="w-full"
+            onChange={(v) => {
+              field.onChange(v.map((i) => i.value));
+            }}
+            placeholder={props.placeholder}
+            value={
+              field.value?.map((i: string) =>
+                options?.find((o) => o.value === i),
+              ) || []
+            }
+            options={options}
+            commandProps={{
+              filter: (value, search, keywords) => {
+                return options
+                  ?.find((o) => o.value === value)
+                  ?.label?.toLowerCase()
+                  .includes(search.toLowerCase())
+                  ? 1
+                  : 0;
+              },
+            }}
+          />
         </FormControl>
       );
     case "skeleton":

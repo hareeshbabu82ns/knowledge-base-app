@@ -161,7 +161,12 @@ const columns = [
           disabled={!table.options.meta?.deleteData}
           toastId={`config-file-fields-deletion-${row.id}`}
           toastLabel={`Delete Input Field Config? ${row.original.name}`}
-          onClick={() => table.options.meta?.deleteData!(row.id, row.original)}
+          onClick={() =>
+            table.options.meta?.deleteData!({
+              rowId: row.id,
+              rowData: row.original,
+            })
+          }
         >
           <Icons.trash className="size-8" />
         </DeleteConfirmButton>
@@ -310,7 +315,7 @@ const AccountFileFieldsTable = ({
           };
           updateAccountFileFields({ index: rowIndex, data: newFileField });
         }}
-        deleteData={(rowId, rowData) => {
+        deleteData={({ rowId, rowData }) => {
           const rowIndex = Number(rowId);
           // console.log("deleteData", { rowIndex, rowData });
           deleteAccountFileFields(rowIndex);

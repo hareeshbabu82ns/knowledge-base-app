@@ -77,7 +77,12 @@ const columns = [
           disabled={!table.options.meta?.deleteData}
           toastId={`loan-roi-deletion-${row.id}`}
           toastLabel={`Delete ROI? ${row.original.rate}`}
-          onClick={() => table.options.meta?.deleteData!(row.id, row.original)}
+          onClick={() =>
+            table.options.meta?.deleteData!({
+              rowId: row.id,
+              rowData: row.original,
+            })
+          }
         >
           <Icons.trash className="size-8" />
         </DeleteConfirmButton>
@@ -168,9 +173,9 @@ const RoiTable = ({ className, loanId }: RoiTableProps) => {
             addRoi({ ...rowData, loan: { connect: { id: loanId } } });
           else updateRoi({ id: rowId, data: rowData });
         }}
-        deleteData={(rowIndex, rowData) => {
+        deleteData={({ rowId, rowData }) => {
           // console.log("deleteData", { rowIndex, rowData });
-          const id = rowData.id;
+          const id = rowData?.id || rowId;
           if (id) deleteRoi(id);
         }}
       />

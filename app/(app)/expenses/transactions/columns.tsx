@@ -4,6 +4,10 @@ import { createColumnHelper } from "@tanstack/react-table";
 import { fetchAccounts, fetchTags } from "../accounts/actions";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
+import { ExpenseTypeOptions } from "@/variables/expenses";
+import { Button } from "@/components/ui/button";
+import { Icons } from "@/components/shared/icons";
+import { DeleteConfirmButton } from "@/components/DeleteConfirmButton";
 
 export type ExpenseTransactionWithAccount = ExpenseTransaction & {
   accountObj: ExpenseAccount;
@@ -20,7 +24,7 @@ export const columns = [
     id: "date",
     size: 100,
     header: "Date",
-    meta: { filterVariant: "dateRange" },
+    meta: { filterVariant: "dateRange", cellInputVariant: "date" },
     cell: (info: any) => (
       <p className="text-sm font-medium">{format(info.getValue(), "PP")}</p>
     ),
@@ -28,14 +32,14 @@ export const columns = [
   columnHelper.accessor("description", {
     id: "description",
     header: "Description",
-    meta: { filterVariant: "text" },
+    meta: { filterVariant: "text", cellInputVariant: "text" },
     size: 500,
   }),
   columnHelper.accessor("amount", {
     id: "amount",
     size: 50,
     header: "Amount",
-    meta: { filterVariant: "range" },
+    meta: { filterVariant: "range", cellInputVariant: "number" },
     cell: ({ row }) => {
       const amount = parseFloat(row.getValue("amount"));
       const formatted = new Intl.NumberFormat("en-CA", {
@@ -63,6 +67,7 @@ export const columns = [
     // enableSorting: false,
     meta: {
       dbMapId: "account",
+      cellInputVariant: "select",
       filterVariant: "multiSelect",
       fieldType: "subObject",
       subObjectLabelField: "name",
@@ -80,6 +85,7 @@ export const columns = [
     id: "tags",
     header: "Tags",
     meta: {
+      cellInputVariant: "multiSelect",
       filterVariant: "multiSelect",
       fieldType: "array",
       filterOptionsFn: async () => {
@@ -103,5 +109,58 @@ export const columns = [
   columnHelper.accessor("type", {
     id: "type",
     header: "Type",
+    meta: {
+      cellInputVariant: "select",
+      filterVariant: "multiSelect",
+      filterOptions: ExpenseTypeOptions,
+    },
+  }),
+  columnHelper.display({
+    id: "actions",
+    header: "Actions",
+    size: 50,
+    cell: ({ row, table, column }) => (
+      <div className="flex flex-row gap-1">
+        {row.getIsEditing() && (
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => {
+              row.toggleEditing();
+            }}
+          >
+            <Icons.close className="size-4" />
+          </Button>
+        )}
+        {row.getCanEdit() && !row.getIsEditing() && (
+          <Button
+            variant="ghost"
+            className="text-destructive size-8 p-2"
+            disabled={row.getIsEditing()}
+            onClick={() => {
+              row.toggleEditing();
+            }}
+          >
+            <Icons.edit className="size-4" />
+          </Button>
+        )}
+        <DeleteConfirmButton
+          variant="ghost"
+          className="text-destructive size-8 p-2"
+          disabled={!table.options.meta?.deleteData}
+          toastId={`config-file-fields-deletion-${row.id}`}
+          toastLabel={`Delete Input Field Config? ${row.original.description}`}
+          onClick={() =>
+            table.options.meta?.deleteData!({
+              rowId: row.id,
+              rowData: row.original,
+            })
+          }
+        >
+          <Icons.trash className="size-8" />
+        </DeleteConfirmButton>
+      </div>
+    ),
+    enableSorting: false,
   }),
 ];

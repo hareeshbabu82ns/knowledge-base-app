@@ -13,10 +13,10 @@ import {
   convertSortingToPrisma,
 } from "@/components/data-table/utils";
 import {
-  IExpTransAmountByAttrStats,
   IExpTransAmountByAttrStatsArray,
   IExpTransByAttrStats,
 } from "@/types/expenses";
+import { ExpenseTransaction, Prisma } from "@prisma/client";
 
 export const fetchTransactions = async ({
   pagination,
@@ -51,6 +51,50 @@ export const fetchTransactions = async ({
   });
   return { rowCount: expenseTransactionCount, rows: transactions };
 };
+
+export const createExpenseTransaction = async (
+  data: Prisma.ExpenseTransactionCreateInput,
+) => {
+  const session = await auth();
+  if (!session?.user?.id) throw new Error("not logged in");
+
+  const dbExpenseTransaction = await db.expenseTransaction.create({
+    data: { ...data, user: { connect: { id: session?.user?.id } } },
+  });
+  if (!dbExpenseTransaction)
+    throw new Error("Unable to create ExpenseTransaction");
+  return dbExpenseTransaction;
+};
+
+export const updateExpenseTransaction = async (
+  id: ExpenseTransaction["id"],
+  data: Prisma.ExpenseTransactionUpdateInput,
+) => {
+  const session = await auth();
+  if (!session?.user?.id) throw new Error("not logged in");
+
+  const dbObj = await db.expenseTransaction.update({
+    data,
+    where: { id, userId: session?.user?.id },
+  });
+  if (!dbObj) throw new Error("ExpenseTransaction not found with " + id);
+  return dbObj;
+};
+
+export const deleteExpenseTransaction = async (
+  id: ExpenseTransaction["id"],
+) => {
+  const session = await auth();
+  if (!session?.user?.id) throw new Error("not logged in");
+
+  const dbTransaction = await db.expenseTransaction.delete({
+    where: { id, userId: session?.user?.id },
+  });
+  if (!dbTransaction) throw new Error("unable to delete Transaction");
+  return dbTransaction;
+};
+
+//////////////Charts////////////////////////////////
 
 export const fetchChartAccountsByMonth = async ({
   filters,

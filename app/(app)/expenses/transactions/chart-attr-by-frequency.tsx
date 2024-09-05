@@ -81,7 +81,7 @@ function prepareChartData(
     }
     chartDataByFreq[frequencyKey] = {
       ...chartDataByFreq[frequencyKey],
-      [key]: item.amount,
+      [key]: Math.round(item.amount),
     };
   });
 
@@ -184,7 +184,7 @@ export function ChartAttributeByFrequency({
             />
             <ChartTooltip
               cursor={false}
-              content={<ChartTooltipContent indicator="dashed" />}
+              content={<ChartTooltipContent indicator="dot" className="w-60" />}
             />
             {Object.keys(chartData.config).map((key) => (
               <Bar

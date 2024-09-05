@@ -56,14 +56,15 @@ export default function DataTableRowEditForm<TData>({
         className={cn("grid grid-cols-2 gap-4 p-2", className)}
       >
         {table.getAllLeafColumns().map((column) => {
+          const name = (column.columnDef.meta?.dbMapId || column.id) as string;
           return column.columnDef.meta?.cellInputVariant ? (
             <DatatableCustomFormField
-              key={column.id}
+              key={name}
               column={column}
               control={form.control}
-              name={column.id as string}
+              name={name}
               label={column.columnDef.header as string}
-              placeholder={column.id as string}
+              placeholder={name}
             />
           ) : null;
         })}

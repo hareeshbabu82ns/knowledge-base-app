@@ -2,10 +2,13 @@
 
 import {
   ColumnDef,
+  ColumnDefTemplate,
   ColumnFiltersState,
   flexRender,
   getCoreRowModel,
+  OnChangeFn,
   PaginationState,
+  Row,
   SortingState,
   useReactTable,
   VisibilityState,
@@ -26,9 +29,14 @@ import {
   DEFAULT_PAGE_INDEX,
   DEFAULT_PAGE_SIZE,
 } from "@/components/data-table/datatable-filters";
-import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useMutation, useQuery } from "@tanstack/react-query";
 import Loader from "../shared/loader";
 import { cn } from "@/lib/utils";
+import { RowSelectionFormProps } from "./types";
+import { RowEditFeature, RowEditState } from "./datatable-feature-row-editing";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
+import DataTableCellInput from "./datatable-cell-input";
+import { toast } from "sonner";
 
 interface DataTableProps<TData, TValue> {
   title?: React.ReactNode;
@@ -44,14 +52,29 @@ interface DataTableProps<TData, TValue> {
     sorting: SortingState;
     filters: ColumnFiltersState;
   }) => Promise<{ rowCount: number; rows: TData[] }>;
+  updateFn?: (data: { rowId: string; rowData: TData }) => Promise<void> | void;
+  addFn?: (data: TData) => Promise<void> | void;
+  deleteFn?: (data: { rowId: string; rowData?: TData }) => Promise<void> | void;
+  actions?: React.ReactNode;
   isFiltersOpen?: boolean;
   beforeTable?: React.ReactNode | React.ComponentType;
+  enableMultiRowEdit?: boolean;
+  rowEditForm?: ColumnDefTemplate<RowSelectionFormProps<TData>>;
+  rowEditFormaAsDialog?: boolean;
+  getRowId?:
+    | ((
+        originalRow: TData,
+        index: number,
+        parent?: Row<TData> | undefined,
+      ) => string)
+    | undefined;
 }
 
 export function DataTableQuery<TData, TValue>({
   title,
   columns,
-  defaultSorting = [{ id: "name", desc: false }],
+  defaultSorting = [],
+  // defaultSorting = [{ id: "name", desc: false }],
   defaultPagination = {
     pageIndex: DEFAULT_PAGE_INDEX,
     pageSize: DEFAULT_PAGE_SIZE,
@@ -61,8 +84,16 @@ export function DataTableQuery<TData, TValue>({
   className,
   queryKey,
   queryFn,
+  addFn,
+  updateFn,
+  deleteFn,
+  actions,
+  getRowId = (row, id) => (row as any)?.id || `${id}`,
   isFiltersOpen = false,
   beforeTable,
+  enableMultiRowEdit = true,
+  rowEditForm,
+  rowEditFormaAsDialog = false,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = React.useState(defaultSorting);
   const [pagination, setPagination] = React.useState(defaultPagination);
@@ -71,6 +102,8 @@ export function DataTableQuery<TData, TValue>({
   const [columnVisibility, setColumnVisibility] = React.useState(
     defaultColumnVisibility,
   );
+  const [editingRows, setEditingRows] = React.useState<RowEditState>({});
+  const [isRowEditFormOpen, setIsRowEditFormOpen] = React.useState(false);
 
   const dataQuery = useQuery({
     queryKey: [queryKey, pagination, sorting, columnFilters],
@@ -78,6 +111,51 @@ export function DataTableQuery<TData, TValue>({
     placeholderData: keepPreviousData,
   });
   const { data, isFetching, isLoading, refetch } = dataQuery;
+
+  const { mutate: updateMutation, isPending: isUpdatePending } = useMutation({
+    mutationFn: async ({
+      rowId,
+      rowData,
+    }: {
+      rowId: string;
+      rowData: TData;
+    }) => {
+      if (rowId && rowId !== "-1") {
+        if (!updateFn) return;
+        return updateFn({ rowId, rowData });
+      } else {
+        if (!addFn) return;
+        return addFn(rowData);
+      }
+    },
+    onSuccess: () => {
+      toast.success("Item Updated/Added");
+      refetch();
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    },
+  });
+
+  const { mutate: deleteMutation, isPending: isDeletePending } = useMutation({
+    mutationFn: async ({
+      rowId,
+      rowData,
+    }: {
+      rowId: string;
+      rowData?: TData;
+    }) => {
+      if (!deleteFn) return;
+      return deleteFn({ rowId, rowData });
+    },
+    onSuccess: () => {
+      toast.success("Item Deleted");
+      refetch();
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    },
+  });
 
   const defaultData = React.useMemo(() => [], []);
 
@@ -93,16 +171,40 @@ export function DataTableQuery<TData, TValue>({
     defaultSorting,
   ]);
 
+  const onRowEditChange = React.useCallback<OnChangeFn<RowEditState>>(
+    (editingRowsUpdater) => {
+      const newEditingRows =
+        typeof editingRowsUpdater === "function"
+          ? editingRowsUpdater(editingRows)
+          : editingRowsUpdater;
+      setEditingRows(newEditingRows);
+      if (Object.keys(newEditingRows).length) {
+        setIsRowEditFormOpen(true);
+      } else {
+        setIsRowEditFormOpen(false);
+      }
+    },
+    [editingRows],
+  );
+
   const table = useReactTable({
+    _features: [RowEditFeature],
     data: data?.rows ?? defaultData,
     rowCount: data?.rowCount,
     columns,
+    meta: {
+      updateData: addFn || updateFn ? updateMutation : undefined,
+      deleteData: deleteFn ? deleteMutation : undefined,
+    },
     state: {
       sorting,
       pagination,
       columnFilters,
       columnVisibility,
+      rowEdit: editingRows,
     },
+    getRowId,
+    onRowEditChange,
     onSortingChange: setSorting,
     onPaginationChange: setPagination,
     onColumnFiltersChange: setColumnFilters,
@@ -111,7 +213,13 @@ export function DataTableQuery<TData, TValue>({
     manualPagination: true,
     manualSorting: true,
     manualFiltering: true,
+    enableMultiRowEdit,
   });
+
+  const editingRowId = Object.keys(editingRows)[0] || undefined;
+  const editingRowData = editingRowId
+    ? table.getRowModel().rowsById[editingRowId].original
+    : undefined;
 
   return (
     <div className={cn("rounded-md border", className)}>
@@ -121,7 +229,44 @@ export function DataTableQuery<TData, TValue>({
         resetFilters={resetFilters}
         isFiltersOpen={isFiltersOpen}
         refetch={() => refetch()}
+        actions={actions}
+        onRowEditFormOpen={
+          rowEditForm && rowEditFormaAsDialog ? setIsRowEditFormOpen : undefined
+        }
       />
+      {rowEditForm &&
+        !rowEditFormaAsDialog &&
+        flexRender(rowEditForm, {
+          key: editingRowId || "new",
+          table,
+          editingRows,
+          rowId: editingRowId,
+          editingRowData,
+        })}
+      {rowEditForm && rowEditFormaAsDialog && (
+        <Dialog
+          open={isRowEditFormOpen}
+          onOpenChange={(open) => {
+            if (!open) {
+              table.resetRowEdit();
+            }
+            setIsRowEditFormOpen(open);
+          }}
+        >
+          <DialogContent className="min-w-[90%] md:min-w-[75%] lg:min-w-[60%]">
+            <DialogHeader>
+              <DialogTitle>Form</DialogTitle>
+            </DialogHeader>
+            {flexRender(rowEditForm, {
+              key: editingRowId || "new",
+              table,
+              editingRows,
+              rowId: editingRowId,
+              editingRowData,
+            })}
+          </DialogContent>
+        </Dialog>
+      )}
       {beforeTable && flexRender(beforeTable, { table })}
       <Table>
         <TableHeader>
@@ -151,7 +296,14 @@ export function DataTableQuery<TData, TValue>({
                         : "",
                     )}
                   >
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                    {!rowEditForm &&
+                    cell.column.columnDef.meta?.cellInputVariant &&
+                    (table.options.enableMultiRowEdit ||
+                      cell.row.getIsEditing()) ? (
+                      <DataTableCellInput {...cell.getContext()} />
+                    ) : (
+                      flexRender(cell.column.columnDef.cell, cell.getContext())
+                    )}
                   </TableCell>
                 ))}
               </TableRow>

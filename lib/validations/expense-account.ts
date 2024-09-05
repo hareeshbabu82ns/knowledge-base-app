@@ -1,5 +1,14 @@
 import * as z from "zod";
 
+export const ExpenseTransactionSchema = z.object({
+  date: z.date(),
+  account: z.string().min(1, "Account is required"),
+  amount: z.number().min(0.1, "Amount must be greater than 0"),
+  description: z.string().max(5000).optional(),
+  type: z.enum(["Expense", "Income"], { message: "Invalid Type" }),
+  tags: z.array(z.string()).nonempty(),
+});
+
 const ExpenseAccountBaseSchema = z.object({
   name: z.string().min(5).max(100),
   description: z.string().max(5000).optional(),

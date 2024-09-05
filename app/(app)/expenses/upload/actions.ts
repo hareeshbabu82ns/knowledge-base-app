@@ -17,7 +17,7 @@ function pepareTransactionTags(
   const tags: string[] = [];
 
   if (!config.tagOps) {
-    return [from.type === "EXPENSE" ? "Untagged_Expense" : "Untagged_Income"];
+    return [from.type === "Expense" ? "Untagged_Expense" : "Untagged_Income"];
   }
 
   for (const tagOp of config.tagOps) {
@@ -63,7 +63,7 @@ function pepareTransactionTags(
   }
 
   if (tags.length === 0) {
-    tags.push(from.type === "EXPENSE" ? "Untagged_Expense" : "Untagged_Income");
+    tags.push(from.type === "Expense" ? "Untagged_Expense" : "Untagged_Income");
   }
 
   return tags;
@@ -189,30 +189,30 @@ function prepareTransactionItem(
         switch (fieldConfig.expenseType) {
           case "EXPENSE_IF_GT_0":
             if (amtVal > 0.0) {
-              item.type = "EXPENSE";
+              item.type = "Expense";
             }
             break;
           case "EXPENSE_IF_GT_0_EL_INCOME":
             if (amtVal > 0.0) {
-              item.type = "EXPENSE";
+              item.type = "Expense";
             } else {
-              item.type = "INCOME";
+              item.type = "Income";
             }
             break;
           case "INCOME_IF_GT_0":
             if (amtVal > 0.0) {
-              item.type = "INCOME";
+              item.type = "Income";
             }
             break;
           case "INCOME_IF_GT_0_EL_EXPENSE":
             if (amtVal > 0.0) {
-              item.type = "INCOME";
+              item.type = "Income";
             } else {
-              item.type = "EXPENSE";
+              item.type = "Expense";
             }
             break;
           default:
-            item.type = "EXPENSE";
+            item.type = "Expense";
         }
         item.amount = amtVal * (fieldConfig.negated ? -1 : 1);
         break;
