@@ -19,7 +19,7 @@ export function DataQueryCharts({ columnFilters }: DataQueryChartsProps) {
   if (isFetching || isLoading) return <Loader />;
 
   return (
-    <div className="grid grid-cols-2 gap-4 p-3 border-b">
+    <div className="grid grid-cols-2 gap-4 border-b p-3">
       <ChartAttributeByFrequency
         key="accountsMonthly"
         transactions={data}

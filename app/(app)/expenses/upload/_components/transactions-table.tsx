@@ -5,6 +5,7 @@ import { IConfig } from "@/types/expenses";
 import { Prisma } from "@prisma/client";
 import { createColumnHelper } from "@tanstack/react-table";
 import { format } from "date-fns";
+import { TransactionFilterDlg } from "./transaction-filter-dlg";
 
 const columnHelper =
   createColumnHelper<Prisma.ExpenseTransactionCreateManyInput>();
@@ -55,7 +56,7 @@ export const columns = [
       filterVariant: "text",
     },
     cell: (info: any) => (
-      <div className="flex flex-row gap-1 text-sm font-medium max-w-52 overflow-x-scroll no-scrollbar">
+      <div className="no-scrollbar flex max-w-52 flex-row gap-1 overflow-x-scroll text-sm font-medium">
         {info.getValue().map((tag: string, i: number) => (
           <Badge variant="outline" key={`${tag}-${i}`}>
             {tag}
@@ -67,6 +68,13 @@ export const columns = [
   columnHelper.accessor("type", {
     id: "type",
     header: "Type",
+  }),
+  columnHelper.display({
+    id: "actions",
+    header: "Actions",
+    size: 50,
+    cell: ({ row }) => <TransactionFilterDlg rowData={row.original} />,
+    enableSorting: false,
   }),
 ];
 

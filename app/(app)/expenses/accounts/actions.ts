@@ -5,6 +5,11 @@ import { db } from "@/lib/db";
 import { ExpenseAccount, ExpenseTags, Prisma } from "@prisma/client";
 import { join } from "path";
 import { readFile } from "fs/promises";
+import {
+  IConfig,
+  IConfigIgnoreOptions,
+  IConfigTagOptions,
+} from "@/types/expenses";
 
 ///////////////////// Tags //////////////////////////
 export const fetchTags = async () => {
@@ -129,6 +134,60 @@ export const deleteAccount = async (id: ExpenseAccount["id"]) => {
   return dbAccount;
 };
 
+export const addAccountConfigTagFields = async (
+  id: ExpenseAccount["id"],
+  data: IConfigTagOptions[],
+  partialConfigFill = true,
+) => {
+  const dbOldAccount = await db.expenseAccount.findUnique({ where: { id } });
+  if (!dbOldAccount) throw new Error("Account not found with " + id);
+
+  const dataFinal = {} as Prisma.ExpenseAccountUpdateInput;
+
+  const config = (dbOldAccount.config as any) || {};
+  if (partialConfigFill) {
+    const finalConfig: IConfig = {
+      ...config,
+      tagOps: [...config.tagOps, ...data],
+    };
+    dataFinal.config = finalConfig as any;
+  } else {
+    dataFinal.config = { ...config, tagOps: [...data] } as any;
+  }
+  const dbAccount = await db.expenseAccount.update({
+    data: dataFinal,
+    where: { id },
+  });
+  return dbAccount;
+};
+
+export const addAccountConfigIgnoreFields = async (
+  id: ExpenseAccount["id"],
+  data: IConfigIgnoreOptions[],
+  partialConfigFill = true,
+) => {
+  const dbOldAccount = await db.expenseAccount.findUnique({ where: { id } });
+  if (!dbOldAccount) throw new Error("Account not found with " + id);
+
+  const dataFinal = {} as Prisma.ExpenseAccountUpdateInput;
+
+  const config = (dbOldAccount.config as any) || {};
+  if (partialConfigFill) {
+    const finalConfig: IConfig = {
+      ...config,
+      ignoreOps: [...config.ignoreOps, ...data],
+    };
+    dataFinal.config = finalConfig as any;
+  } else {
+    dataFinal.config = { ...config, ignoreOps: [...data] } as any;
+  }
+  const dbAccount = await db.expenseAccount.update({
+    data: dataFinal,
+    where: { id },
+  });
+  return dbAccount;
+};
+
 export const uploadAccounts = async (url: string) => {
   const session = await auth();
   if (!session?.user?.id) throw new Error("not logged in");
@@ -150,9 +209,40 @@ export const uploadAccounts = async (url: string) => {
     },
   );
 
-  const res = await db.expenseAccount.createMany({
-    data: accounts,
+  const existingAccounts = await db.expenseAccount.findMany({
+    where: { userId: session?.user?.id, id: { in: accounts.map((a) => a.id) } },
   });
 
-  return res;
+  const newAccounts = accounts.filter(
+    (a) => !existingAccounts.find((e) => e.id === a.id),
+  );
+
+  if (newAccounts.length > 0) {
+    await db.expenseAccount.createMany({
+      data: newAccounts,
+    });
+  }
+
+  const updatedAccounts = accounts.filter((a) =>
+    existingAccounts.find((e) => e.id === a.id),
+  );
+
+  for (const acc of updatedAccounts) {
+    const accOld = existingAccounts.find((e) => e.id === acc.id);
+    if (!accOld) continue;
+    const { id, userId, ...restAcc } = acc;
+    const { id: idOld, userId: userIdOld, ...restAccOld } = accOld;
+    const data = {
+      ...restAccOld,
+      ...restAcc,
+      user: { connect: { id: userId } },
+    } as Prisma.ExpenseAccountUpdateInput;
+    console.log("data", data);
+    await db.expenseAccount.update({
+      data,
+      where: { id },
+    });
+  }
+
+  return;
 };

@@ -38,7 +38,9 @@ export const fetchTransactions = async ({
   const orderBy = convertSortingToPrisma(sorting, columns);
   // console.dir({ sorting, orderBy }, { depth: 3 });
 
-  const expenseTransactionCount = await db.expenseTransaction.count({ where });
+  const expenseTransactionCount = await db.expenseTransaction.count({
+    where: { ...where, userId: session.user.id },
+  });
 
   const transactions = await db.expenseTransaction.findMany({
     skip: pagination.pageIndex * pagination.pageSize,
