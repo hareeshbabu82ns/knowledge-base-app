@@ -9,6 +9,7 @@ import config from "@/config/config";
 import { IConfig } from "@/types/expenses";
 import { parse } from "date-fns";
 import { ITransactionUploadRes } from "./types";
+import { trimQuotes, trimNewLineChar } from "@/lib/utils";
 
 function pepareTransactionTags(
   from: Prisma.ExpenseTransactionCreateManyInput,
@@ -170,21 +171,25 @@ function prepareTransactionItem(
   const accConfig = account.config as unknown as IConfig;
 
   accConfig.fileFields.forEach((fieldConfig, idx) => {
-    const value: string = from[fieldConfig.name];
+    const value: string = accConfig.trimQuotes
+      ? trimQuotes(from[fieldConfig.name])
+      : from[fieldConfig.name];
+
     if (!value) {
       return;
     }
+
     switch (fieldConfig.expenseColumn) {
       case "date":
-        item.date = parse(value, fieldConfig.format, new Date());
-        if (fieldConfig.timeColumnIndex > 0) {
-          const timeValue =
-            from[accConfig.fileFields[fieldConfig.timeColumnIndex].name];
-          item.date.setHours(
-            Number(timeValue.split(":")[0]),
-            Number(timeValue.split(":")[1]),
-          );
-        }
+        const timeStr =
+          fieldConfig.timeColumnIndex > 0
+            ? from[accConfig.fileFields[fieldConfig.timeColumnIndex - 1].name]
+            : "";
+        const timeStrUnquoted = accConfig.trimQuotes
+          ? trimQuotes(timeStr)
+          : timeStr;
+        const dateValue = `${value} ${timeStrUnquoted}`;
+        item.date = parse(dateValue, fieldConfig.format, new Date());
         break;
       // case "description":
       //   item.description = value;
@@ -233,6 +238,57 @@ function prepareTransactionItem(
   item.tags = pepareTransactionTags(item, accConfig);
   return item;
 }
+const preprocessLine = ({
+  line,
+  accConfig,
+  lineIdx,
+  headerLabels,
+}: {
+  line: string;
+  lineIdx: number;
+  accConfig: IConfig;
+  headerLabels: string[];
+}) => {
+  // empty line
+  if (!line.trim()) {
+    return;
+  }
+
+  // line scope replacements
+  const lineScoped =
+    accConfig?.textToAdjust?.reduce((acc, conf) => {
+      if (conf.scope === "line") {
+        return acc.replace(conf.source, conf.replaceWith);
+      }
+      return acc;
+    }, line) || line;
+  const lineSplits: string[] = trimNewLineChar(lineScoped).split(
+    accConfig.separator,
+  );
+
+  if (accConfig.headerLines === 0 && lineIdx === 0) {
+    headerLabels.push(...lineSplits.map((_, idx) => `Column-${idx + 1}`));
+  } else if (lineIdx < accConfig.headerLines) {
+    headerLabels.push(...lineSplits);
+    return;
+  }
+
+  if (lineSplits.length !== accConfig.fileFields.length) {
+    throw new Error(
+      `Line(${lineIdx}): ${line} \n\t- Columns: ${lineSplits.length} - Header Columns: ${headerLabels.length} mismatch`,
+    );
+  }
+
+  const item = lineSplits.reduce(
+    (acc, value, idx) => {
+      acc[accConfig.fileFields[idx].name] = value;
+      return acc;
+    },
+    {} as Record<string, string>,
+  );
+  return item;
+};
+
 export const uploadTransactions = async ({
   url,
   account,
@@ -264,40 +320,13 @@ export const uploadTransactions = async ({
   const ignoredTransactions: Prisma.ExpenseTransactionCreateManyInput[] = [];
 
   data.forEach((line, lineIdx) => {
-    // empty line
-    if (!line.trim()) {
-      return;
-    }
-    // line scope replacements
-    const lineScoped =
-      accConfig?.textToAdjust?.reduce((acc, conf) => {
-        if (conf.scope === "line") {
-          return acc.replace(conf.source, conf.replaceWith);
-        }
-        return acc;
-      }, line) || line;
-    const lineSplits = lineScoped.split(accConfig.separator);
-
-    if (accConfig.headerLines === 0 && lineIdx === 0) {
-      headerLabels.push(...lineSplits.map((_, idx) => `Column-${idx + 1}`));
-    } else if (lineIdx < accConfig.headerLines) {
-      headerLabels.push(...lineSplits);
-      return;
-    }
-
-    if (lineSplits.length !== accConfig.fileFields.length) {
-      throw new Error(
-        `Line(${lineIdx}): ${line} \n\t- Columns: ${lineSplits.length} - Header Columns: ${headerLabels.length} mismatch`,
-      );
-    }
-
-    const item = lineSplits.reduce(
-      (acc, value, idx) => {
-        acc[accConfig.fileFields[idx].name] = value;
-        return acc;
-      },
-      {} as Record<string, string>,
-    );
+    const item = preprocessLine({
+      line,
+      accConfig,
+      lineIdx,
+      headerLabels,
+    });
+    if (!item) return;
     allRecords.push(item);
 
     const transaction = prepareTransactionItem(

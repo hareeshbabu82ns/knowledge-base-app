@@ -180,10 +180,6 @@
     "parent": "Transportation"
   },
   {
-    "tag": "Parking",
-    "parent": "Transportation"
-  },
-  {
     "tag": "Tolls",
     "parent": "Transportation"
   },

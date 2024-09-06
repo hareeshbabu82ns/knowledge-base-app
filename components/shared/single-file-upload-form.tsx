@@ -25,6 +25,7 @@ const SingleFileUploadForm = ({
   label,
   loading = false,
   onUploadSuccess,
+  onChangeFiles,
 }: FileUploadProps) => {
   const [file, setFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -67,6 +68,7 @@ const SingleFileUploadForm = ({
         ? URL.createObjectURL(file)
         : "/assets/icons/file-generic.svg",
     );
+    onChangeFiles && onChangeFiles([file]);
 
     /** Reset file input */
     e.currentTarget.type = "text";
@@ -80,6 +82,7 @@ const SingleFileUploadForm = ({
     }
     setFile(null);
     setPreviewUrl(null);
+    onChangeFiles && onChangeFiles([]);
   };
 
   const onUploadFile = async (e: MouseEvent<HTMLButtonElement>) => {
@@ -125,11 +128,11 @@ const SingleFileUploadForm = ({
 
   return (
     <form
-      className="w-full p-3 border border-muted border-dashed"
+      className="border-muted w-full border border-dashed p-3"
       onSubmit={(e) => e.preventDefault()}
     >
-      <div className="flex flex-col md:flex-row gap-1.5 md:py-4">
-        <div className="flex-grow flex justify-center items-center">
+      <div className="flex flex-col gap-1.5 md:flex-row md:py-4">
+        <div className="flex grow items-center justify-center">
           {showPreviews && previewUrl && (
             <div className="mx-auto w-80 space-y-1">
               <Image
@@ -140,7 +143,7 @@ const SingleFileUploadForm = ({
                 height={218}
                 layout="fixed"
               />
-              <p className="text-center text-xs text-muted-foreground">
+              <p className="text-muted-foreground text-center text-xs">
                 {file?.name}
               </p>
             </div>
@@ -153,7 +156,7 @@ const SingleFileUploadForm = ({
           {!previewUrl && (
             <label
               className={cn(
-                "flex flex-col items-center justify-center h-full py-3 transition-colors duration-150 cursor-pointer hover:text-muted-foreground",
+                "hover:text-muted-foreground flex h-full cursor-pointer flex-col items-center justify-center py-3 transition-colors duration-150",
                 disabled && "cursor-default",
               )}
             >
@@ -177,7 +180,7 @@ const SingleFileUploadForm = ({
             </label>
           )}
         </div>
-        <div className="flex mt-4 md:mt-0 md:flex-col justify-center gap-1.5">
+        <div className="mt-4 flex justify-center gap-1.5 md:mt-0 md:flex-col">
           <Button
             disabled={!previewUrl || disabled}
             onClick={onCancelFile}
@@ -193,7 +196,7 @@ const SingleFileUploadForm = ({
             variant="outline"
           >
             {loading ? (
-              <Icons.loaderWheel className="size-14 animate-spin text-muted" />
+              <Icons.loaderWheel className="text-muted size-14 animate-spin" />
             ) : (
               <Icons.upload className="size-4" />
             )}

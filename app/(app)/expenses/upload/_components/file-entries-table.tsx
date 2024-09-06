@@ -37,7 +37,7 @@ const TransactionFileEntriesTable = ({ data, config }: ComponentProps) => {
       <DataTableBasic
         title="File Entries"
         columns={columns as any}
-        defaultPagination={{ pageSize: 50, pageIndex: 0 }}
+        defaultPagination={{ pageSize: 30, pageIndex: 0 }}
         defaultColumnVisibility={columnVisibility}
         data={data.allRecords}
       />

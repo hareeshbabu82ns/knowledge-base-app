@@ -146,3 +146,17 @@ export const downloadFile = ({
   a.dispatchEvent(clickEvt);
   a.remove();
 };
+
+export const trimNewLineChar = (line: any) => {
+  if (typeof line === "string") {
+    return line.replace(/\r?\n|\r/g, "");
+  }
+  return line;
+};
+
+export const trimQuotes = (val: any) => {
+  if (typeof val === "string") {
+    return val.replace(/^["']+|["']+$/g, "");
+  }
+  return val;
+};

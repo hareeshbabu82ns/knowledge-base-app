@@ -6,6 +6,7 @@ import { Prisma } from "@prisma/client";
 import { createColumnHelper } from "@tanstack/react-table";
 import { format } from "date-fns";
 import { TransactionFilterDlg } from "./transaction-filter-dlg";
+import { ReactNode } from "react";
 
 const columnHelper =
   createColumnHelper<Prisma.ExpenseTransactionCreateManyInput>();
@@ -82,16 +83,18 @@ interface ComponentProps {
   title: string;
   data: Prisma.ExpenseTransactionCreateManyInput[];
   config: IConfig;
+  actions?: ReactNode;
 }
-const TransactionUploadTable = ({ title, data }: ComponentProps) => {
+const TransactionUploadTable = ({ title, data, actions }: ComponentProps) => {
   return (
     <div>
       <DataTableBasic
         title={title}
         columns={columns as any}
-        defaultPagination={{ pageSize: 50, pageIndex: 0 }}
+        defaultPagination={{ pageSize: 30, pageIndex: 0 }}
         defaultColumnVisibility={{ type: false }}
         data={data}
+        actions={actions}
       />
       {/* <pre>{JSON.stringify(data.allRecords, null, 2)}</pre> */}
     </div>

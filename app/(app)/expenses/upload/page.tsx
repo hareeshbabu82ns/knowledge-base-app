@@ -1,17 +1,35 @@
 "use client";
 
 import SingleFileUploadForm from "@/components/shared/single-file-upload-form";
-import ExpenseAccountsDDLB from "./_components/accounts-ddlb";
 import { useCallback, useState } from "react";
 import { ExpenseAccount } from "@prisma/client";
 import { uploadTransactions } from "./actions";
 import { toast } from "sonner";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import Loader from "@/components/shared/loader";
 import TransactionFileEntriesTable from "./_components/file-entries-table";
 import TransactionUploadTable from "./_components/transactions-table";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { fetchAccounts } from "../accounts/actions";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
+import { Icons } from "@/components/shared/icons";
 
 const ExpensesUploadPage = () => {
   const [selectedAccount, setSelectedAccount] = useState<
@@ -25,6 +43,27 @@ const ExpensesUploadPage = () => {
     mutationFn: uploadTransactions,
     mutationKey: ["uploadTransactions", selectedAccount?.id],
   });
+
+  const {
+    data: accountsDDLB,
+    isLoading,
+    isFetching,
+  } = useQuery({
+    queryKey: ["accountsDDLB"],
+    queryFn: async () => await fetchAccounts(),
+  });
+
+  const handleOnChangeFiles = useCallback(
+    (files: File[]) => {
+      if (files.length === 0) {
+        return;
+      }
+      const fileName = files[0].name;
+      const acc = accountsDDLB?.find((a) => fileName.includes(a.name));
+      setSelectedAccount(acc?.id ? acc : undefined);
+    },
+    [accountsDDLB],
+  );
 
   const handleOnUploadSuccess = useCallback(
     async (urls: string[]) => {
@@ -49,11 +88,34 @@ const ExpensesUploadPage = () => {
     [selectedAccount, isPreview, uploadTransactionsFn],
   );
 
+  if (isLoading || isFetching) return <Loader />;
+
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-col items-center gap-4 sm:flex-row">
         <div className="flex flex-row gap-4 sm:flex-col">
-          <ExpenseAccountsDDLB onSelect={setSelectedAccount} />
+          {/* <ExpenseAccountsDDLB onSelect={setSelectedAccount} /> */}
+          <Select
+            onValueChange={(v) => {
+              const acc = accountsDDLB?.find((a) => a.id === v);
+              setSelectedAccount(acc);
+            }}
+            value={selectedAccount?.id || ""}
+          >
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Select an Account" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                <SelectLabel>Accounts</SelectLabel>
+                {accountsDDLB?.map((acc) => (
+                  <SelectItem key={acc.id} value={acc.id}>
+                    {acc.name}
+                  </SelectItem>
+                ))}
+              </SelectGroup>
+            </SelectContent>
+          </Select>
           <div className="flex h-10 items-center space-x-2 rounded-md border px-2">
             <Checkbox
               id="preview"
@@ -80,10 +142,11 @@ const ExpensesUploadPage = () => {
           </Button>
         </div>
         <SingleFileUploadForm
-          disabled={!selectedAccount}
+          // disabled={!selectedAccount}
           label="Upload Transactions"
           allowedTypes={["text/csv"]}
           onUploadSuccess={handleOnUploadSuccess}
+          onChangeFiles={handleOnChangeFiles}
         />
       </div>
       {isPending && <Loader />}
@@ -92,36 +155,27 @@ const ExpensesUploadPage = () => {
             {JSON.stringify(data?.allTransactions, null, 2)}
           </pre>
         )} */}
-      <div className="@5xl/main-content:grid-cols-2 grid grid-cols-1 gap-4">
+      <div className="@7xl/main-content:grid-cols-2 grid grid-cols-1 gap-4">
+        {!isPending && data?.finalTransactions && (
+          <TransactionUploadTable
+            title="Final Transactions"
+            data={data.finalTransactions}
+            config={selectedAccount?.config as never}
+          />
+        )}
+        {!isPending && data?.ignoredTransactions && (
+          <TransactionUploadTable
+            title="Ignored Transactions"
+            data={data.ignoredTransactions}
+            config={selectedAccount?.config as never}
+          />
+        )}
         {!isPending && data?.allRecords && (
           <TransactionFileEntriesTable
             data={data}
             config={selectedAccount?.config as never}
           />
         )}
-        {/* {!isPending && data?.allTransactions && (
-          <TransactionUploadTable
-            title="All Transactions"
-            data={data.allTransactions}
-            config={selectedAccount?.config as never}
-          />
-        )} */}
-        <div className="flex flex-col gap-2">
-          {!isPending && data?.ignoredTransactions && (
-            <TransactionUploadTable
-              title="Ignored Transactions"
-              data={data.ignoredTransactions}
-              config={selectedAccount?.config as never}
-            />
-          )}
-          {!isPending && data?.finalTransactions && (
-            <TransactionUploadTable
-              title="Final Transactions"
-              data={data.finalTransactions}
-              config={selectedAccount?.config as never}
-            />
-          )}
-        </div>
       </div>
     </div>
   );
