@@ -82,6 +82,10 @@ export const configComparisionOptions: Option[] = [
     value: "LE",
   },
   {
+    label: "Regular Expression",
+    value: "REGEX",
+  },
+  {
     label: "Contains",
     value: "CONTAINS",
   },

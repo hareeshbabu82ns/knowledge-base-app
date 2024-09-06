@@ -24,12 +24,13 @@ model User {
   // Optional for WebAuthn support
   Authenticator Authenticator[]
 
-  createdAt          DateTime             @default(now())
-  updatedAt          DateTime             @updatedAt
-  ExpenseAccount     ExpenseAccount[]
-  ExpenseTransaction ExpenseTransaction[]
-  ExpenseTags        ExpenseTags[]
-  Loan               Loan[]
+  createdAt                 DateTime                    @default(now())
+  updatedAt                 DateTime                    @updatedAt
+  ExpenseAccount            ExpenseAccount[]
+  ExpenseTransaction        ExpenseTransaction[]
+  ExpenseTags               ExpenseTags[]
+  Loan                      Loan[]
+  ExpenseIgnoredTransaction ExpenseIgnoredTransaction[]
 }
 
 model Account {
@@ -103,9 +104,10 @@ model ExpenseAccount {
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  createdAt          DateTime             @default(now())
-  updatedAt          DateTime             @updatedAt
-  ExpenseTransaction ExpenseTransaction[]
+  createdAt                 DateTime                    @default(now())
+  updatedAt                 DateTime                    @updatedAt
+  ExpenseTransaction        ExpenseTransaction[]
+  ExpenseIgnoredTransaction ExpenseIgnoredTransaction[]
 
   @@unique([userId, name])
   @@map("expense_accounts")
@@ -121,7 +123,8 @@ model ExpenseTransaction {
   type        String   @default("Expense")
   tags        String[] @default([])
   date        DateTime @default(now())
-  dateZ       String   @default("")
+  dateZ       String?  @default("")
+  sourceLine  String?  @default("")
 
   user       User           @relation(fields: [userId], references: [id], onDelete: Cascade)
   accountObj ExpenseAccount @relation(fields: [account], references: [id], onDelete: Restrict)
@@ -130,6 +133,27 @@ model ExpenseTransaction {
   updatedAt DateTime @updatedAt
 
   @@map("expense_transactions")
+}
+
+model ExpenseIgnoredTransaction {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId      String   @db.ObjectId
+  account     String
+  amount      Float    @default(0)
+  description String   @default("")
+  type        String   @default("Expense")
+  tags        String[] @default([])
+  date        DateTime @default(now())
+  dateZ       String?  @default("")
+  sourceLine  String?  @default("")
+
+  user       User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accountObj ExpenseAccount @relation(fields: [account], references: [id], onDelete: Restrict)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("expense_ignored_transactions")
 }
 
 model ExpenseTags {

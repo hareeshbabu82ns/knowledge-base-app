@@ -58,9 +58,9 @@ export const uploadTags = async (url: string) => {
 
   const accounts: Prisma.ExpenseTagsCreateManyInput[] = jsonData.map(
     (item: any) => {
-      const { id, userId, ...rest } = item;
+      const { id, userId, tag, ...rest } = item;
       return {
-        ...rest,
+        tag,
         userId: session?.user?.id,
       } as Prisma.ExpenseTagsCreateManyInput;
     },

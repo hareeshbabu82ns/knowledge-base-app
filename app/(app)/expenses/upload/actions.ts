@@ -64,9 +64,13 @@ function pepareTransactionTags(
 
   if (tags.length === 0) {
     tags.push(from.type === "Expense" ? "Untagged_Expense" : "Untagged_Income");
+    return tags;
+  } else {
+    const finalTags = tags.filter(
+      (tag) => ["Untagged_Expense", "Untagged_Income"].indexOf(tag) === -1,
+    );
+    return finalTags;
   }
-
-  return tags;
 }
 
 function ignoreTransaction(
@@ -155,10 +159,12 @@ function prepareTransactionItem(
   from: Record<string, string>,
   account: ExpenseAccount,
   userId: string,
+  sourceLine?: string,
 ): Prisma.ExpenseTransactionCreateManyInput {
   const item: Prisma.ExpenseTransactionCreateManyInput = {
     userId,
     account: account.id,
+    sourceLine,
   };
 
   const accConfig = account.config as unknown as IConfig;
@@ -244,7 +250,12 @@ export const uploadTransactions = async ({
   const file = join(config.dataFolder, url);
   const data = (await readFile(file, "utf-8")).split("\n");
 
-  const accConfig = account.config as unknown as IConfig;
+  const dbAccount = await db.expenseAccount.findUnique({
+    where: { id: account.id, userId: session.user.id },
+  });
+  if (!dbAccount) throw new Error("Account not found");
+
+  const accConfig = dbAccount.config as unknown as IConfig;
 
   const headerLabels: string[] = [];
   const allRecords: Record<string, string>[] = [];
@@ -291,8 +302,9 @@ export const uploadTransactions = async ({
 
     const transaction = prepareTransactionItem(
       item,
-      account,
+      dbAccount,
       session?.user?.id,
+      line,
     );
     allTransactions.push(transaction);
 
@@ -306,6 +318,9 @@ export const uploadTransactions = async ({
   if (!preview) {
     await db.expenseTransaction.createMany({
       data: finalTransactions,
+    });
+    await db.expenseIgnoredTransaction.createMany({
+      data: ignoredTransactions,
     });
   }
 

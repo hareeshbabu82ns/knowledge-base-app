@@ -162,5 +162,6 @@ export const columns = [
       </div>
     ),
     enableSorting: false,
+    enableHiding: false,
   }),
 ];

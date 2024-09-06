@@ -11,6 +11,7 @@ import Loader from "@/components/shared/loader";
 import TransactionFileEntriesTable from "./_components/file-entries-table";
 import TransactionUploadTable from "./_components/transactions-table";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Button } from "@/components/ui/button";
 
 const ExpensesUploadPage = () => {
   const [selectedAccount, setSelectedAccount] = useState<
@@ -19,6 +20,7 @@ const ExpensesUploadPage = () => {
 
   const [isPreview, setIsPreview] = useState(true);
   const [data, setData] = useState<any>(undefined);
+  const [urls, setUrls] = useState<string[]>([]);
   const { mutateAsync: uploadTransactionsFn, isPending } = useMutation({
     mutationFn: uploadTransactions,
     mutationKey: ["uploadTransactions", selectedAccount?.id],
@@ -37,7 +39,8 @@ const ExpensesUploadPage = () => {
           preview: isPreview,
         });
         setData(res);
-        toast.info("Uploaded Successfully");
+        setUrls(urls);
+        toast.info(`Uploaded Successfully? ${isPreview ? "Preview" : "DB"}`);
       } catch (e) {
         console.log(e);
         toast.error("An error occurred. Please try again.");
@@ -48,10 +51,10 @@ const ExpensesUploadPage = () => {
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex flex-col sm:flex-row gap-4 items-center">
-        <div className="flex flex-row sm:flex-col gap-4">
+      <div className="flex flex-col items-center gap-4 sm:flex-row">
+        <div className="flex flex-row gap-4 sm:flex-col">
           <ExpenseAccountsDDLB onSelect={setSelectedAccount} />
-          <div className="flex items-center space-x-2 border rounded-md h-10 px-2">
+          <div className="flex h-10 items-center space-x-2 rounded-md border px-2">
             <Checkbox
               id="preview"
               checked={isPreview}
@@ -59,11 +62,22 @@ const ExpensesUploadPage = () => {
             />
             <label
               htmlFor="preview"
-              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 peer-hover:cursor-pointer"
+              className="text-sm font-medium leading-none peer-hover:cursor-pointer peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
             >
               Preview Transactions
             </label>
           </div>
+          <Button
+            variant="outline"
+            disabled={!urls || urls.length === 0}
+            type="button"
+            onClick={() => {
+              setData(undefined);
+              handleOnUploadSuccess(urls);
+            }}
+          >
+            Re Process
+          </Button>
         </div>
         <SingleFileUploadForm
           disabled={!selectedAccount}
@@ -78,34 +92,36 @@ const ExpensesUploadPage = () => {
             {JSON.stringify(data?.allTransactions, null, 2)}
           </pre>
         )} */}
-      <div className="grid grid-cols-1 @5xl/main-content:grid-cols-2 gap-4">
+      <div className="@5xl/main-content:grid-cols-2 grid grid-cols-1 gap-4">
         {!isPending && data?.allRecords && (
           <TransactionFileEntriesTable
             data={data}
             config={selectedAccount?.config as never}
           />
         )}
-        {!isPending && data?.allTransactions && (
+        {/* {!isPending && data?.allTransactions && (
           <TransactionUploadTable
             title="All Transactions"
             data={data.allTransactions}
             config={selectedAccount?.config as never}
           />
-        )}
-        {!isPending && data?.finalTransactions && (
-          <TransactionUploadTable
-            title="Final Transactions"
-            data={data.finalTransactions}
-            config={selectedAccount?.config as never}
-          />
-        )}
-        {!isPending && data?.ignoredTransactions && (
-          <TransactionUploadTable
-            title="Ignored Transactions"
-            data={data.ignoredTransactions}
-            config={selectedAccount?.config as never}
-          />
-        )}
+        )} */}
+        <div className="flex flex-col gap-2">
+          {!isPending && data?.ignoredTransactions && (
+            <TransactionUploadTable
+              title="Ignored Transactions"
+              data={data.ignoredTransactions}
+              config={selectedAccount?.config as never}
+            />
+          )}
+          {!isPending && data?.finalTransactions && (
+            <TransactionUploadTable
+              title="Final Transactions"
+              data={data.finalTransactions}
+              config={selectedAccount?.config as never}
+            />
+          )}
+        </div>
       </div>
     </div>
   );

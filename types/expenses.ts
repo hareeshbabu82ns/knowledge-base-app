@@ -1,4 +1,3 @@
-import { ExpenseAccount } from "@prisma/client";
 import { z } from "zod";
 
 // export enum ConfigComparisionEnum {

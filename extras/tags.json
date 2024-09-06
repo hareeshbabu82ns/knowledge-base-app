@@ -1,0 +1,534 @@
+[
+  {
+    "tag": "Income",
+    "parent": null
+  },
+  {
+    "tag": "Hareesh Salary",
+    "parent": "Income"
+  },
+  {
+    "tag": "Jaya Salary",
+    "parent": "Income"
+  },
+  {
+    "tag": "EI",
+    "parent": "Income"
+  },
+  {
+    "tag": "CA Gov Incentive",
+    "parent": "Income"
+  },
+  {
+    "tag": "Interest Gain",
+    "parent": "Income"
+  },
+  {
+    "tag": "CCB",
+    "parent": "Income"
+  },
+  {
+    "tag": "CRA Returns",
+    "parent": "Income"
+  },
+  {
+    "tag": "Housing",
+    "parent": null
+  },
+  {
+    "tag": "Rent",
+    "parent": "Housing"
+  },
+  {
+    "tag": "Mortgage",
+    "parent": "Housing"
+  },
+  {
+    "tag": "Property Tax",
+    "parent": "Housing"
+  },
+  {
+    "tag": "Property Maintenance",
+    "parent": "Housing"
+  },
+  {
+    "tag": "Homeowners Insurance",
+    "parent": "Housing"
+  },
+  {
+    "tag": "Renters Insurance",
+    "parent": "Housing"
+  },
+  {
+    "tag": "Utilities",
+    "parent": null
+  },
+  {
+    "tag": "Electricity",
+    "parent": "Utilities"
+  },
+  {
+    "tag": "Water",
+    "parent": "Utilities"
+  },
+  {
+    "tag": "Sewage",
+    "parent": "Utilities"
+  },
+  {
+    "tag": "Gas",
+    "parent": "Utilities"
+  },
+  {
+    "tag": "Internet",
+    "parent": "Utilities"
+  },
+  {
+    "tag": "Cable",
+    "parent": "Utilities"
+  },
+  {
+    "tag": "Mobile",
+    "parent": "Utilities"
+  },
+  {
+    "tag": "Garbage",
+    "parent": "Utilities"
+  },
+  {
+    "tag": "Recycling",
+    "parent": "Utilities"
+  },
+  {
+    "tag": "Groceries",
+    "parent": null
+  },
+  {
+    "tag": "Supermarket",
+    "parent": "Groceries"
+  },
+  {
+    "tag": "Fresh Produce",
+    "parent": "Groceries"
+  },
+  {
+    "tag": "Food",
+    "parent": null
+  },
+  {
+    "tag": "Meal Subscriptions",
+    "parent": "Food"
+  },
+  {
+    "tag": "DineOut",
+    "parent": "Food"
+  },
+  {
+    "tag": "Restaurants",
+    "parent": "Food"
+  },
+  {
+    "tag": "Takeout/Delivery",
+    "parent": "Food"
+  },
+  {
+    "tag": "Coffee/Snacks",
+    "parent": "Food"
+  },
+  {
+    "tag": "Transportation",
+    "parent": null
+  },
+  {
+    "tag": "Vehicle Expenses",
+    "parent": "Transportation"
+  },
+  {
+    "tag": "Car Loan",
+    "parent": "Transportation"
+  },
+  {
+    "tag": "Fuel",
+    "parent": "Transportation"
+  },
+  {
+    "tag": "Vehicle Insurance",
+    "parent": "Transportation"
+  },
+  {
+    "tag": "Maintenance/Repairs",
+    "parent": "Transportation"
+  },
+  {
+    "tag": "Registry Services",
+    "parent": "Transportation"
+  },
+  {
+    "tag": "Public Transportation",
+    "parent": "Transportation"
+  },
+  {
+    "tag": "Bus/Train/Subway",
+    "parent": "Transportation"
+  },
+  {
+    "tag": "Ride-Sharing",
+    "parent": "Transportation"
+  },
+  {
+    "tag": "Car Rental",
+    "parent": "Transportation"
+  },
+  {
+    "tag": "Parking",
+    "parent": "Transportation"
+  },
+  {
+    "tag": "Tolls",
+    "parent": "Transportation"
+  },
+  {
+    "tag": "Parking",
+    "parent": "Transportation"
+  },
+  {
+    "tag": "Insurance",
+    "parent": null
+  },
+  {
+    "tag": "Life Insurance",
+    "parent": "Insurance"
+  },
+  {
+    "tag": "Debt",
+    "parent": null
+  },
+  {
+    "tag": "Credit Card Payments",
+    "parent": "Debt"
+  },
+  {
+    "tag": "Student Loans",
+    "parent": "Debt"
+  },
+  {
+    "tag": "Personal Loans",
+    "parent": "Debt"
+  },
+  {
+    "tag": "Line of Credit",
+    "parent": "Debt"
+  },
+  {
+    "tag": "Home Loan",
+    "parent": "Debt"
+  },
+  {
+    "tag": "Income Tax",
+    "parent": "Debt"
+  },
+  {
+    "tag": "Healthcare",
+    "parent": null
+  },
+  {
+    "tag": "Health Insurance",
+    "parent": "Healthcare"
+  },
+  {
+    "tag": "Doctor Visits",
+    "parent": "Healthcare"
+  },
+  {
+    "tag": "Dental Care",
+    "parent": "Healthcare"
+  },
+  {
+    "tag": "Vision Care",
+    "parent": "Healthcare"
+  },
+  {
+    "tag": "Pharmacy",
+    "parent": "Healthcare"
+  },
+  {
+    "tag": "Physiotherapy",
+    "parent": "Healthcare"
+  },
+  {
+    "tag": "Chiropractic",
+    "parent": "Healthcare"
+  },
+  {
+    "tag": "Alternative Therapies",
+    "parent": "Healthcare"
+  },
+  {
+    "tag": "Personal Care",
+    "parent": null
+  },
+  {
+    "tag": "DayCare",
+    "parent": "Personal Care"
+  },
+  {
+    "tag": "Child Care",
+    "parent": "Personal Care"
+  },
+  {
+    "tag": "Elderly Care",
+    "parent": "Personal Care"
+  },
+  {
+    "tag": "Haircuts/Salon",
+    "parent": "Personal Care"
+  },
+  {
+    "tag": "Beauty/Cosmetics",
+    "parent": "Personal Care"
+  },
+  {
+    "tag": "Gym Membership",
+    "parent": "Personal Care"
+  },
+  {
+    "tag": "Entertainment",
+    "parent": null
+  },
+  {
+    "tag": "Toys",
+    "parent": "Entertainment"
+  },
+  {
+    "tag": "Sports",
+    "parent": "Entertainment"
+  },
+  {
+    "tag": "Streaming Services",
+    "parent": "Entertainment"
+  },
+  {
+    "tag": "Hobbies",
+    "parent": "Entertainment"
+  },
+  {
+    "tag": "Movies/Concerts/Events",
+    "parent": "Entertainment"
+  },
+  {
+    "tag": "Gaming",
+    "parent": "Entertainment"
+  },
+  {
+    "tag": "Books/Magazines",
+    "parent": "Entertainment"
+  },
+  {
+    "tag": "Education",
+    "parent": null
+  },
+  {
+    "tag": "Tuition Fees",
+    "parent": "Education"
+  },
+  {
+    "tag": "Online Courses/Training",
+    "parent": "Education"
+  },
+  {
+    "tag": "Books/Educational Materials",
+    "parent": "Education"
+  },
+  {
+    "tag": "Professional Memberships",
+    "parent": "Education"
+  },
+  {
+    "tag": "Workshops/Seminars",
+    "parent": "Education"
+  },
+  {
+    "tag": "Miscellaneous",
+    "parent": null
+  },
+  {
+    "tag": "Gifts",
+    "parent": "Miscellaneous"
+  },
+  {
+    "tag": "Charity/Donations",
+    "parent": "Miscellaneous"
+  },
+  {
+    "tag": "Emergency Expenses",
+    "parent": "Miscellaneous"
+  },
+  {
+    "tag": "Maintenance",
+    "parent": null
+  },
+  {
+    "tag": "Home Repairs",
+    "parent": "Maintenance"
+  },
+  {
+    "tag": "Furniture/Appliance",
+    "parent": "Maintenance"
+  },
+  {
+    "tag": "Cleaning Services/Supplies",
+    "parent": "Maintenance"
+  },
+  {
+    "tag": "Home Improvement",
+    "parent": "Maintenance"
+  },
+  {
+    "tag": "Gardening/Lawn Care",
+    "parent": "Maintenance"
+  },
+  {
+    "tag": "Travel & Vacation",
+    "parent": null
+  },
+  {
+    "tag": "Flights/Transport",
+    "parent": "Travel & Vacation"
+  },
+  {
+    "tag": "Hotel",
+    "parent": "Travel & Vacation"
+  },
+  {
+    "tag": "Accommodation",
+    "parent": "Travel & Vacation"
+  },
+  {
+    "tag": "Travel Insurance",
+    "parent": "Travel & Vacation"
+  },
+  {
+    "tag": "Activities/Excursions",
+    "parent": "Travel & Vacation"
+  },
+  {
+    "tag": "Clothing & Shopping",
+    "parent": null
+  },
+  {
+    "tag": "Accessories",
+    "parent": "Clothing & Shopping"
+  },
+  {
+    "tag": "Shoes",
+    "parent": "Clothing & Shopping"
+  },
+  {
+    "tag": "Work Uniforms",
+    "parent": "Clothing & Shopping"
+  },
+  {
+    "tag": "Online Shopping",
+    "parent": "Clothing & Shopping"
+  },
+  {
+    "tag": "Technology & Gadgets",
+    "parent": null
+  },
+  {
+    "tag": "Equipment",
+    "parent": "Technology & Gadgets"
+  },
+  {
+    "tag": "Gadget Purchases",
+    "parent": "Technology & Gadgets"
+  },
+  {
+    "tag": "Software/Apps Subscriptions",
+    "parent": "Technology & Gadgets"
+  },
+  {
+    "tag": "Infra Subscriptions",
+    "parent": "Technology & Gadgets"
+  },
+  {
+    "tag": "Tech Repairs & Maintenance",
+    "parent": "Technology & Gadgets"
+  },
+  {
+    "tag": "Fee",
+    "parent": null
+  },
+  {
+    "tag": "Bank Fee",
+    "parent": "Fees"
+  },
+  {
+    "tag": "Legal Fee",
+    "parent": "Fee"
+  },
+  {
+    "tag": "Accounting/Tax Filing",
+    "parent": "Fee"
+  },
+  {
+    "tag": "Financial Advisor Fee",
+    "parent": "Fee"
+  },
+  {
+    "tag": "Consulting Services",
+    "parent": "Fee"
+  },
+  {
+    "tag": "CRA",
+    "parent": "Fee"
+  },
+  {
+    "tag": "Others",
+    "parent": null
+  },
+  {
+    "tag": "Untagged_Expense",
+    "parent": "Others"
+  },
+  {
+    "tag": "Untagged_Income",
+    "parent": "Others"
+  },
+  {
+    "tag": "Redstone House",
+    "parent": "Others"
+  },
+  {
+    "tag": "Cornerstone House",
+    "parent": "Others"
+  },
+  {
+    "tag": "Taralake House",
+    "parent": "Others"
+  },
+  {
+    "tag": "Toyota Car",
+    "parent": "Others"
+  },
+  {
+    "tag": "Layaa",
+    "parent": "Others"
+  },
+  {
+    "tag": "Laasya",
+    "parent": "Others"
+  },
+  {
+    "tag": "Jayasri",
+    "parent": "Others"
+  },
+  {
+    "tag": "Hareesh",
+    "parent": "Others"
+  },
+  {
+    "tag": "Subscriptions",
+    "parent": "Others"
+  }
+]

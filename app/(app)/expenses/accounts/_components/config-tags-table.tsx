@@ -68,7 +68,7 @@ const columns = [
     header: "Tags",
     filterFn: filterFns.arrIncludes,
     meta: {
-      cellInputVariant: "text",
+      cellInputVariant: "multiSelect",
       filterVariant: "select",
       fieldType: "array",
       filterOptionsFn: async () => {
