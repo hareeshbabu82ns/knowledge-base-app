@@ -3,10 +3,11 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { IConfig } from "@/types/expenses";
 import { Prisma } from "@prisma/client";
-import { createColumnHelper } from "@tanstack/react-table";
+import { createColumnHelper, filterFns } from "@tanstack/react-table";
 import { format } from "date-fns";
 import { TransactionFilterDlg } from "./transaction-filter-dlg";
 import { ReactNode } from "react";
+import { fetchTags } from "../../accounts/actions";
 
 const columnHelper =
   createColumnHelper<Prisma.ExpenseTransactionCreateManyInput>();
@@ -53,8 +54,17 @@ export const columns = [
     id: "tags",
     header: "Tags",
     size: 200,
+    filterFn: filterFns.arrIncludes,
     meta: {
-      filterVariant: "text",
+      filterVariant: "select",
+      fieldType: "array",
+      filterOptionsFn: async () => {
+        const tags = await fetchTags();
+        return tags.map((tag) => ({
+          label: tag.tag,
+          value: tag.tag,
+        }));
+      },
     },
     cell: (info: any) => (
       <div className="no-scrollbar flex max-w-52 flex-row gap-1 overflow-x-scroll text-sm font-medium">

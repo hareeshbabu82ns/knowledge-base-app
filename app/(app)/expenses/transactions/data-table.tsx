@@ -7,6 +7,7 @@ import {
   createExpenseTransaction,
   updateExpenseTransaction,
   deleteExpenseTransaction,
+  reprocessDBTransactions,
 } from "./actions";
 import {
   ColumnFiltersState,
@@ -18,6 +19,11 @@ import { DataQueryCharts } from "./data-query-charts";
 import DataTableRowEditForm from "@/components/data-table/datatable-row-edit-form";
 import { ExpenseTransactionSchema } from "@/lib/validations/expense-account";
 import { Prisma } from "@prisma/client";
+import { Button } from "@/components/ui/button";
+import { Icons } from "@/components/shared/icons";
+import { useState } from "react";
+import { useMutation } from "@tanstack/react-query";
+import { toast } from "sonner";
 
 const defaultSorting: SortingState = [{ id: "date", desc: true }];
 const defaultColumnVisibility: VisibilityState = {
@@ -75,6 +81,14 @@ async function deleteFn({ rowId }: { rowId: string }) {
 }
 
 export function DataTable() {
+  const [filters, setFilters] =
+    useState<ColumnFiltersState>(defaultColumnFilters);
+
+  const { mutate: reprocessFn, isPending: isReProcessPending } = useMutation({
+    mutationFn: reprocessDBTransactions,
+    mutationKey: ["transactions", filters],
+  });
+
   return (
     <div className="flex flex-col gap-4">
       <DataTableQuery
@@ -88,6 +102,7 @@ export function DataTable() {
         defaultSorting={defaultSorting}
         defaultColumnVisibility={defaultColumnVisibility}
         defaultColumnFilters={defaultColumnFilters}
+        onColumnFiltersChange={setFilters}
         isFiltersOpen={true}
         beforeTable={({ table }: any) => (
           <DataQueryCharts columnFilters={table?.getState().columnFilters} />
@@ -100,6 +115,34 @@ export function DataTable() {
             zodSchema={ExpenseTransactionSchema}
           />
         )}
+        actions={
+          <>
+            <Button
+              variant="ghost"
+              size="icon"
+              title="Re-Apply Tags"
+              disabled={isReProcessPending}
+              onClick={() => {
+                reprocessFn(
+                  { filters },
+                  {
+                    onSuccess: (data) => {
+                      toast.success(
+                        `${data.rowCount} Transactions Re-Processed \n ${data.rowCountIgnored} Transactions Ignored`,
+                      );
+                    },
+                    onError: (error) => {
+                      console.error(error);
+                      toast.error("Error Re-Processing Transactions");
+                    },
+                  },
+                );
+              }}
+            >
+              <Icons.calculate className="size-4" />
+            </Button>
+          </>
+        }
       />
     </div>
   );

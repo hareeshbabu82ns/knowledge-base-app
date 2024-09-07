@@ -54,9 +54,7 @@ import {
 } from "lucide-react";
 
 // https://react-icons.github.io/react-icons/
-import { FaIndianRupeeSign } from "react-icons/fa6";
-import { HiBanknotes } from "react-icons/hi2";
-import { MdFoodBank } from "react-icons/md";
+import { FaIndianRupeeSign, FaCalculator } from "react-icons/fa6";
 
 export type Icon = typeof LucideIcon;
 
@@ -149,6 +147,7 @@ export const Icons = {
     </svg>
   ),
   transactions: FaIndianRupeeSign,
+  calculate: FaCalculator,
 
   sidebarMenu: ({ ...props }: LucideProps) => (
     <svg

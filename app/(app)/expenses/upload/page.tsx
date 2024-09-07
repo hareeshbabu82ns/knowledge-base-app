@@ -39,6 +39,9 @@ const ExpensesUploadPage = () => {
   const [isPreview, setIsPreview] = useState(true);
   const [data, setData] = useState<any>(undefined);
   const [urls, setUrls] = useState<string[]>([]);
+  // const [urls, setUrls] = useState<string[]>([
+  //   "/uploads/2024-09-06/2024-09-06-2024-02-ATB-Har-CC.csv-759208900.csv",
+  // ]);
   const { mutateAsync: uploadTransactionsFn, isPending } = useMutation({
     mutationFn: uploadTransactions,
     mutationKey: ["uploadTransactions", selectedAccount?.id],

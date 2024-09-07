@@ -51,33 +51,34 @@ export function DataTableHeader<TData>({
           <div className="flex items-center gap-2">
             {actions}
             {onRowEditFormOpen && (
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    onClick={() => onRowEditFormOpen(true)}
-                    variant="ghost"
-                    size="icon"
-                  >
-                    <Icons.add className="size-4" />
-                    <span className="sr-only">Show Edit Form</span>
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>Show Edit Form</TooltipContent>
-              </Tooltip>
+              <Button
+                onClick={() => onRowEditFormOpen(true)}
+                variant="ghost"
+                size="icon"
+                title="Show Edit Form"
+              >
+                <Icons.add className="size-4" />
+                <span className="sr-only">Show Edit Form</span>
+              </Button>
             )}
             {refetch && (
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button onClick={() => refetch()} variant="ghost" size="icon">
-                    <Icons.refresh className="size-4" />
-                    <span className="sr-only">Refetch Data</span>
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>Refetch Data</TooltipContent>
-              </Tooltip>
+              <Button
+                onClick={() => refetch()}
+                variant="ghost"
+                size="icon"
+                title="Refetch Data"
+              >
+                <Icons.refresh className="size-4" />
+                <span className="sr-only">Refetch Data</span>
+              </Button>
             )}
             <CollapsibleTrigger asChild>
-              <Button variant="ghost" size="sm" className="w-9 p-0">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="w-9 p-0"
+                title="Toggle Filters"
+              >
                 <Icons.settingsSliders className="size-4" />
                 <span className="sr-only">Toggle Filters</span>
               </Button>

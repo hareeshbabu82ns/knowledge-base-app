@@ -237,7 +237,7 @@ export const uploadAccounts = async (url: string) => {
       ...restAcc,
       user: { connect: { id: userId } },
     } as Prisma.ExpenseAccountUpdateInput;
-    console.log("data", data);
+    // console.log("data", data);
     await db.expenseAccount.update({
       data,
       where: { id },

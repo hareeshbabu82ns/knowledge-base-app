@@ -10,6 +10,7 @@ import {
   PaginationState,
   Row,
   SortingState,
+  Updater,
   useReactTable,
   VisibilityState,
 } from "@tanstack/react-table";
@@ -68,6 +69,7 @@ interface DataTableProps<TData, TValue> {
         parent?: Row<TData> | undefined,
       ) => string)
     | undefined;
+  onColumnFiltersChange?: OnChangeFn<ColumnFiltersState>;
 }
 
 export function DataTableQuery<TData, TValue>({
@@ -94,6 +96,7 @@ export function DataTableQuery<TData, TValue>({
   enableMultiRowEdit = true,
   rowEditForm,
   rowEditFormaAsDialog = false,
+  onColumnFiltersChange,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = React.useState(defaultSorting);
   const [pagination, setPagination] = React.useState(defaultPagination);
@@ -104,6 +107,14 @@ export function DataTableQuery<TData, TValue>({
   );
   const [editingRows, setEditingRows] = React.useState<RowEditState>({});
   const [isRowEditFormOpen, setIsRowEditFormOpen] = React.useState(false);
+
+  const setColumnFiltersWithCallback = React.useCallback(
+    (filters: Updater<ColumnFiltersState>) => {
+      setColumnFilters(filters);
+      onColumnFiltersChange && onColumnFiltersChange(filters);
+    },
+    [onColumnFiltersChange],
+  );
 
   const dataQuery = useQuery({
     queryKey: [queryKey, pagination, sorting, columnFilters],
@@ -207,7 +218,7 @@ export function DataTableQuery<TData, TValue>({
     onRowEditChange,
     onSortingChange: setSorting,
     onPaginationChange: setPagination,
-    onColumnFiltersChange: setColumnFilters,
+    onColumnFiltersChange: setColumnFiltersWithCallback,
     onColumnVisibilityChange: setColumnVisibility,
     getCoreRowModel: getCoreRowModel(),
     manualPagination: true,

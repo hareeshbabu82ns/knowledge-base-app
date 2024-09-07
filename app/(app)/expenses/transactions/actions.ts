@@ -13,10 +13,16 @@ import {
   convertSortingToPrisma,
 } from "@/components/data-table/utils";
 import {
+  IConfig,
   IExpTransAmountByAttrStatsArray,
   IExpTransByAttrStats,
 } from "@/types/expenses";
 import { ExpenseTransaction, Prisma } from "@prisma/client";
+import {
+  ignoreTransaction,
+  prepareTransactionItem,
+  preprocessTransactionLine,
+} from "../upload/utils";
 
 export const fetchTransactions = async ({
   pagination,
@@ -50,6 +56,114 @@ export const fetchTransactions = async ({
     include: { accountObj: true },
   });
   return { rowCount: expenseTransactionCount, rows: transactions };
+};
+
+export const reprocessDBTransactions = async ({
+  filters,
+}: {
+  filters: ColumnFiltersState;
+}) => {
+  const session = await auth();
+  if (!session) {
+    throw new Error("Unauthorized");
+  }
+
+  const where = convertColumnFiltersToPrisma(filters, columns);
+  // console.dir({ filters, where }, { depth: 3 });
+
+  const transactions = await db.expenseTransaction.findMany({
+    where: { ...where, userId: session.user.id },
+    include: { accountObj: true },
+  });
+
+  const finalTransactions: ExpenseTransaction[] = [];
+  const ignoredTransactions: ExpenseTransaction[] = [];
+
+  transactions.forEach((t, idx) => {
+    const accConfig = t.accountObj.config as any as IConfig;
+    if (t.sourceLine?.length === 0) {
+      const { id, accountObj, sourceLine, ...dbTransaction } = t;
+      if (ignoreTransaction(dbTransaction, accConfig)) {
+        ignoredTransactions.push({ ...(dbTransaction as any), id: t.id });
+      } else {
+        if (
+          t.amount !== dbTransaction.amount ||
+          t.date.toString() !== dbTransaction.date.toString() ||
+          t.description !== dbTransaction.description ||
+          !(dbTransaction.tags as string[])?.every((tag) =>
+            t.tags.includes(tag),
+          )
+        ) {
+          finalTransactions.push({ ...(dbTransaction as any), id: t.id });
+        }
+      }
+    } else {
+      // const headerLabels: string[] = accConfig.fileFields.map((f) => f.name);
+      const item = preprocessTransactionLine({
+        line: t.sourceLine || "",
+        accConfig,
+      });
+      if (!item) return;
+
+      const lineSplitsLength = Object.keys(item).length;
+
+      if (lineSplitsLength !== accConfig.fileFields.length) {
+        throw new Error(
+          `Line: ${t.sourceLine} \n\t- Columns: ${lineSplitsLength} - Header Columns: ${accConfig.fileFields.length} mismatch`,
+        );
+      }
+      // console.dir({ accConfig, item }, { depth: 3 });
+      const transaction = prepareTransactionItem(
+        item,
+        t.accountObj,
+        session?.user?.id,
+        t.sourceLine || "",
+      );
+      // console.dir(transaction, { depth: 3 });
+
+      if (ignoreTransaction(transaction, accConfig)) {
+        ignoredTransactions.push({ ...(transaction as any), id: t.id });
+      } else {
+        if (
+          t.amount !== transaction.amount ||
+          t.date.toString() !== transaction.date?.toString() ||
+          t.description !== transaction.description ||
+          !(transaction.tags as string[])?.every((tag) => t.tags.includes(tag))
+        ) {
+          finalTransactions.push({ ...(transaction as any), id: t.id });
+        }
+      }
+    }
+  });
+
+  for (const t of finalTransactions) {
+    const { id, userId, account, sourceLine, ...dbTransaction } = t;
+    await db.expenseTransaction.update({
+      data: dbTransaction,
+      where: { id },
+    });
+  }
+
+  // delete ignored transactions
+  // console.log("ignoredTransactions", ignoredTransactions);
+  const ids = ignoredTransactions.map((t) => t.id!);
+  if (ids && ids.length > 0) {
+    await db.expenseTransaction.deleteMany({
+      where: { id: { in: ids } },
+    });
+  }
+  // move to ignored transactions
+  for (const t of ignoredTransactions) {
+    const { id, ...dbTransaction } = t;
+    await db.expenseIgnoredTransaction.createMany({
+      data: dbTransaction,
+    });
+  }
+
+  return {
+    rowCount: finalTransactions.length,
+    rowCountIgnored: ignoredTransactions.length,
+  };
 };
 
 export const createExpenseTransaction = async (
