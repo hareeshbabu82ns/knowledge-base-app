@@ -26,6 +26,7 @@ export function DataQueryCharts({ columnFilters }: DataQueryChartsProps) {
         attribute="tag"
         frequency="monthly"
         className="col-span-2"
+        chartContainerClassName="aspect-auto h-[250px] w-full"
       />
       <ChartAttributeByFrequency
         key="accountsMonthly"

@@ -209,6 +209,28 @@ export const deleteExpenseTransaction = async (
   return dbTransaction;
 };
 
+export const ignoreExpenseTransaction = async (
+  id: ExpenseTransaction["id"],
+) => {
+  const session = await auth();
+  if (!session?.user?.id) throw new Error("not logged in");
+
+  const dbTransaction = await db.expenseTransaction.findUnique({
+    where: { id },
+  });
+  if (!dbTransaction) throw new Error("unable to find Transaction");
+
+  const dbIgnoredTransaction = await db.expenseIgnoredTransaction.create({
+    data: dbTransaction,
+  });
+  if (!dbIgnoredTransaction) throw new Error("unable to ignore Transaction");
+
+  const res = await db.expenseTransaction.delete({ where: { id } });
+  if (!res) throw new Error("unable to delete source Transaction");
+
+  return dbIgnoredTransaction;
+};
+
 //////////////Charts////////////////////////////////
 
 export const fetchChartAccountsByMonth = async ({

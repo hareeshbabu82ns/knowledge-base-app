@@ -33,15 +33,20 @@ export interface DeleteConfirmButtonProps extends ButtonProps {
 export const DeleteConfirmButton = ({
   toastId,
   toastLabel,
+  variant,
   onClick,
   ...props
 }: DeleteConfirmButtonProps) => {
+  const toastVar = props.className?.includes("text-destructive")
+    ? toast.error
+    : toast.warning;
   // const { toast } = useToast();
   return (
     <Button
       {...props}
+      variant={variant}
       onClick={() => {
-        toast.error(toastLabel || "Confirm Deletion?", {
+        toastVar(toastLabel || "Confirm Deletion?", {
           id: toastId,
           // position: "top-center",
           duration: Infinity,
@@ -49,14 +54,15 @@ export const DeleteConfirmButton = ({
           action: (
             <Button
               size="icon"
-              variant="destructive"
+              variant={variant}
               className="ml-auto"
               onClick={(e) => {
                 onClick && onClick(e);
                 toast.dismiss(toastId);
               }}
             >
-              <Icons.trash className="size-4" />
+              {/* <Icons.trash className="size-4" /> */}
+              {props.children}
             </Button>
           ),
         });

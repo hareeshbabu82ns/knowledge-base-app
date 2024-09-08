@@ -132,11 +132,13 @@ export function ChartAttributeByFrequency({
   attribute,
   frequency = "monthly",
   className,
+  chartContainerClassName,
 }: {
   transactions: any;
   attribute: "account" | "type" | "tag";
   frequency?: "yearly" | "monthly" | "daily";
   className?: string;
+  chartContainerClassName?: string;
 }) {
   const chartData = prepareChartData(
     Object.values(
@@ -165,7 +167,10 @@ export function ChartAttributeByFrequency({
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <ChartContainer config={chartData.config}>
+        <ChartContainer
+          config={chartData.config}
+          className={cn("", chartContainerClassName)}
+        >
           <BarChart accessibilityLayer data={chartData.data}>
             <CartesianGrid vertical={false} />
             <YAxis

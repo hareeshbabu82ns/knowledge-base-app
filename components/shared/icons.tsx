@@ -55,6 +55,7 @@ import {
 
 // https://react-icons.github.io/react-icons/
 import { FaIndianRupeeSign, FaCalculator } from "react-icons/fa6";
+import { MdArchive } from "react-icons/md";
 
 export type Icon = typeof LucideIcon;
 
@@ -126,6 +127,7 @@ export const Icons = {
   upload: Upload,
   download: Download,
 
+  archive: MdArchive,
   expenses: BanknoteIcon,
   accounts: ({ ...props }: LucideProps) => (
     <svg

@@ -8,6 +8,8 @@ import { ExpenseTypeOptions } from "@/variables/expenses";
 import { Button } from "@/components/ui/button";
 import { Icons } from "@/components/shared/icons";
 import { DeleteConfirmButton } from "@/components/DeleteConfirmButton";
+import { ignoreExpenseTransaction } from "./actions";
+import { toast } from "sonner";
 
 export type ExpenseTransactionWithAccount = ExpenseTransaction & {
   accountObj: ExpenseAccount;
@@ -135,7 +137,7 @@ export const columns = [
         {row.getCanEdit() && !row.getIsEditing() && (
           <Button
             variant="ghost"
-            className="text-destructive size-8 p-2"
+            className="size-8 p-2"
             disabled={row.getIsEditing()}
             onClick={() => {
               row.toggleEditing();
@@ -148,16 +150,32 @@ export const columns = [
           variant="ghost"
           className="text-destructive size-8 p-2"
           disabled={!table.options.meta?.deleteData}
-          toastId={`config-file-fields-deletion-${row.id}`}
-          toastLabel={`Delete Input Field Config? ${row.original.description}`}
-          onClick={() =>
+          toastId={`expense-transaction-deletion-${row.id}`}
+          toastLabel={`Delete Transaction? ${row.original.description}`}
+          onClick={() => {
+            row.getIsEditing() && row.toggleEditing();
             table.options.meta?.deleteData!({
               rowId: row.id,
               rowData: row.original,
-            })
-          }
+            });
+          }}
         >
           <Icons.trash className="size-8" />
+        </DeleteConfirmButton>
+        <DeleteConfirmButton
+          variant="ghost"
+          title="Move to Ignored List"
+          className="size-8 p-2"
+          disabled={!table.options.meta?.deleteData}
+          toastId={`expense-transaction-ignore-${row.id}`}
+          toastLabel={`Move to Ignored List? ${row.original.description}`}
+          onClick={async () => {
+            row.getIsEditing() && row.toggleEditing();
+            await ignoreExpenseTransaction(row.id);
+            toast.success("Transaction moved to Ignored List");
+          }}
+        >
+          <Icons.archive className="size-8" />
         </DeleteConfirmButton>
       </div>
     ),

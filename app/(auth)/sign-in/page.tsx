@@ -70,14 +70,14 @@ export default function LoginForm() {
             </div>
             <div className="grid gap-2">
               <div className="h-3"></div>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button variant="ghost" size="icon" onClick={sendEmailToken}>
-                    <Icons.email className="size-4" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>Send Token</TooltipContent>
-              </Tooltip>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={sendEmailToken}
+                title="Send Token"
+              >
+                <Icons.email className="size-4" />
+              </Button>
             </div>
           </div>
 
@@ -95,23 +95,19 @@ export default function LoginForm() {
             </div>
             <div className="grid gap-2">
               <div className="h-3"></div>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Link
-                    href={
-                      emailToken && email
-                        ? `/api/auth/callback/resend?callbackUrl=/dashboard&token=${emailToken}&email=${email}`
-                        : ""
-                    }
-                    className={cn(
-                      buttonVariants({ variant: "ghost", size: "icon" }),
-                    )}
-                  >
-                    <Icons.login className="size-4" />
-                  </Link>
-                </TooltipTrigger>
-                <TooltipContent>Login with Token</TooltipContent>
-              </Tooltip>
+              <Link
+                title="Login with Token"
+                href={
+                  emailToken && email
+                    ? `/api/auth/callback/resend?callbackUrl=/dashboard&token=${emailToken}&email=${email}`
+                    : ""
+                }
+                className={cn(
+                  buttonVariants({ variant: "ghost", size: "icon" }),
+                )}
+              >
+                <Icons.login className="size-4" />
+              </Link>
             </div>
           </div>
 
