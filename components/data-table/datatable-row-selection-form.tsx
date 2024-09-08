@@ -51,7 +51,7 @@ export default function DataTableRowSelectionForm<TData>({
               console.log({ rowId, rowData });
               // table.updateRow(rowId, rowData);
               table.options.meta?.updateData!({
-                rowIndex: rowId ? Number(rowId) : -1,
+                rowId: rowId || "-1",
                 rowData: rowData,
               });
             }}

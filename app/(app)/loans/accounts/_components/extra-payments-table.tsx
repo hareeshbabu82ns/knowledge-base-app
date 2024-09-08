@@ -87,7 +87,12 @@ const columns = [
           disabled={!table.options.meta?.deleteData}
           toastId={`loan-extra-payments-deletion-${row.id}`}
           toastLabel={`Delete Extra Payment? ${row.original.amount}`}
-          onClick={() => table.options.meta?.deleteData!(row.id, row.original)}
+          onClick={() =>
+            table.options.meta?.deleteData!({
+              rowId: row.id,
+              rowData: row.original,
+            })
+          }
         >
           <Icons.trash className="size-8" />
         </DeleteConfirmButton>
@@ -179,10 +184,9 @@ const ExtraPaymentsTable = ({ className, loanId }: ExtraPaymentsTableProps) => {
             addExtraPayment({ ...rowData, loan: { connect: { id: loanId } } });
           else updateExtraPayment({ id: rowId, data: rowData });
         }}
-        deleteData={(rowId, rowData) => {
+        deleteData={({ rowId, rowData }) => {
           // console.log("deleteData", { rowId, rowData });
-          const id = rowData.id;
-          if (id) deleteExtraPayment(id);
+          deleteExtraPayment(rowId);
         }}
       />
     </div>

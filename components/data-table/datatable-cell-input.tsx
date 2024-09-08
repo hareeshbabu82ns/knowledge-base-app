@@ -96,7 +96,7 @@ export default function DataTableCellInput<TData>({
                     const numVal = Number(e.target.value);
                     if (numVal !== numValue) {
                       table.options.meta?.updateCellData!({
-                        rowIndex: row.index,
+                        rowId: row.index.toString(),
                         rowData: row.original,
                         columnId: column.id,
                         value: numVal,
@@ -119,7 +119,7 @@ export default function DataTableCellInput<TData>({
             onCheckedChange={(value) => {
               setCellValue(value);
               table.options.meta?.updateCellData!({
-                rowIndex: row.index,
+                rowId: row.index.toString(),
                 rowData: row.original,
                 columnId: column.id,
                 value,
@@ -135,7 +135,7 @@ export default function DataTableCellInput<TData>({
             onValueChange={(value) => {
               setCellValue(value);
               table.options.meta?.updateCellData!({
-                rowIndex: row.index,
+                rowId: row.index.toString(),
                 rowData: row.original,
                 columnId: column.id,
                 value,
@@ -213,7 +213,7 @@ export default function DataTableCellInput<TData>({
                 onSelect={(date?: Date) => {
                   setCellValue(date);
                   table.options.meta?.updateCellData!({
-                    rowIndex: row.index,
+                    rowId: row.index.toString(),
                     rowData: row.original,
                     columnId: column.id,
                     value: date,
@@ -287,7 +287,7 @@ export default function DataTableCellInput<TData>({
                           ? value.split(",")
                           : value;
                       table.options.meta?.updateCellData!({
-                        rowIndex: row.index,
+                        rowId: row.index.toString(),
                         rowData: row.original,
                         columnId: column.id,
                         value: fieldTypeValue,

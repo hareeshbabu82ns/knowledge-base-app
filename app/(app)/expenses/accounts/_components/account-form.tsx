@@ -236,7 +236,7 @@ export const AccountForm = ({ id, data, type }: AccountFormProps) => {
               placeholder="Separator"
             />
             <CustomFormField
-              className="flex-initial min-w-32"
+              className="min-w-32 flex-initial"
               fieldType={FormFieldType.SWITCH}
               control={form.control}
               name="config.trimQuotes"

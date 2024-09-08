@@ -125,12 +125,12 @@ const MultipleFileUploadForm = ({
 
   return (
     <form
-      className="w-full p-3 border border-gray-500 border-dashed"
+      className="w-full border border-dashed border-gray-500 p-3"
       onSubmit={(e) => e.preventDefault()}
     >
       {files && files.length > 0 ? (
         <div className="flex flex-col gap-2">
-          <div className="flex flex-row justify-between items-center">
+          <div className="flex flex-row items-center justify-between">
             <Button
               onClick={() => {
                 setPreviewUrls([]);
@@ -149,7 +149,7 @@ const MultipleFileUploadForm = ({
 
           <div className="flex flex-wrap justify-start">
             {previewUrls.map((previewUrl, idx) => (
-              <div key={idx} className="w-full p-1.5 md:w-1/2 space-y-1">
+              <div key={idx} className="w-full space-y-1 p-1.5 md:w-1/2">
                 <Image
                   alt="file uploader preview"
                   objectFit="cover"
@@ -158,7 +158,7 @@ const MultipleFileUploadForm = ({
                   height={218}
                   layout="responsive"
                 />
-                <p className="text-center text-xs text-muted-foreground">
+                <p className="text-muted-foreground text-center text-xs">
                   {files[idx]?.name}
                 </p>
               </div>
@@ -166,10 +166,10 @@ const MultipleFileUploadForm = ({
           </div>
         </div>
       ) : (
-        <label className="flex flex-col items-center justify-center h-full py-8 transition-colors duration-150 cursor-pointer hover:text-gray-600">
+        <label className="flex h-full cursor-pointer flex-col items-center justify-center py-8 transition-colors duration-150 hover:text-gray-600">
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            className="w-14 h-14"
+            className="size-14"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -185,7 +185,7 @@ const MultipleFileUploadForm = ({
             {label || "Select Files"}
           </strong>
           <input
-            className="block w-0 h-0"
+            className="block size-0"
             name="file"
             type="file"
             onChange={onFilesUploadChange}
