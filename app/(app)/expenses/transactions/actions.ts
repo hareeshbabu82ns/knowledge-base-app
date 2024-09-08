@@ -79,28 +79,35 @@ export const reprocessDBTransactions = async ({
   const finalTransactions: ExpenseTransaction[] = [];
   const ignoredTransactions: ExpenseTransaction[] = [];
 
-  transactions.forEach((t, lineIdx) => {
-    const accConfig = t.accountObj.config as any as IConfig;
-    if (t.sourceLine?.length === 0) {
-      const { id, accountObj, sourceLine, ...dbTransaction } = t;
-      if (ignoreTransaction(dbTransaction, accConfig)) {
-        ignoredTransactions.push({ ...(dbTransaction as any), id: t.id });
+  transactions.forEach((dbTrans, lineIdx) => {
+    const accConfig = dbTrans.accountObj.config as any as IConfig;
+    if (dbTrans.sourceLine?.length === 0) {
+      // no sourceLine, probably manually added, process using db values
+      const { id, accountObj, sourceLine, ...dbTransRest } = dbTrans;
+      if (ignoreTransaction(dbTransRest, accConfig)) {
+        ignoredTransactions.push({
+          ...(dbTransRest as any),
+          id: dbTrans.id,
+        });
       } else {
         if (
-          t.amount !== dbTransaction.amount ||
-          t.date.toString() !== dbTransaction.date.toString() ||
-          t.description !== dbTransaction.description ||
-          !(dbTransaction.tags as string[])?.every((tag) =>
-            t.tags.includes(tag),
+          dbTrans.amount !== dbTransRest.amount ||
+          dbTrans.date.toString() !== dbTransRest.date.toString() ||
+          dbTrans.description !== dbTransRest.description ||
+          !(dbTransRest.tags as string[])?.every((tag) =>
+            dbTrans.tags.includes(tag),
           )
         ) {
-          finalTransactions.push({ ...(dbTransaction as any), id: t.id });
+          finalTransactions.push({
+            ...(dbTransRest as any),
+            id: dbTrans.id,
+          });
         }
       }
     } else {
-      // const headerLabels: string[] = accConfig.fileFields.map((f) => f.name);
+      // uploaded by file, reprocess using the sourceLine
       const item = preprocessTransactionLine({
-        line: t.sourceLine || "",
+        line: dbTrans.sourceLine || "",
         lineIdx,
         accConfig,
       });
@@ -110,28 +117,36 @@ export const reprocessDBTransactions = async ({
 
       if (lineSplitsLength !== accConfig.fileFields.length) {
         throw new Error(
-          `Line: ${t.sourceLine} \n\t- Columns: ${lineSplitsLength} - Header Columns: ${accConfig.fileFields.length} mismatch`,
+          `Line: ${dbTrans.sourceLine} \n\t- Columns: ${lineSplitsLength} - Header Columns: ${accConfig.fileFields.length} mismatch`,
         );
       }
       // console.dir({ accConfig, item }, { depth: 3 });
       const transaction = prepareTransactionItem(
         item,
-        t.accountObj,
+        dbTrans.accountObj,
         session?.user?.id,
-        t.sourceLine || "",
+        dbTrans.sourceLine || "",
       );
       // console.dir(transaction, { depth: 3 });
 
       if (ignoreTransaction(transaction, accConfig)) {
-        ignoredTransactions.push({ ...(transaction as any), id: t.id });
+        ignoredTransactions.push({
+          ...(transaction as any),
+          id: dbTrans.id,
+        });
       } else {
         if (
-          t.amount !== transaction.amount ||
-          t.date.toString() !== transaction.date?.toString() ||
-          t.description !== transaction.description ||
-          !(transaction.tags as string[])?.every((tag) => t.tags.includes(tag))
+          dbTrans.amount !== transaction.amount ||
+          dbTrans.date.toString() !== transaction.date?.toString() ||
+          dbTrans.description !== transaction.description ||
+          !(transaction.tags as string[])?.every((tag) =>
+            dbTrans.tags.includes(tag),
+          )
         ) {
-          finalTransactions.push({ ...(transaction as any), id: t.id });
+          finalTransactions.push({
+            ...(transaction as any),
+            id: dbTrans.id,
+          });
         }
       }
     }

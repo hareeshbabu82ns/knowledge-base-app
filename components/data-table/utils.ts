@@ -79,6 +79,7 @@ export const convertColumnFiltersToPrisma = (
       }
       case "multiSelect": {
         const values = (value as Option[]).map((o) => o.value);
+        if (!values.length) break;
         acc[dbId] =
           column?.meta.fieldType === "array"
             ? { hasSome: values }
