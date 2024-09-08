@@ -229,7 +229,7 @@ export function DataTableQuery<TData, TValue>({
 
   const editingRowId = Object.keys(editingRows)[0] || undefined;
   const editingRowData = editingRowId
-    ? table.getRowModel().rowsById[editingRowId].original
+    ? table.getRowModel().rowsById[editingRowId]?.original
     : undefined;
 
   return (

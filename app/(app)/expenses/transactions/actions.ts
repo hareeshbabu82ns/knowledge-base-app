@@ -79,7 +79,7 @@ export const reprocessDBTransactions = async ({
   const finalTransactions: ExpenseTransaction[] = [];
   const ignoredTransactions: ExpenseTransaction[] = [];
 
-  transactions.forEach((t, idx) => {
+  transactions.forEach((t, lineIdx) => {
     const accConfig = t.accountObj.config as any as IConfig;
     if (t.sourceLine?.length === 0) {
       const { id, accountObj, sourceLine, ...dbTransaction } = t;
@@ -101,6 +101,7 @@ export const reprocessDBTransactions = async ({
       // const headerLabels: string[] = accConfig.fileFields.map((f) => f.name);
       const item = preprocessTransactionLine({
         line: t.sourceLine || "",
+        lineIdx,
         accConfig,
       });
       if (!item) return;

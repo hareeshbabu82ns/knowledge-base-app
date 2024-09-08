@@ -3,10 +3,27 @@ import { IConfig } from "@/types/expenses";
 import { ExpenseAccount, Prisma } from "@prisma/client";
 import { parse } from "date-fns";
 
+export const preprocessTags = (tags?: string[]) => {
+  if (!tags) {
+    return [];
+  }
+  const tagsSet = new Set<string>();
+  tags.forEach((tag) => {
+    tagsSet.add(tag);
+  });
+  if (tagsSet.size > 1) {
+    tagsSet.delete("Untagged_Expense");
+    tagsSet.delete("Untagged_Income");
+  }
+  return Array.from(tagsSet).sort();
+};
+
 export const preprocessTransactionLine = ({
   line,
+  lineIdx,
   accConfig,
 }: {
+  lineIdx?: number;
   line: string;
   accConfig: IConfig;
 }) => {
@@ -27,8 +44,15 @@ export const preprocessTransactionLine = ({
     accConfig.separator,
   );
 
+  if (lineSplits.length !== accConfig.fileFields.length) {
+    throw new Error(
+      `Line(${lineIdx}): ${line} \n\t- Columns: ${lineSplits.length} - Header Columns: ${accConfig.fileFields.length} mismatch`,
+    );
+  }
+
   const item = lineSplits.reduce(
     (acc, value, idx) => {
+      // console.log(acc, accConfig.fileFields[idx], value);
       acc[accConfig.fileFields[idx].name] = value;
       return acc;
     },
@@ -103,7 +127,16 @@ export function prepareTransactionItem(
           default:
             item.type = "Expense";
         }
-        item.amount = amtVal * (fieldConfig.negated ? -1 : 1);
+        // item.amount = amtVal * (fieldConfig.negated ? -1 : 1);
+        item.amount = fieldConfig.negated ? Math.abs(amtVal) : amtVal;
+        break;
+      case "description":
+        item.description =
+          item.description && item.description.length
+            ? value && value.trim().length
+              ? `${item.description} - ${value}`
+              : item.description
+            : value;
         break;
       default:
         if (fieldConfig.expenseColumn !== "none" && !fieldConfig.ignore) {

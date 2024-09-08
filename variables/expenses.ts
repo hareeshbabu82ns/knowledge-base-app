@@ -39,6 +39,7 @@ export const configFieldExpenseTypeOptions: Option[] = [
 
 export const configFieldExpenseColumnOptions: Option[] = [
   { label: "None", value: "none" },
+  { label: "Amount", value: "amount" },
   { label: "Date", value: "date" },
   { label: "Description", value: "description" },
 ];

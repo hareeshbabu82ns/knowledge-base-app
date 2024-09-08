@@ -17,10 +17,7 @@ import {
   ChartTooltipContent,
 } from "@/components/ui/chart";
 import { format, startOfDay, startOfMonth, startOfYear } from "date-fns";
-import { ColumnFiltersState } from "@tanstack/react-table";
-import { useQuery } from "@tanstack/react-query";
-import { fetchTransactionStats } from "./actions";
-import { formatCurrency } from "@/lib/utils";
+import { cn, formatCurrency } from "@/lib/utils";
 
 // const chartData = [
 //   { month: "January", desktop: 186, mobile: 80 },
@@ -134,10 +131,12 @@ export function ChartAttributeByFrequency({
   transactions,
   attribute,
   frequency = "monthly",
+  className,
 }: {
   transactions: any;
   attribute: "account" | "type" | "tag";
   frequency?: "yearly" | "monthly" | "daily";
+  className?: string;
 }) {
   const chartData = prepareChartData(
     Object.values(
@@ -156,7 +155,7 @@ export function ChartAttributeByFrequency({
   );
 
   return (
-    <Card>
+    <Card className={cn("", className)}>
       <CardHeader>
         <CardTitle>
           {attribute} by {frequency}

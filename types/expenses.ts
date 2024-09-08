@@ -126,7 +126,7 @@ export const ConfigFileFieldsSchema = z.object({
     message: "Invalid type",
   }),
   format: z.string(),
-  expenseColumn: z.enum(["none", "date", "description"], {
+  expenseColumn: z.enum(["none", "amount", "date", "description"], {
     message: "Invalid expense column",
   }),
   expenseType: z.enum(

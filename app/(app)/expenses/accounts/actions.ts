@@ -10,6 +10,7 @@ import {
   IConfigIgnoreOptions,
   IConfigTagOptions,
 } from "@/types/expenses";
+import { preprocessTags } from "../upload/utils";
 
 ///////////////////// Tags //////////////////////////
 export const fetchTags = async () => {
@@ -18,6 +19,7 @@ export const fetchTags = async () => {
 
   const tags = await db.expenseTags.findMany({
     where: { userId: session?.user?.id },
+    orderBy: { tag: "asc" },
   });
   return tags;
 };
@@ -110,8 +112,14 @@ export const updateAccount = async (
     const dbAccount = await db.expenseAccount.findUnique({ where: { id } });
     if (!dbAccount) throw new Error("Account not found with " + id);
     const config = (dbAccount.config as any) || {};
-    data.config = { ...config, ...(data.config as any) };
+    data.config = { ...config, ...(data.config as any) } as any;
   }
+  const finalConfig = data.config as any as IConfig;
+  finalConfig.tagOps = finalConfig.tagOps?.map((tagOp) => ({
+    ...tagOp,
+    tags: preprocessTags(tagOp.tags),
+  }));
+  data.config = finalConfig as any;
   const dbAccount = await db.expenseAccount.update({ data, where: { id } });
   if (!dbAccount) throw new Error("Account not found with " + id);
   return dbAccount;
@@ -145,14 +153,17 @@ export const addAccountConfigTagFields = async (
   const dataFinal = {} as Prisma.ExpenseAccountUpdateInput;
 
   const config = (dbOldAccount.config as any) || {};
+
+  const dataOps = data.map((d) => ({ ...d, tags: preprocessTags(d.tags) }));
+
   if (partialConfigFill) {
     const finalConfig: IConfig = {
       ...config,
-      tagOps: [...config.tagOps, ...data],
+      tagOps: [...config.tagOps, ...dataOps],
     };
     dataFinal.config = finalConfig as any;
   } else {
-    dataFinal.config = { ...config, tagOps: [...data] } as any;
+    dataFinal.config = { ...config, tagOps: [...dataOps] } as any;
   }
   const dbAccount = await db.expenseAccount.update({
     data: dataFinal,
@@ -198,8 +209,14 @@ export const uploadAccounts = async (url: string) => {
 
   const accounts: Prisma.ExpenseAccountCreateManyInput[] = jsonData.map(
     (item: any) => {
+      const config = item.config as IConfig;
+      config.tagOps = config.tagOps?.map((d) => ({
+        ...d,
+        tags: preprocessTags(d.tags),
+      }));
       return {
         ...item,
+        config,
         id: item.id || item._id,
         // id: `${session?.user?.id}-${Buffer.from(item.name).toString("base64")}`,
         _id: undefined,

@@ -55,19 +55,11 @@ export const uploadTransactions = async ({
 
     const item = preprocessTransactionLine({
       line,
+      lineIdx,
       accConfig,
     });
     // console.log(item);
-
     if (!item) return;
-
-    const lineSplitsLength = Object.keys(item).length;
-
-    if (lineSplitsLength !== accConfig.fileFields.length) {
-      throw new Error(
-        `Line(${lineIdx}): ${line} \n\t- Columns: ${lineSplitsLength} - Header Columns: ${headerLabels.length} mismatch`,
-      );
-    }
 
     allRecords.push(item);
 
