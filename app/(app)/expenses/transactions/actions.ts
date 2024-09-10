@@ -347,8 +347,13 @@ export const fetchTransactionStats = async ({
   const byAccount: IExpTransByAttrStats = {};
   const byType: IExpTransByAttrStats = {};
 
+  const tagFilter = (
+    filters.find((c) => c.id === "tags") || { id: "tags", value: [] }
+  ).value as string[];
+
   transactions.forEach((t) => {
     t.tags?.forEach((tag) => {
+      if (tagFilter.length === 0 && !ImpTags.includes(tag)) return;
       const tagKey = tag.replace(/\s+/g, "-").toLowerCase();
       if (!byTag[tagKey]) {
         byTag[tagKey] = [];
@@ -480,3 +485,31 @@ export const fetchTransactionStats = async ({
     byTagMonthly,
   };
 };
+const ImpTags = [
+  "Income",
+  "Food",
+  "Utilities",
+  "Housing",
+  "Transportation",
+  "Cornerstone House",
+  "Healthcare",
+  "Personal Care",
+  "Entertainment",
+  "Untagged_Expense",
+  "Untagged_Income",
+];
+const TopLevelTags = [
+  "Income",
+  "Housing",
+  "Utilities",
+  "Food",
+  "Transportation",
+  "Healthcare",
+  "Personal Care",
+  "Entertainment",
+  "Education",
+  "Miscellaneous",
+  "Maintenance",
+  "Fee",
+  "Others",
+];

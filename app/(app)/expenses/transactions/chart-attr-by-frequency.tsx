@@ -53,8 +53,9 @@ function prepareChartData(
 ) {
   const chartDataByFreq: any = {};
   const config: ChartConfig = {};
+  const dataSortedByAmount = data.sort((a, b) => b.amount - a.amount);
   // console.log("data", data);
-  data.forEach((item) => {
+  dataSortedByAmount.forEach((item) => {
     const key = item.attr;
     // const key = item.attr.replace(/\s+/g, "-").toLowerCase();
     if (!config[key]) {

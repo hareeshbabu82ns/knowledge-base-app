@@ -384,72 +384,72 @@
     "parent": "Maintenance"
   },
   {
-    "tag": "Travel & Vacation",
+    "tag": "Travel/Vacation",
     "parent": null
   },
   {
     "tag": "Flights/Transport",
-    "parent": "Travel & Vacation"
+    "parent": "Travel/Vacation"
   },
   {
     "tag": "Hotel",
-    "parent": "Travel & Vacation"
+    "parent": "Travel/Vacation"
   },
   {
     "tag": "Accommodation",
-    "parent": "Travel & Vacation"
+    "parent": "Travel/Vacation"
   },
   {
     "tag": "Travel Insurance",
-    "parent": "Travel & Vacation"
+    "parent": "Travel/Vacation"
   },
   {
     "tag": "Activities/Excursions",
-    "parent": "Travel & Vacation"
+    "parent": "Travel/Vacation"
   },
   {
-    "tag": "Clothing & Shopping",
+    "tag": "Clothing/Shopping",
     "parent": null
   },
   {
     "tag": "Accessories",
-    "parent": "Clothing & Shopping"
+    "parent": "Clothing/Shopping"
   },
   {
     "tag": "Shoes",
-    "parent": "Clothing & Shopping"
+    "parent": "Clothing/Shopping"
   },
   {
     "tag": "Work Uniforms",
-    "parent": "Clothing & Shopping"
+    "parent": "Clothing/Shopping"
   },
   {
     "tag": "Online Shopping",
-    "parent": "Clothing & Shopping"
+    "parent": "Clothing/Shopping"
   },
   {
-    "tag": "Technology & Gadgets",
+    "tag": "Technology/Gadgets",
     "parent": null
   },
   {
     "tag": "Equipment",
-    "parent": "Technology & Gadgets"
+    "parent": "Technology/Gadgets"
   },
   {
     "tag": "Gadget Purchases",
-    "parent": "Technology & Gadgets"
+    "parent": "Technology/Gadgets"
   },
   {
     "tag": "Software/Apps Subscriptions",
-    "parent": "Technology & Gadgets"
+    "parent": "Technology/Gadgets"
   },
   {
     "tag": "Infra Subscriptions",
-    "parent": "Technology & Gadgets"
+    "parent": "Technology/Gadgets"
   },
   {
-    "tag": "Tech Repairs & Maintenance",
-    "parent": "Technology & Gadgets"
+    "tag": "Tech Repairs/Maintenance",
+    "parent": "Technology/Gadgets"
   },
   {
     "tag": "Fee",
