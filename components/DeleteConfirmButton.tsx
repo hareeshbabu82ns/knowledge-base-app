@@ -69,38 +69,4 @@ export const DeleteConfirmButton = ({
       }}
     />
   );
-
-  // return (
-  //   <Button
-  //     {...props}
-  //     onClick={() => {
-  //       toast.warning(toastLabel || "Confirm Deletion?", {
-  //         id: toastId,
-  //         position: "top-center",
-  //         duration: Infinity,
-  //         cancel: {
-  //           label: "Cancel",
-  //           onClick: (e) => {},
-
-  //           // action: (e) => {
-  //           //   toast.dismiss(toastId);
-  //           // },
-  //         },
-  //         action: (
-  //           <Button
-  //             size="icon"
-  //             variant="destructive"
-  //             // className="ml-auto"
-  //             onClick={(e) => {
-  //               onClick && onClick(e);
-  //               toast.dismiss(toastId);
-  //             }}
-  //           >
-  //             <Icons.trash className="size-4" />
-  //           </Button>
-  //         ),
-  //       });
-  //     }}
-  //   />
-  // );
 };

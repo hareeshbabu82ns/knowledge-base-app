@@ -7,9 +7,17 @@ import { format } from "date-fns";
 import { ExpenseTypeOptions } from "@/variables/expenses";
 import { Button } from "@/components/ui/button";
 import { Icons } from "@/components/shared/icons";
-import { DeleteConfirmButton } from "@/components/DeleteConfirmButton";
-import { ignoreExpenseTransaction } from "./actions";
+import { ignoreExpenseTransaction, splitExpenseTransaction } from "./actions";
 import { toast } from "sonner";
+import { TransactionAmountSplitter } from "./transaction-splitter-dlg";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export type ExpenseTransactionWithAccount = ExpenseTransaction & {
   accountObj: ExpenseAccount;
@@ -122,62 +130,119 @@ export const columns = [
     header: "Actions",
     size: 50,
     cell: ({ row, table, column }) => (
-      <div className="flex flex-row gap-1">
-        {row.getIsEditing() && (
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => {
-              row.toggleEditing();
-            }}
-          >
-            <Icons.close className="size-4" />
-          </Button>
-        )}
-        {row.getCanEdit() && !row.getIsEditing() && (
-          <Button
-            variant="ghost"
-            className="size-8 p-2"
-            disabled={row.getIsEditing()}
-            onClick={() => {
-              row.toggleEditing();
-            }}
-          >
-            <Icons.edit className="size-4" />
-          </Button>
-        )}
-        <DeleteConfirmButton
-          variant="ghost"
-          className="text-destructive size-8 p-2"
-          disabled={!table.options.meta?.deleteData}
-          toastId={`expense-transaction-deletion-${row.id}`}
-          toastLabel={`Delete Transaction? ${row.original.description}`}
-          onClick={() => {
+      <>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" className="size-8 p-0">
+              <span className="sr-only">Open menu</span>
+              <Icons.moreHorizontal className="size-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuLabel>Actions</DropdownMenuLabel>
+            <DropdownMenuItem
+              onClick={() =>
+                navigator.clipboard.writeText(row.original.description || "")
+              }
+            >
+              <Icons.booking className="mr-2 size-4" />
+              <span>Copy Description</span>
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            {row.getCanEdit() && (
+              <DropdownMenuItem
+                onClick={() => {
+                  row.toggleEditing();
+                }}
+              >
+                <Icons.edit className="mr-2 size-4" />
+                <span>Edit Transaction</span>
+              </DropdownMenuItem>
+            )}
+            <DropdownMenuItem
+              disabled={!table.options.meta?.deleteData}
+              onClick={() => {
+                toast.error(`Delete Transaction? ${row.original.description}`, {
+                  id: `expense-transaction-deletion-${row.id}`,
+                  duration: Infinity,
+                  closeButton: true,
+                  action: (
+                    <Button
+                      size="icon"
+                      variant="destructive"
+                      className="ml-auto"
+                      onClick={() => {
+                        row.getIsEditing() && row.toggleEditing();
+                        table.options.meta?.deleteData!({
+                          rowId: row.id,
+                          rowData: row.original,
+                        });
+                        toast.dismiss(row.original.id);
+                      }}
+                    >
+                      <Icons.trash className="size-4" />
+                    </Button>
+                  ),
+                });
+              }}
+            >
+              <Icons.trash className="mr-2 size-4" />
+              <span>Delete Transaction</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={() => {
+                toast.warning(
+                  `Move to Ignored List? ${row.original.description}`,
+                  {
+                    id: `expense-transaction-ignore-${row.id}`,
+                    duration: Infinity,
+                    closeButton: true,
+                    action: (
+                      <Button
+                        size="icon"
+                        className="ml-auto"
+                        onClick={async () => {
+                          row.getIsEditing() && row.toggleEditing();
+                          try {
+                            await ignoreExpenseTransaction(row.id);
+                            toast.success("Transaction moved to Ignored List");
+                          } catch (e) {
+                            console.error(e);
+                            toast.error(
+                              "Failed to move transaction to Ignored List",
+                            );
+                          }
+                        }}
+                      >
+                        <Icons.archive className="size-4" />
+                      </Button>
+                    ),
+                  },
+                );
+              }}
+            >
+              <Icons.archive className="mr-2 size-4" />
+              <span>Archive Transaction</span>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+        <TransactionAmountSplitter
+          row={row}
+          onSave={async (splits: number[]) => {
             row.getIsEditing() && row.toggleEditing();
-            table.options.meta?.deleteData!({
-              rowId: row.id,
-              rowData: row.original,
-            });
+            try {
+              await splitExpenseTransaction({
+                id: row.id,
+                splits: splits.map((s) => ({ amount: s })),
+              });
+              toast.success("Transaction splitted successfully");
+            } catch (e) {
+              console.error(e);
+              toast.error("Transaction split failed");
+            }
           }}
-        >
-          <Icons.trash className="size-8" />
-        </DeleteConfirmButton>
-        <DeleteConfirmButton
-          variant="ghost"
-          title="Move to Ignored List"
-          className="size-8 p-2"
-          disabled={!table.options.meta?.deleteData}
-          toastId={`expense-transaction-ignore-${row.id}`}
-          toastLabel={`Move to Ignored List? ${row.original.description}`}
-          onClick={async () => {
-            row.getIsEditing() && row.toggleEditing();
-            await ignoreExpenseTransaction(row.id);
-            toast.success("Transaction moved to Ignored List");
-          }}
-        >
-          <Icons.archive className="size-8" />
-        </DeleteConfirmButton>
-      </div>
+        />
+      </>
     ),
     enableSorting: false,
     enableHiding: false,

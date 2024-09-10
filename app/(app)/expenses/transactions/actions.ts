@@ -224,26 +224,69 @@ export const deleteExpenseTransaction = async (
   return dbTransaction;
 };
 
+export const splitExpenseTransaction = async ({
+  id,
+  splits,
+}: {
+  id: ExpenseTransaction["id"];
+  splits: { amount: number; description?: string }[];
+}) => {
+  const session = await auth();
+  if (!session?.user?.id) throw new Error("not logged in");
+
+  return await db.$transaction(async (tx) => {
+    const dbTransaction = await tx.expenseTransaction.findUnique({
+      where: { id },
+    });
+    if (!dbTransaction) throw new Error("unable to find Transaction");
+
+    for (const split of splits) {
+      const dbSplit = await tx.expenseTransaction.create({
+        data: {
+          ...dbTransaction,
+          amount: split.amount,
+          description: split.description || dbTransaction.description,
+          sourceLine: "", // clear sourceLine to indicate manual split
+          id: undefined,
+        },
+      });
+      if (!dbSplit) throw new Error("unable to split Transaction");
+    }
+
+    const dbIgnoredTransaction = await tx.expenseIgnoredTransaction.create({
+      data: dbTransaction,
+    });
+    if (!dbIgnoredTransaction) throw new Error("unable to ignore Transaction");
+
+    const res = await tx.expenseTransaction.delete({ where: { id } });
+    if (!res) throw new Error("unable to delete source Transaction");
+
+    return dbIgnoredTransaction;
+  });
+};
+
 export const ignoreExpenseTransaction = async (
   id: ExpenseTransaction["id"],
 ) => {
   const session = await auth();
   if (!session?.user?.id) throw new Error("not logged in");
 
-  const dbTransaction = await db.expenseTransaction.findUnique({
-    where: { id },
+  return await db.$transaction(async (tx) => {
+    const dbTransaction = await tx.expenseTransaction.findUnique({
+      where: { id },
+    });
+    if (!dbTransaction) throw new Error("unable to find Transaction");
+
+    const dbIgnoredTransaction = await tx.expenseIgnoredTransaction.create({
+      data: dbTransaction,
+    });
+    if (!dbIgnoredTransaction) throw new Error("unable to ignore Transaction");
+
+    const res = await tx.expenseTransaction.delete({ where: { id } });
+    if (!res) throw new Error("unable to delete source Transaction");
+
+    return dbIgnoredTransaction;
   });
-  if (!dbTransaction) throw new Error("unable to find Transaction");
-
-  const dbIgnoredTransaction = await db.expenseIgnoredTransaction.create({
-    data: dbTransaction,
-  });
-  if (!dbIgnoredTransaction) throw new Error("unable to ignore Transaction");
-
-  const res = await db.expenseTransaction.delete({ where: { id } });
-  if (!res) throw new Error("unable to delete source Transaction");
-
-  return dbIgnoredTransaction;
 };
 
 //////////////Charts////////////////////////////////

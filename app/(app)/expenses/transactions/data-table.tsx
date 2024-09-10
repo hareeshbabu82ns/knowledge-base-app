@@ -31,7 +31,7 @@ const defaultColumnVisibility: VisibilityState = {
   type: false,
 };
 const defaultColumnFilters: ColumnFiltersState = [
-  { id: "date", value: [subMonths(new Date(), 6), undefined] },
+  { id: "date", value: [subMonths(new Date(), 6), new Date()] },
 ];
 
 const defaultData: Partial<ExpenseTransactionWithAccount> = {
