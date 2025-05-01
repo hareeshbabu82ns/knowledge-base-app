@@ -6,7 +6,7 @@ import { useParams } from "next/navigation";
 import { toast } from "sonner";
 import { getLoanDetails } from "../../actions";
 import LoanDetails from "../../_components/loan-details";
-import { Loan } from "@prisma/client";
+import { Loan } from "@/app/generated/prisma";
 
 const defaultLoan = {
   id: "",
@@ -23,19 +23,19 @@ const defaultLoan = {
 
 function Page() {
   const params = useParams();
-  const id = decodeURIComponent(params.id as string);
-  const { isPending, isError, data, error } = useQuery({
-    queryKey: ["loan", id],
-    queryFn: async () => await getLoanDetails(id),
+  const id = decodeURIComponent( params.id as string );
+  const { isPending, isError, data, error } = useQuery( {
+    queryKey: [ "loan", id ],
+    queryFn: async () => await getLoanDetails( id ),
     enabled: id !== "new",
-  });
+  } );
 
-  if (id !== "new" && isPending) {
+  if ( id !== "new" && isPending ) {
     return <span>Loading...</span>;
   }
 
-  if (isError) {
-    toast.error(error.message, { id: `${id}-error` });
+  if ( isError ) {
+    toast.error( error.message, { id: `${id}-error` } );
     // return <span>Error: {error.message}</span>;
     return null;
   }

@@ -1,7 +1,7 @@
 "use client";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Prisma } from "@prisma/client";
+import { Prisma } from "@/app/generated/prisma";
 import React from "react";
 import { useForm } from "@tanstack/react-form";
 import { ConfigComparisionEnum, IConfigTagOptions } from "@/types/expenses";
@@ -27,46 +27,46 @@ interface CompProps {
   rowData: Prisma.ExpenseTransactionCreateManyInput;
 }
 
-const ConfigAddTagForm = ({ rowData }: CompProps) => {
+const ConfigAddTagForm = ( { rowData }: CompProps ) => {
   const {
     isLoading,
     isPending,
     data: tags,
     error,
-  } = useQuery({
-    queryKey: ["filters", "tags"],
+  } = useQuery( {
+    queryKey: [ "filters", "tags" ],
     queryFn: async () => {
       const tags = await fetchTags();
-      return tags.map((t) => ({ value: t.tag, label: t.tag }) as Option);
+      return tags.map( ( t ) => ( { value: t.tag, label: t.tag } ) as Option );
     },
-  });
+  } );
 
-  const { mutate: addAccountTagFieldsFn } = useMutation({
-    mutationFn: async (data: IConfigTagOptions) => {
-      return addAccountConfigTagFields(rowData.account, [data]);
+  const { mutate: addAccountTagFieldsFn } = useMutation( {
+    mutationFn: async ( data: IConfigTagOptions ) => {
+      return addAccountConfigTagFields( rowData.account, [ data ] );
     },
     onSuccess: () => {
-      toast.success("Filter added successfully");
+      toast.success( "Filter added successfully" );
     },
-  });
+  } );
 
-  const form = useForm<IConfigTagOptions>({
+  const form = useForm<IConfigTagOptions>( {
     defaultValues: {
       name: "description",
       comparision: "STARTS_WITH",
       value: rowData.description || "",
-      tags: (rowData.tags as string[]) || [],
+      tags: ( rowData.tags as string[] ) || [],
     },
-    onSubmit: async ({ value }) => {
-      addAccountTagFieldsFn(value);
+    onSubmit: async ( { value } ) => {
+      addAccountTagFieldsFn( value );
     },
-  });
+  } );
 
-  if (isLoading || isPending) return <Loader />;
+  if ( isLoading || isPending ) return <Loader />;
 
   return (
     <form
-      onSubmit={(e) => {
+      onSubmit={( e ) => {
         e.preventDefault();
         e.stopPropagation();
         form.handleSubmit();
@@ -74,7 +74,7 @@ const ConfigAddTagForm = ({ rowData }: CompProps) => {
     >
       <div className="grid gap-4 py-4">
         <form.Field name="name">
-          {(field) => {
+          {( field ) => {
             return (
               <div className="space-y-1">
                 <Label htmlFor={field.name}>Field</Label>
@@ -86,7 +86,7 @@ const ConfigAddTagForm = ({ rowData }: CompProps) => {
                     <SelectValue placeholder={field.name} />
                   </SelectTrigger>
                   <SelectContent>
-                    {generateFilterOptions(configTagNameOptions)}
+                    {generateFilterOptions( configTagNameOptions )}
                   </SelectContent>
                 </Select>
               </div>
@@ -94,13 +94,13 @@ const ConfigAddTagForm = ({ rowData }: CompProps) => {
           }}
         </form.Field>
         <form.Field name="comparision">
-          {(field) => {
+          {( field ) => {
             return (
               <div className="space-y-1">
                 <Label htmlFor={field.name}>Comparision</Label>
                 <Select
-                  onValueChange={(v) =>
-                    field.handleChange(v as ConfigComparisionEnum)
+                  onValueChange={( v ) =>
+                    field.handleChange( v as ConfigComparisionEnum )
                   }
                   value={field.state.value || ""}
                 >
@@ -108,7 +108,7 @@ const ConfigAddTagForm = ({ rowData }: CompProps) => {
                     <SelectValue placeholder={field.name} />
                   </SelectTrigger>
                   <SelectContent>
-                    {generateFilterOptions(configComparisionOptions)}
+                    {generateFilterOptions( configComparisionOptions )}
                   </SelectContent>
                 </Select>
               </div>
@@ -118,12 +118,12 @@ const ConfigAddTagForm = ({ rowData }: CompProps) => {
         <form.Field
           name="value"
           validators={{
-            onSubmit: ({ value }) => {
+            onSubmit: ( { value } ) => {
               return value ? undefined : "Value is required";
             },
           }}
         >
-          {(field) => {
+          {( field ) => {
             return (
               <div className="space-y-1">
                 <Label htmlFor={field.name}>Value</Label>
@@ -131,14 +131,14 @@ const ConfigAddTagForm = ({ rowData }: CompProps) => {
                   id={field.name}
                   name={field.name}
                   onBlur={field.handleBlur}
-                  onChange={(e) => field.handleChange(e.target.value)}
+                  onChange={( e ) => field.handleChange( e.target.value )}
                   type="text"
                   value={field.state.value}
                   placeholder={field.name}
                 />
                 {field.state.meta.errors ? (
                   <em className="text-destructive text-sm">
-                    {field.state.meta.errors.join(", ")}
+                    {field.state.meta.errors.join( ", " )}
                   </em>
                 ) : null}
               </div>
@@ -148,29 +148,29 @@ const ConfigAddTagForm = ({ rowData }: CompProps) => {
         <form.Field
           name="tags"
           validators={{
-            onSubmit: ({ value }) => {
+            onSubmit: ( { value } ) => {
               return value.length > 0 ? undefined : "Tags are required";
             },
           }}
         >
-          {(field) => {
+          {( field ) => {
             return (
               <div className="space-y-1">
                 <Label htmlFor={field.name}>Tags</Label>
                 <MultipleSelector
                   className="w-full"
-                  onChange={(e) => {
-                    field.handleChange(e.map((o) => o.value));
+                  onChange={( e ) => {
+                    field.handleChange( e.map( ( o ) => o.value ) );
                   }}
                   placeholder="select tags..."
-                  value={field.state.value.map((v) => ({ value: v, label: v }))}
+                  value={field.state.value.map( ( v ) => ( { value: v, label: v } ) )}
                   options={tags}
                   commandProps={{
-                    filter: (value, search, keywords) => {
+                    filter: ( value, search, keywords ) => {
                       return tags
-                        ?.find((o) => o.value === value)
+                        ?.find( ( o ) => o.value === value )
                         ?.label?.toLowerCase()
-                        .includes(search.toLowerCase())
+                        .includes( search.toLowerCase() )
                         ? 1
                         : 0;
                     },
@@ -178,7 +178,7 @@ const ConfigAddTagForm = ({ rowData }: CompProps) => {
                 />
                 {field.state.meta.errors ? (
                   <em className="text-destructive text-sm">
-                    {field.state.meta.errors.join(", ")}
+                    {field.state.meta.errors.join( ", " )}
                   </em>
                 ) : null}
               </div>
@@ -196,15 +196,15 @@ const ConfigAddTagForm = ({ rowData }: CompProps) => {
   );
 };
 
-function generateFilterOptions(filterOptions?: Option[]) {
-  if (!filterOptions) return null;
+function generateFilterOptions( filterOptions?: Option[] ) {
+  if ( !filterOptions ) return null;
 
-  return filterOptions.map(({ value, label }) => (
+  return filterOptions.map( ( { value, label } ) => (
     <SelectItem key={value} value={value}>
       <div className="flex cursor-pointer items-center gap-2">
         <p>{label}</p>
       </div>
     </SelectItem>
-  ));
+  ) );
 }
 export default ConfigAddTagForm;

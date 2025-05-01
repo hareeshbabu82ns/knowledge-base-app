@@ -17,7 +17,7 @@ import {
   IExpTransAmountByAttrStatsArray,
   IExpTransByAttrStats,
 } from "@/types/expenses";
-import { ExpenseTransaction, Prisma } from "@prisma/client";
+import { ExpenseTransaction, Prisma } from "@/app/generated/prisma";
 import {
   ignoreTransaction,
   prepareTransactionItem,

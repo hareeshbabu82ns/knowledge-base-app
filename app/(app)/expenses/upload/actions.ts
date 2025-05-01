@@ -4,7 +4,7 @@ import { db } from "@/lib/db";
 import { join } from "path";
 import { readFile } from "fs/promises";
 import { auth } from "@/lib/auth";
-import { ExpenseAccount, Prisma } from "@prisma/client";
+import { ExpenseAccount, Prisma } from "@/app/generated/prisma";
 import config from "@/config/config";
 import { IConfig } from "@/types/expenses";
 import { ITransactionUploadRes } from "./types";

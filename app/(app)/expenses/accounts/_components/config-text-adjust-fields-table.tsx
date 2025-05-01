@@ -7,7 +7,7 @@ import { getAccountDetails, updateAccount } from "../actions";
 import { DataTableBasic } from "@/components/data-table/datatable-basic";
 import Loader from "@/components/shared/loader";
 import { createColumnHelper } from "@tanstack/react-table";
-import { Prisma } from "@prisma/client";
+import { Prisma } from "@/app/generated/prisma";
 import { Button } from "@/components/ui/button";
 import { Icons } from "@/components/shared/icons";
 import {
@@ -22,34 +22,34 @@ import { DeleteConfirmButton } from "@/components/DeleteConfirmButton";
 
 const columnHelper = createColumnHelper<IConfigText>();
 const columns = [
-  columnHelper.accessor("scope", {
+  columnHelper.accessor( "scope", {
     id: "scope",
     header: "scope",
     meta: {
       cellInputVariant: "select",
       filterVariant: "select",
-      filterOptions: [{ label: "Line", value: "line" }] as Option[],
+      filterOptions: [ { label: "Line", value: "line" } ] as Option[],
     },
-  }),
-  columnHelper.accessor("source", {
+  } ),
+  columnHelper.accessor( "source", {
     id: "source",
     header: "Source",
     meta: {
       cellInputVariant: "text",
     },
-  }),
-  columnHelper.accessor("replaceWith", {
+  } ),
+  columnHelper.accessor( "replaceWith", {
     id: "replaceWith",
     header: "Replace With",
     meta: {
       cellInputVariant: "text",
     },
-  }),
-  columnHelper.display({
+  } ),
+  columnHelper.display( {
     id: "actions",
     header: "Actions",
     size: 50,
-    cell: ({ row, table, column }) => (
+    cell: ( { row, table, column } ) => (
       <div className="flex flex-row gap-1">
         {row.getIsEditing() && (
           <Button
@@ -81,10 +81,10 @@ const columns = [
           toastId={`config-text-adjust-deletion-${row.id}`}
           toastLabel={`Delete Text Adjustment Config? ${row.original.source}`}
           onClick={() =>
-            table.options.meta?.deleteData!({
+            table.options.meta?.deleteData!( {
               rowId: row.id,
               rowData: row.original,
-            })
+            } )
           }
         >
           <Icons.trash className="size-8" />
@@ -92,7 +92,7 @@ const columns = [
       </div>
     ),
     enableSorting: false,
-  }),
+  } ),
 ];
 
 interface AccountTextAdjustFieldsTableProps {
@@ -106,136 +106,136 @@ const defaultData: IConfigText = {
   replaceWith: "",
 };
 
-const AccountTextAdjustFieldsTable = ({
+const AccountTextAdjustFieldsTable = ( {
   className,
   accountId,
-}: AccountTextAdjustFieldsTableProps) => {
+}: AccountTextAdjustFieldsTableProps ) => {
   const {
     data: account,
     isFetching,
     isLoading,
     refetch,
-  } = useQuery({
-    queryKey: ["account", accountId],
+  } = useQuery( {
+    queryKey: [ "account", accountId ],
     queryFn: async () => {
-      const account = await getAccountDetails(accountId);
+      const account = await getAccountDetails( accountId );
       return account;
     },
     enabled: accountId !== "new" && accountId !== "",
-  });
+  } );
 
-  const { mutate: addAccountTextAdjustFields, isPending } = useMutation({
-    mutationFn: async (data: IConfigText) => {
+  const { mutate: addAccountTextAdjustFields, isPending } = useMutation( {
+    mutationFn: async ( data: IConfigText ) => {
       const config = account?.config as unknown as IConfig;
       const newFileFields = [
-        ...(config.textToAdjust || []),
+        ...( config.textToAdjust || [] ),
         {
           ...data,
         },
       ];
       const newConfig = { ...config, textToAdjust: newFileFields };
-      await updateAccount(accountId, {
-        config: (newConfig as unknown as Prisma.JsonValue) || {},
-      });
+      await updateAccount( accountId, {
+        config: ( newConfig as unknown as Prisma.JsonValue ) || {},
+      } );
     },
     onSuccess: () => {
       refetch();
     },
-  });
+  } );
 
   const { mutate: updateAccountTextAdjustFields, isPending: isUpdatePending } =
-    useMutation({
-      mutationFn: async ({
+    useMutation( {
+      mutationFn: async ( {
         index,
         data,
       }: {
         index: number;
         data: IConfigText;
-      }) => {
+      } ) => {
         const config = account?.config as unknown as IConfig;
         const textToAdjust = config?.textToAdjust || [];
-        const newFileField = { ...(textToAdjust[index] || {}), ...data };
+        const newFileField = { ...( textToAdjust[ index ] || {} ), ...data };
         const newFileFields = [
-          ...textToAdjust.slice(0, index),
+          ...textToAdjust.slice( 0, index ),
           newFileField,
-          ...textToAdjust.slice(index + 1),
+          ...textToAdjust.slice( index + 1 ),
         ];
         // console.log("newFileFields", newFileFields);
         const newConfig = { ...config, textToAdjust: newFileFields };
-        await updateAccount(accountId, {
-          config: (newConfig as unknown as Prisma.JsonValue) || {},
-        });
+        await updateAccount( accountId, {
+          config: ( newConfig as unknown as Prisma.JsonValue ) || {},
+        } );
       },
       onSuccess: () => {
         refetch();
       },
-    });
+    } );
 
   const { mutate: deleteAccountTextAdjustFields, isPending: isDeletePending } =
-    useMutation({
-      mutationFn: async (index: number) => {
+    useMutation( {
+      mutationFn: async ( index: number ) => {
         const config = account?.config as unknown as IConfig;
         const textToAdjust = config?.textToAdjust || [];
         const newFileFields = [
-          ...textToAdjust.slice(0, index),
-          ...textToAdjust.slice(index + 1),
+          ...textToAdjust.slice( 0, index ),
+          ...textToAdjust.slice( index + 1 ),
         ];
         const newConfig = { ...config, textToAdjust: newFileFields };
-        await updateAccount(accountId, {
-          config: (newConfig as unknown as Prisma.JsonValue) || {},
-        });
+        await updateAccount( accountId, {
+          config: ( newConfig as unknown as Prisma.JsonValue ) || {},
+        } );
       },
       onSuccess: () => {
         refetch();
       },
-    });
+    } );
 
-  if (isLoading || isFetching) return <Loader />;
+  if ( isLoading || isFetching ) return <Loader />;
 
   const config = account?.config as unknown as IConfig;
 
   return (
-    <div className={cn("mt-2 flex flex-1 flex-col", className)}>
+    <div className={cn( "mt-2 flex flex-1 flex-col", className )}>
       <DataTableBasic
         title="TextAdjust"
         data={config.textToAdjust || []}
         columns={columns}
         enableMultiRowEdit={false}
         defaultPagination={{ pageSize: 10, pageIndex: 0 }}
-        defaultSorting={[{ id: "source", desc: false }]}
+        defaultSorting={[ { id: "source", desc: false } ]}
         defaultColumnVisibility={{}}
         refetch={() => refetch()}
         rowEditFormaAsDialog
-        rowEditForm={(props) => (
+        rowEditForm={( props ) => (
           <DataTableRowEditForm
             {...props}
             defaultData={defaultData}
             zodSchema={ConfigTextAdjustFieldsSchema}
           />
         )}
-        updateData={({ rowId, rowData }) => {
-          const rowIndex = Number(rowId);
+        updateData={( { rowId, rowData } ) => {
+          const rowIndex = Number( rowId );
           // console.log("updateData", { rowIndex, columnId, value, rowData });
           rowIndex < 0
-            ? addAccountTextAdjustFields(rowData)
-            : updateAccountTextAdjustFields({ index: rowIndex, data: rowData });
+            ? addAccountTextAdjustFields( rowData )
+            : updateAccountTextAdjustFields( { index: rowIndex, data: rowData } );
         }}
-        updateCellData={({ rowId, rowData, columnId, value }) => {
-          const rowIndex = Number(rowId);
+        updateCellData={( { rowId, rowData, columnId, value } ) => {
+          const rowIndex = Number( rowId );
           // console.log("updateData", { rowIndex, columnId, value, rowData });
           const newFileField = {
             ...rowData,
-            ...{ [columnId]: value },
+            ...{ [ columnId ]: value },
           };
-          updateAccountTextAdjustFields({
+          updateAccountTextAdjustFields( {
             index: rowIndex,
             data: newFileField,
-          });
+          } );
         }}
-        deleteData={({ rowId, rowData }) => {
-          const rowIndex = Number(rowId);
+        deleteData={( { rowId, rowData } ) => {
+          const rowIndex = Number( rowId );
           // console.log("deleteData", { rowIndex, rowData });
-          deleteAccountTextAdjustFields(rowIndex);
+          deleteAccountTextAdjustFields( rowIndex );
         }}
       />
     </div>

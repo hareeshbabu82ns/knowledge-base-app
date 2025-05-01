@@ -12,7 +12,7 @@ import {
 import { DataTableBasic } from "@/components/data-table/datatable-basic";
 import Loader from "@/components/shared/loader";
 import { createColumnHelper } from "@tanstack/react-table";
-import { LoanExtraPayments, Prisma } from "@prisma/client";
+import { LoanExtraPayments, Prisma } from "@/app/generated/prisma";
 import { filterFnDateRange } from "@/components/data-table/utils";
 import { Button } from "@/components/ui/button";
 import { Icons } from "@/components/shared/icons";
@@ -32,42 +32,42 @@ const defaultData: LoanExtraPayments = {
 
 const columnHelper = createColumnHelper<LoanExtraPayments>();
 const columns = [
-  columnHelper.accessor("id", {
+  columnHelper.accessor( "id", {
     id: "id",
     header: "id",
-  }),
-  columnHelper.accessor("date", {
+  } ),
+  columnHelper.accessor( "date", {
     id: "date",
     header: "Date",
-    cell: (info: any) => (
-      <p className="text-sm font-medium">{format(info.getValue(), "PP")}</p>
+    cell: ( info: any ) => (
+      <p className="text-sm font-medium">{format( info.getValue(), "PP" )}</p>
     ),
     filterFn: filterFnDateRange,
     meta: {
       cellInputVariant: "date",
       filterVariant: "dateRange",
     },
-  }),
-  columnHelper.accessor("amount", {
+  } ),
+  columnHelper.accessor( "amount", {
     id: "amount",
     header: "Amount",
     meta: {
       cellInputVariant: "number",
     },
-  }),
-  columnHelper.accessor("continue", {
+  } ),
+  columnHelper.accessor( "continue", {
     id: "continue",
     header: "Continuous",
     size: 50,
     meta: {
       cellInputVariant: "switch",
     },
-  }),
-  columnHelper.display({
+  } ),
+  columnHelper.display( {
     id: "actions",
     header: "Actions",
     size: 50,
-    cell: ({ row, table }) => (
+    cell: ( { row, table } ) => (
       <div className="flex flex-row gap-1">
         {row.getCanEdit() && (
           <Button
@@ -88,10 +88,10 @@ const columns = [
           toastId={`loan-extra-payments-deletion-${row.id}`}
           toastLabel={`Delete Extra Payment? ${row.original.amount}`}
           onClick={() =>
-            table.options.meta?.deleteData!({
+            table.options.meta?.deleteData!( {
               rowId: row.id,
               rowData: row.original,
-            })
+            } )
           }
         >
           <Icons.trash className="size-8" />
@@ -99,7 +99,7 @@ const columns = [
       </div>
     ),
     enableSorting: false,
-  }),
+  } ),
 ];
 
 interface ExtraPaymentsTableProps {
@@ -107,86 +107,86 @@ interface ExtraPaymentsTableProps {
   loanId: string;
 }
 
-const ExtraPaymentsTable = ({ className, loanId }: ExtraPaymentsTableProps) => {
+const ExtraPaymentsTable = ( { className, loanId }: ExtraPaymentsTableProps ) => {
   const {
     data: extraPayments,
     isFetching,
     isLoading,
     refetch,
-  } = useQuery({
-    queryKey: ["extraPayments", loanId],
+  } = useQuery( {
+    queryKey: [ "extraPayments", loanId ],
     queryFn: async () => {
-      const extraPayments = await fetchLoanExtraPayments(loanId);
+      const extraPayments = await fetchLoanExtraPayments( loanId );
       return extraPayments;
     },
     enabled: loanId !== "new" && loanId !== "",
-  });
+  } );
 
-  const { mutate: addExtraPayment, isPending } = useMutation({
-    mutationFn: async (data: Prisma.LoanExtraPaymentsCreateInput) => {
-      await createLoanExtraPayments({
+  const { mutate: addExtraPayment, isPending } = useMutation( {
+    mutationFn: async ( data: Prisma.LoanExtraPaymentsCreateInput ) => {
+      await createLoanExtraPayments( {
         ...data,
-      });
+      } );
     },
     onSuccess: () => {
       refetch();
     },
-  });
+  } );
 
   const { mutate: updateExtraPayment, isPending: isUpdatePending } =
-    useMutation({
-      mutationFn: async ({
+    useMutation( {
+      mutationFn: async ( {
         id,
         data,
       }: {
-        id: LoanExtraPayments["id"];
+        id: LoanExtraPayments[ "id" ];
         data: Prisma.LoanExtraPaymentsUpdateInput;
-      }) => {
-        await updateLoanExtraPayments(id, data);
+      } ) => {
+        await updateLoanExtraPayments( id, data );
       },
       onSuccess: () => {
         refetch();
       },
-    });
+    } );
 
   const { mutate: deleteExtraPayment, isPending: isDeletePending } =
-    useMutation({
-      mutationFn: async (id: LoanExtraPayments["id"]) => {
-        await deleteLoanExtraPayments(id);
+    useMutation( {
+      mutationFn: async ( id: LoanExtraPayments[ "id" ] ) => {
+        await deleteLoanExtraPayments( id );
       },
       onSuccess: () => {
         refetch();
       },
-    });
+    } );
 
-  if (isLoading || isFetching) return <Loader />;
+  if ( isLoading || isFetching ) return <Loader />;
 
   return (
-    <div className={cn("mt-2 flex flex-1 flex-col", className)}>
+    <div className={cn( "mt-2 flex flex-1 flex-col", className )}>
       <DataTableBasic
         title="Extra Payments"
         data={extraPayments || []}
         columns={columns}
-        defaultSorting={[{ id: "date", desc: true }]}
+        defaultSorting={[ { id: "date", desc: true } ]}
         defaultColumnVisibility={{ id: false }}
         refetch={() => refetch()}
         rowEditFormaAsDialog
-        rowEditForm={(props) => (
+        rowEditForm={( props ) => (
           <DataTableRowEditForm
             {...props}
             defaultData={defaultData}
             zodSchema={LoanExtraPaymentSchema}
           />
         )}
-        updateData={({ rowId, rowData }) => {
+        updateData={( { rowId, rowData } ) => {
           // console.log("updateData", { rowId, rowData });
-          if (rowId === "-1")
-            addExtraPayment({ ...rowData, loan: { connect: { id: loanId } } });
-          else updateExtraPayment({ id: rowId, data: rowData });
+          if ( rowId === "-1" )
+            addExtraPayment( { ...rowData, loan: { connect: { id: loanId } } } );
+          else updateExtraPayment( { id: rowId, data: rowData } );
         }}
-        deleteData={({ rowId, rowData }) => {
+        deleteData={( { rowId, rowData } ) => {
           // console.log("deleteData", { rowId, rowData });
-          deleteExtraPayment(rowId);
+          deleteExtraPayment( rowId );
         }}
       />
     </div>

@@ -1,13 +1,13 @@
 "use client";
 
-import { ExpenseAccount, Prisma } from "@prisma/client";
+import { ExpenseAccount, Prisma } from "@/app/generated/prisma";
 import { AccountForm } from "./account-form";
 import AccountTagFieldsTable from "./config-tags-table";
 import AccountFileFieldsTable from "./config-file-fields-table";
 import AccountIgnoreFieldsTable from "./config-ignore-fields-table";
 import AccountTextAdjustFieldsTable from "./config-text-adjust-fields-table";
 
-const AccountDetails = ({ account }: { account: ExpenseAccount }) => {
+const AccountDetails = ( { account }: { account: ExpenseAccount } ) => {
   return (
     <div className="flex flex-col gap-4">
       <AccountForm

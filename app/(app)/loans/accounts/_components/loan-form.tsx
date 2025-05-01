@@ -1,7 +1,7 @@
 "use client";
 
 import { getLoanSchema } from "@/lib/validations/loans";
-import { Loan, Prisma } from "@prisma/client";
+import { Loan, Prisma } from "@/app/generated/prisma";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -26,21 +26,21 @@ import { calculateEMI } from "../../utils";
 import { DeleteConfirmButton } from "@/components/DeleteConfirmButton";
 
 interface LoanFormProps {
-  id: Loan["id"];
+  id: Loan[ "id" ];
   data: Partial<Loan>;
   type: "create" | "update";
   // onSubmit: (data: Partial<Loan>) => Promise<Loan | null>;
 }
-export const LoanForm = ({ id, data, type }: LoanFormProps) => {
+export const LoanForm = ( { id, data, type }: LoanFormProps ) => {
   const router = useRouter();
   const session = useSession();
-  const [isLoading, setIsLoading] = useState(false);
+  const [ isLoading, setIsLoading ] = useState( false );
   const queryClient = useQueryClient();
 
-  const FormValidation = getLoanSchema(type);
+  const FormValidation = getLoanSchema( type );
 
-  const form = useForm<z.infer<typeof FormValidation>>({
-    resolver: zodResolver(FormValidation),
+  const form = useForm<z.infer<typeof FormValidation>>( {
+    resolver: zodResolver( FormValidation ),
     defaultValues: {
       id: id ? id : "",
       name: data.name ? data.name : "",
@@ -52,31 +52,31 @@ export const LoanForm = ({ id, data, type }: LoanFormProps) => {
       durationMonths: data?.durationMonths || 360,
       interestRate: data?.interestRate || 0.0,
     },
-  });
+  } );
 
   const {
     formState: { errors },
   } = form;
 
-  const updateMutation = useMutation({
-    mutationKey: ["loan", id],
-    mutationFn: async ({
+  const updateMutation = useMutation( {
+    mutationKey: [ "loan", id ],
+    mutationFn: async ( {
       id,
       values,
     }: {
-      id: Loan["id"];
+      id: Loan[ "id" ];
       values: z.infer<typeof FormValidation>;
-    }) => {
+    } ) => {
       const emi =
         values.emi === 0.0
           ? Number(
-              calculateEMI({
-                principal: values.amount,
-                annualInterestRate: values.interestRate,
-                loanTermMonths: values.durationMonths,
-                paymentFrequency: values.frequency,
-              }).toFixed(2),
-            )
+            calculateEMI( {
+              principal: values.amount,
+              annualInterestRate: values.interestRate,
+              loanTermMonths: values.durationMonths,
+              paymentFrequency: values.frequency,
+            } ).toFixed( 2 ),
+          )
           : values.emi;
       const updateData = {
         name: values.name,
@@ -88,37 +88,37 @@ export const LoanForm = ({ id, data, type }: LoanFormProps) => {
         emi,
         interestRate: values.interestRate,
       } as Prisma.LoanUpdateInput;
-      const updatedData = await updateAction(id, updateData);
+      const updatedData = await updateAction( id, updateData );
       return updatedData;
     },
     onMutate: async () => {
-      setIsLoading(true);
+      setIsLoading( true );
     },
-    onSuccess: (updatedData) => {
-      queryClient.invalidateQueries({ queryKey: ["loans", "loan", id] });
-      form.reset(updatedData);
-      toast.success("Loan updated successfully");
+    onSuccess: ( updatedData ) => {
+      queryClient.invalidateQueries( { queryKey: [ "loans", "loan", id ] } );
+      form.reset( updatedData );
+      toast.success( "Loan updated successfully" );
     },
-    onError: (error) => {
-      console.log(error);
-      toast.error("An error occurred. Please try again.");
+    onError: ( error ) => {
+      console.log( error );
+      toast.error( "An error occurred. Please try again." );
     },
     onSettled: () => {
-      setIsLoading(false);
+      setIsLoading( false );
     },
-  });
-  const createMutation = useMutation({
-    mutationFn: async (values: z.infer<typeof FormValidation>) => {
+  } );
+  const createMutation = useMutation( {
+    mutationFn: async ( values: z.infer<typeof FormValidation> ) => {
       const emi =
         values.emi === 0.0
           ? Number(
-              calculateEMI({
-                principal: values.amount,
-                annualInterestRate: values.interestRate,
-                loanTermMonths: values.durationMonths,
-                paymentFrequency: values.frequency,
-              }).toFixed(2),
-            )
+            calculateEMI( {
+              principal: values.amount,
+              annualInterestRate: values.interestRate,
+              loanTermMonths: values.durationMonths,
+              paymentFrequency: values.frequency,
+            } ).toFixed( 2 ),
+          )
           : values.emi;
       const createData = {
         name: values.name,
@@ -131,61 +131,61 @@ export const LoanForm = ({ id, data, type }: LoanFormProps) => {
         interestRate: values.interestRate,
         user: { connect: { id: session.data?.user.id } },
       } as Prisma.LoanCreateInput;
-      const createdData = await createAction(createData);
+      const createdData = await createAction( createData );
       return createdData;
     },
     onMutate: async () => {
-      setIsLoading(true);
+      setIsLoading( true );
     },
-    onSuccess: (createdData) => {
-      queryClient.invalidateQueries({ queryKey: ["loans"] });
+    onSuccess: ( createdData ) => {
+      queryClient.invalidateQueries( { queryKey: [ "loans" ] } );
       form.reset();
-      router.push(`/loans/accounts/${createdData.id}`);
+      router.push( `/loans/accounts/${createdData.id}` );
       router.refresh();
-      toast.success("Loan created successfully");
+      toast.success( "Loan created successfully" );
     },
-    onError: (error) => {
-      console.log(error);
-      toast.error("An error occurred. Please try again.");
+    onError: ( error ) => {
+      console.log( error );
+      toast.error( "An error occurred. Please try again." );
     },
     onSettled: () => {
-      setIsLoading(false);
+      setIsLoading( false );
     },
-  });
-  const deleteMutation = useMutation({
-    mutationKey: ["loans"],
-    mutationFn: async (id: Loan["id"]) => {
-      const deletedData = await deleteAction(id);
+  } );
+  const deleteMutation = useMutation( {
+    mutationKey: [ "loans" ],
+    mutationFn: async ( id: Loan[ "id" ] ) => {
+      const deletedData = await deleteAction( id );
       return deletedData;
     },
     onMutate: async () => {
-      setIsLoading(true);
+      setIsLoading( true );
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["loans"] });
-      router.replace("/loans/accounts");
+      queryClient.invalidateQueries( { queryKey: [ "loans" ] } );
+      router.replace( "/loans/accounts" );
       router.refresh();
-      toast.success("Loan deleted successfully");
+      toast.success( "Loan deleted successfully" );
     },
-    onError: (error) => {
-      console.log(error);
-      toast.error("An error occurred. Please try again.");
+    onError: ( error ) => {
+      console.log( error );
+      toast.error( "An error occurred. Please try again." );
     },
     onSettled: () => {
-      setIsLoading(false);
+      setIsLoading( false );
     },
-  });
+  } );
 
-  const onSubmit = async (values: z.infer<typeof FormValidation>) => {
-    if (type === "update" && id) {
-      updateMutation.mutate({ id, values });
+  const onSubmit = async ( values: z.infer<typeof FormValidation> ) => {
+    if ( type === "update" && id ) {
+      updateMutation.mutate( { id, values } );
     } else {
-      createMutation.mutate(values);
+      createMutation.mutate( values );
     }
   };
 
   let buttonLabel;
-  switch (type) {
+  switch ( type ) {
     case "create":
       buttonLabel = "Create";
       break;
@@ -195,7 +195,7 @@ export const LoanForm = ({ id, data, type }: LoanFormProps) => {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="flex-1 space-y-6">
+      <form onSubmit={form.handleSubmit( onSubmit )} className="flex-1 space-y-6">
         <section className="mb-5 space-y-4">
           <h1 className="header">
             {type === "create" ? "New Loan" : "Update Loan"}
@@ -234,13 +234,13 @@ export const LoanForm = ({ id, data, type }: LoanFormProps) => {
               placeholder="Select loan type"
               className="@lg/details:max-w-[200px]"
             >
-              {loanFrequency.map((loan, i) => (
+              {loanFrequency.map( ( loan, i ) => (
                 <SelectItem key={loan.label + i} value={loan.value}>
                   <div className="flex cursor-pointer items-center gap-2">
                     <p>{loan.label}</p>
                   </div>
                 </SelectItem>
-              ))}
+              ) )}
             </CustomFormField>
 
             <CustomFormField
@@ -308,7 +308,7 @@ export const LoanForm = ({ id, data, type }: LoanFormProps) => {
             type="button"
             toastId={`loan-deletion-${id}`}
             toastLabel={`Delete Loan? ${data.name}`}
-            onClick={() => deleteMutation.mutate(id)}
+            onClick={() => deleteMutation.mutate( id )}
             disabled={type === "create" || isLoading}
           >
             Delete

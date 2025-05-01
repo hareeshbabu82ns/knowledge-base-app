@@ -1,11 +1,11 @@
 "use client";
 
-import { Loan } from "@prisma/client";
+import { Loan } from "@/app/generated/prisma";
 import { LoanForm } from "./loan-form";
 import RoiTable from "./roi-table";
 import ExtraPaymentsTable from "./extra-payments-table";
 
-const LoanDetails = ({ loan }: { loan: Loan }) => {
+const LoanDetails = ( { loan }: { loan: Loan } ) => {
   return (
     <div className="flex flex-col gap-4">
       <LoanForm

@@ -18,20 +18,20 @@ import { subMonths } from "date-fns";
 import { DataQueryCharts } from "./data-query-charts";
 import DataTableRowEditForm from "@/components/data-table/datatable-row-edit-form";
 import { ExpenseTransactionSchema } from "@/lib/validations/expense-account";
-import { Prisma } from "@prisma/client";
+import { Prisma } from "@/app/generated/prisma";
 import { Button } from "@/components/ui/button";
 import { Icons } from "@/components/shared/icons";
 import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
 
-const defaultSorting: SortingState = [{ id: "date", desc: true }];
+const defaultSorting: SortingState = [ { id: "date", desc: true } ];
 const defaultColumnVisibility: VisibilityState = {
   id: false,
   type: false,
 };
 const defaultColumnFilters: ColumnFiltersState = [
-  { id: "date", value: [subMonths(new Date(), 6), new Date()] },
+  { id: "date", value: [ subMonths( new Date(), 6 ), new Date() ] },
 ];
 
 const defaultData: Partial<ExpenseTransactionWithAccount> = {
@@ -43,7 +43,7 @@ const defaultData: Partial<ExpenseTransactionWithAccount> = {
   tags: [],
 };
 
-async function addFn(data: Partial<ExpenseTransactionWithAccount>) {
+async function addFn( data: Partial<ExpenseTransactionWithAccount> ) {
   const dbData: Prisma.ExpenseTransactionCreateInput = {
     date: data.date,
     description: data.description,
@@ -53,16 +53,16 @@ async function addFn(data: Partial<ExpenseTransactionWithAccount>) {
     type: data.type,
     tags: data.tags || [],
   };
-  await createExpenseTransaction(dbData);
+  await createExpenseTransaction( dbData );
 }
 
-async function updateFn({
+async function updateFn( {
   rowId,
   rowData,
 }: {
   rowId: string;
   rowData: Partial<ExpenseTransactionWithAccount>;
-}) {
+} ) {
   // console.log({ rowId, rowData });
   const dbData: Prisma.ExpenseTransactionUpdateInput = {
     date: rowData.date,
@@ -72,22 +72,22 @@ async function updateFn({
     type: rowData.type,
     tags: rowData.tags || [],
   };
-  await updateExpenseTransaction(rowId, dbData);
+  await updateExpenseTransaction( rowId, dbData );
 }
 
-async function deleteFn({ rowId }: { rowId: string }) {
+async function deleteFn( { rowId }: { rowId: string } ) {
   // console.log({ rowId, rowData });
-  await deleteExpenseTransaction(rowId);
+  await deleteExpenseTransaction( rowId );
 }
 
 export function DataTable() {
-  const [filters, setFilters] =
-    useState<ColumnFiltersState>(defaultColumnFilters);
+  const [ filters, setFilters ] =
+    useState<ColumnFiltersState>( defaultColumnFilters );
 
-  const { mutate: reprocessFn, isPending: isReProcessPending } = useMutation({
+  const { mutate: reprocessFn, isPending: isReProcessPending } = useMutation( {
     mutationFn: reprocessDBTransactions,
-    mutationKey: ["transactions", filters],
-  });
+    mutationKey: [ "transactions", filters ],
+  } );
 
   return (
     <div className="flex flex-col gap-4">
@@ -104,11 +104,11 @@ export function DataTable() {
         defaultColumnFilters={defaultColumnFilters}
         onColumnFiltersChange={setFilters}
         isFiltersOpen={true}
-        beforeTable={({ table }: any) => (
+        beforeTable={( { table }: any ) => (
           <DataQueryCharts columnFilters={table?.getState().columnFilters} />
         )}
         rowEditFormaAsDialog
-        rowEditForm={(props) => (
+        rowEditForm={( props ) => (
           <DataTableRowEditForm
             {...props}
             defaultData={defaultData}
@@ -126,14 +126,14 @@ export function DataTable() {
                 reprocessFn(
                   { filters },
                   {
-                    onSuccess: (data) => {
+                    onSuccess: ( data ) => {
                       toast.success(
                         `${data.rowCount} Transactions Re-Processed \n ${data.rowCountIgnored} Transactions Ignored`,
                       );
                     },
-                    onError: (error) => {
-                      console.error(error);
-                      toast.error("Error Re-Processing Transactions");
+                    onError: ( error ) => {
+                      console.error( error );
+                      toast.error( "Error Re-Processing Transactions" );
                     },
                   },
                 );

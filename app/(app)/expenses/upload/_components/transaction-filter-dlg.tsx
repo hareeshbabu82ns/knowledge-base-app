@@ -9,7 +9,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Prisma } from "@prisma/client";
+import { Prisma } from "@/app/generated/prisma";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ConfigAddTagForm from "../../accounts/_components/config-add-tag-form";
@@ -22,7 +22,7 @@ interface TransactionFilterDlgProps {
   rowData: Prisma.ExpenseTransactionCreateManyInput;
 }
 
-export function TransactionFilterDlg({ rowData }: TransactionFilterDlgProps) {
+export function TransactionFilterDlg( { rowData }: TransactionFilterDlgProps ) {
   return (
     <Dialog>
       <DialogTrigger asChild>

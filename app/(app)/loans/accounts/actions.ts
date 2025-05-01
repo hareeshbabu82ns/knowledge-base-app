@@ -3,7 +3,12 @@
 import { Option } from "@/components/ui/multi-select";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { Loan, LoanExtraPayments, LoanRates, Prisma } from "@prisma/client";
+import {
+  Loan,
+  LoanExtraPayments,
+  LoanRates,
+  Prisma,
+} from "@/app/generated/prisma";
 import { connect } from "http2";
 
 // Loans

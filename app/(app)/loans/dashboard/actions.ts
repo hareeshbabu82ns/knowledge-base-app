@@ -1,7 +1,7 @@
 "use server";
 
 import { db } from "@/lib/db";
-import { Loan } from "@prisma/client";
+import { Loan } from "@/app/generated/prisma";
 
 export const getLoanDetailsWithSub = async (id: Loan["id"]) => {
   const dbLoan = await db.loan.findUnique({

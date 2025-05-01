@@ -13,33 +13,33 @@ import { useQuery } from "@tanstack/react-query";
 import Loader from "@/components/shared/loader";
 import { useState } from "react";
 import { fetchAccounts } from "../../accounts/actions";
-import { ExpenseAccount } from "@prisma/client";
+import { ExpenseAccount } from "@/app/generated/prisma";
 
-const ExpenseAccountsDDLB = ({
+const ExpenseAccountsDDLB = ( {
   onSelect,
 }: {
-  onSelect: (account?: ExpenseAccount) => void;
-}) => {
-  const [selected, setSelected] = useState<string>("");
+  onSelect: ( account?: ExpenseAccount ) => void;
+} ) => {
+  const [ selected, setSelected ] = useState<string>( "" );
 
   const {
     data: accountsDDLB,
     isLoading,
     isFetching,
-  } = useQuery({
-    queryKey: ["accountsDDLB"],
+  } = useQuery( {
+    queryKey: [ "accountsDDLB" ],
     queryFn: async () => await fetchAccounts(),
-  });
+  } );
 
-  if (isLoading || isFetching) return <Loader />;
+  if ( isLoading || isFetching ) return <Loader />;
 
   return (
     <div>
       <Select
-        onValueChange={(v) => {
-          const acc = accountsDDLB?.find((a) => a.id === v);
-          onSelect && onSelect(acc);
-          setSelected(v);
+        onValueChange={( v ) => {
+          const acc = accountsDDLB?.find( ( a ) => a.id === v );
+          onSelect && onSelect( acc );
+          setSelected( v );
         }}
         value={selected || ""}
       >
@@ -49,11 +49,11 @@ const ExpenseAccountsDDLB = ({
         <SelectContent>
           <SelectGroup>
             <SelectLabel>Accounts</SelectLabel>
-            {accountsDDLB?.map((acc) => (
+            {accountsDDLB?.map( ( acc ) => (
               <SelectItem key={acc.id} value={acc.id}>
                 {acc.name}
               </SelectItem>
-            ))}
+            ) )}
           </SelectGroup>
         </SelectContent>
       </Select>

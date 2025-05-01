@@ -2,7 +2,7 @@
 
 import SingleFileUploadForm from "@/components/shared/single-file-upload-form";
 import { useCallback, useState } from "react";
-import { ExpenseAccount } from "@prisma/client";
+import { ExpenseAccount } from "@/app/generated/prisma";
 import { uploadTransactions } from "./actions";
 import { toast } from "sonner";
 import { useMutation, useQuery } from "@tanstack/react-query";
@@ -32,66 +32,66 @@ import {
 import { Icons } from "@/components/shared/icons";
 
 const ExpensesUploadPage = () => {
-  const [selectedAccount, setSelectedAccount] = useState<
+  const [ selectedAccount, setSelectedAccount ] = useState<
     ExpenseAccount | undefined
-  >(undefined);
+  >( undefined );
 
-  const [isPreview, setIsPreview] = useState(true);
-  const [data, setData] = useState<any>(undefined);
-  const [urls, setUrls] = useState<string[]>([]);
+  const [ isPreview, setIsPreview ] = useState( true );
+  const [ data, setData ] = useState<any>( undefined );
+  const [ urls, setUrls ] = useState<string[]>( [] );
   // const [urls, setUrls] = useState<string[]>([
   //   "/uploads/2024-09-06/2024-09-06-2024-02-ATB-Har-CC.csv-759208900.csv",
   // ]);
-  const { mutateAsync: uploadTransactionsFn, isPending } = useMutation({
+  const { mutateAsync: uploadTransactionsFn, isPending } = useMutation( {
     mutationFn: uploadTransactions,
-    mutationKey: ["uploadTransactions", selectedAccount?.id],
-  });
+    mutationKey: [ "uploadTransactions", selectedAccount?.id ],
+  } );
 
   const {
     data: accountsDDLB,
     isLoading,
     isFetching,
-  } = useQuery({
-    queryKey: ["accountsDDLB"],
+  } = useQuery( {
+    queryKey: [ "accountsDDLB" ],
     queryFn: async () => await fetchAccounts(),
-  });
+  } );
 
   const handleOnChangeFiles = useCallback(
-    (files: File[]) => {
-      if (files.length === 0) {
+    ( files: File[] ) => {
+      if ( files.length === 0 ) {
         return;
       }
-      const fileName = files[0].name;
-      const acc = accountsDDLB?.find((a) => fileName.includes(a.name));
-      setSelectedAccount(acc?.id ? acc : undefined);
+      const fileName = files[ 0 ].name;
+      const acc = accountsDDLB?.find( ( a ) => fileName.includes( a.name ) );
+      setSelectedAccount( acc?.id ? acc : undefined );
     },
-    [accountsDDLB],
+    [ accountsDDLB ],
   );
 
   const handleOnUploadSuccess = useCallback(
-    async (urls: string[]) => {
-      if (!selectedAccount) {
-        toast.info("Please select an Account");
+    async ( urls: string[] ) => {
+      if ( !selectedAccount ) {
+        toast.info( "Please select an Account" );
         return;
       }
       try {
-        const res = await uploadTransactionsFn({
-          url: urls[0],
+        const res = await uploadTransactionsFn( {
+          url: urls[ 0 ],
           account: selectedAccount,
           preview: isPreview,
-        });
-        setData(res);
-        setUrls(urls);
-        toast.info(`Uploaded Successfully? ${isPreview ? "Preview" : "DB"}`);
-      } catch (e) {
-        console.log(e);
-        toast.error("An error occurred. Please try again.");
+        } );
+        setData( res );
+        setUrls( urls );
+        toast.info( `Uploaded Successfully? ${isPreview ? "Preview" : "DB"}` );
+      } catch ( e ) {
+        console.log( e );
+        toast.error( "An error occurred. Please try again." );
       }
     },
-    [selectedAccount, isPreview, uploadTransactionsFn],
+    [ selectedAccount, isPreview, uploadTransactionsFn ],
   );
 
-  if (isLoading || isFetching) return <Loader />;
+  if ( isLoading || isFetching ) return <Loader />;
 
   return (
     <div className="flex flex-col gap-4">
@@ -99,9 +99,9 @@ const ExpensesUploadPage = () => {
         <div className="flex flex-row gap-4 sm:flex-col">
           {/* <ExpenseAccountsDDLB onSelect={setSelectedAccount} /> */}
           <Select
-            onValueChange={(v) => {
-              const acc = accountsDDLB?.find((a) => a.id === v);
-              setSelectedAccount(acc);
+            onValueChange={( v ) => {
+              const acc = accountsDDLB?.find( ( a ) => a.id === v );
+              setSelectedAccount( acc );
             }}
             value={selectedAccount?.id || ""}
           >
@@ -111,11 +111,11 @@ const ExpensesUploadPage = () => {
             <SelectContent>
               <SelectGroup>
                 <SelectLabel>Accounts</SelectLabel>
-                {accountsDDLB?.map((acc) => (
+                {accountsDDLB?.map( ( acc ) => (
                   <SelectItem key={acc.id} value={acc.id}>
                     {acc.name}
                   </SelectItem>
-                ))}
+                ) )}
               </SelectGroup>
             </SelectContent>
           </Select>
@@ -123,7 +123,7 @@ const ExpensesUploadPage = () => {
             <Checkbox
               id="preview"
               checked={isPreview}
-              onCheckedChange={(v) => setIsPreview(v as boolean)}
+              onCheckedChange={( v ) => setIsPreview( v as boolean )}
             />
             <label
               htmlFor="preview"
@@ -137,8 +137,8 @@ const ExpensesUploadPage = () => {
             disabled={!urls || urls.length === 0}
             type="button"
             onClick={() => {
-              setData(undefined);
-              handleOnUploadSuccess(urls);
+              setData( undefined );
+              handleOnUploadSuccess( urls );
             }}
           >
             Re Process
@@ -147,7 +147,7 @@ const ExpensesUploadPage = () => {
         <SingleFileUploadForm
           // disabled={!selectedAccount}
           label="Upload Transactions"
-          allowedTypes={["text/csv"]}
+          allowedTypes={[ "text/csv" ]}
           onUploadSuccess={handleOnUploadSuccess}
           onChangeFiles={handleOnChangeFiles}
         />

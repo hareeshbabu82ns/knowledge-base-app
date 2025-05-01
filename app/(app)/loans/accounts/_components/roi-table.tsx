@@ -12,7 +12,7 @@ import {
 import { DataTableBasic } from "@/components/data-table/datatable-basic";
 import Loader from "@/components/shared/loader";
 import { createColumnHelper } from "@tanstack/react-table";
-import { LoanRates, Prisma } from "@prisma/client";
+import { LoanRates, Prisma } from "@/app/generated/prisma";
 import { filterFnDateRange } from "@/components/data-table/utils";
 import { Button } from "@/components/ui/button";
 import { Icons } from "@/components/shared/icons";
@@ -30,34 +30,34 @@ const defaultRoi: LoanRates = {
 };
 const columnHelper = createColumnHelper<LoanRates>();
 const columns = [
-  columnHelper.accessor("id", {
+  columnHelper.accessor( "id", {
     id: "id",
     header: "id",
-  }),
-  columnHelper.accessor("date", {
+  } ),
+  columnHelper.accessor( "date", {
     id: "date",
     header: "Date",
-    cell: (info: any) => (
-      <p className="text-sm font-medium">{format(info.getValue(), "PP")}</p>
+    cell: ( info: any ) => (
+      <p className="text-sm font-medium">{format( info.getValue(), "PP" )}</p>
     ),
     filterFn: filterFnDateRange,
     meta: {
       cellInputVariant: "date",
       filterVariant: "dateRange",
     },
-  }),
-  columnHelper.accessor("rate", {
+  } ),
+  columnHelper.accessor( "rate", {
     id: "rate",
     header: "Interest Rate (%)",
     meta: {
       cellInputVariant: "number",
     },
-  }),
-  columnHelper.display({
+  } ),
+  columnHelper.display( {
     id: "actions",
     header: "Actions",
     size: 50,
-    cell: ({ row, table, column }) => (
+    cell: ( { row, table, column } ) => (
       <div className="flex flex-row gap-1">
         {row.getCanEdit() && (
           <Button
@@ -78,10 +78,10 @@ const columns = [
           toastId={`loan-roi-deletion-${row.id}`}
           toastLabel={`Delete ROI? ${row.original.rate}`}
           onClick={() =>
-            table.options.meta?.deleteData!({
+            table.options.meta?.deleteData!( {
               rowId: row.id,
               rowData: row.original,
-            })
+            } )
           }
         >
           <Icons.trash className="size-8" />
@@ -89,7 +89,7 @@ const columns = [
       </div>
     ),
     enableSorting: false,
-  }),
+  } ),
 ];
 
 interface RoiTableProps {
@@ -97,86 +97,86 @@ interface RoiTableProps {
   loanId: string;
 }
 
-const RoiTable = ({ className, loanId }: RoiTableProps) => {
+const RoiTable = ( { className, loanId }: RoiTableProps ) => {
   const {
     data: rois,
     isFetching,
     isLoading,
     refetch,
-  } = useQuery({
-    queryKey: ["rois", loanId],
+  } = useQuery( {
+    queryKey: [ "rois", loanId ],
     queryFn: async () => {
-      const rates = await fetchLoanRates(loanId);
+      const rates = await fetchLoanRates( loanId );
       return rates;
     },
     enabled: loanId !== "new" && loanId !== "",
-  });
+  } );
 
-  const { mutate: addRoi, isPending } = useMutation({
-    mutationFn: async (data: Prisma.LoanRatesCreateInput) => {
-      await createLoanRates({
+  const { mutate: addRoi, isPending } = useMutation( {
+    mutationFn: async ( data: Prisma.LoanRatesCreateInput ) => {
+      await createLoanRates( {
         ...data,
-      });
+      } );
     },
     onSuccess: () => {
       refetch();
     },
-  });
+  } );
 
-  const { mutate: updateRoi, isPending: isUpdatePending } = useMutation({
-    mutationFn: async ({
+  const { mutate: updateRoi, isPending: isUpdatePending } = useMutation( {
+    mutationFn: async ( {
       id,
       data,
     }: {
-      id: LoanRates["id"];
+      id: LoanRates[ "id" ];
       data: Prisma.LoanRatesUpdateInput;
-    }) => {
-      await updateLoanRates(id, data);
+    } ) => {
+      await updateLoanRates( id, data );
     },
     onSuccess: () => {
       refetch();
     },
-  });
+  } );
 
-  const { mutate: deleteRoi, isPending: isDeletePending } = useMutation({
-    mutationFn: async (id: LoanRates["id"]) => {
-      await deleteLoanRates(id);
+  const { mutate: deleteRoi, isPending: isDeletePending } = useMutation( {
+    mutationFn: async ( id: LoanRates[ "id" ] ) => {
+      await deleteLoanRates( id );
     },
     onSuccess: () => {
       refetch();
     },
-  });
+  } );
 
-  if (isLoading || isFetching) return <Loader />;
+  if ( isLoading || isFetching ) return <Loader />;
 
   return (
-    <div className={cn("mt-2 flex flex-1 flex-col", className)}>
+    <div className={cn( "mt-2 flex flex-1 flex-col", className )}>
       <DataTableBasic
         title="Anual Interest Rates"
         data={rois || []}
-        getRowId={(row) => row.id}
+        getRowId={( row ) => row.id}
         columns={columns}
-        defaultSorting={[{ id: "date", desc: true }]}
+        defaultSorting={[ { id: "date", desc: true } ]}
         defaultColumnVisibility={{ id: false }}
         refetch={() => refetch()}
         rowEditFormaAsDialog
-        rowEditForm={(props) => (
+        rowEditForm={( props ) => (
           <DataTableRowEditForm
             {...props}
             defaultData={defaultRoi}
             zodSchema={LoanRoiSchema}
           />
         )}
-        updateData={({ rowId, rowData }) => {
+        updateData={( { rowId, rowData } ) => {
           // console.log("updateData", { rowId, rowData });
-          if (rowId === "-1")
-            addRoi({ ...rowData, loan: { connect: { id: loanId } } });
-          else updateRoi({ id: rowId, data: rowData });
+          if ( rowId === "-1" )
+            addRoi( { ...rowData, loan: { connect: { id: loanId } } } );
+          else updateRoi( { id: rowId, data: rowData } );
         }}
-        deleteData={({ rowId, rowData }) => {
+        deleteData={( { rowId, rowData } ) => {
           // console.log("deleteData", { rowIndex, rowData });
           const id = rowData?.id || rowId;
-          if (id) deleteRoi(id);
+          if ( id ) deleteRoi( id );
         }}
       />
     </div>

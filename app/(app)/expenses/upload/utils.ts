@@ -1,6 +1,6 @@
 import { trimNewLineChar, trimQuotes } from "@/lib/utils";
 import { IConfig } from "@/types/expenses";
-import { ExpenseAccount, Prisma } from "@prisma/client";
+import { ExpenseAccount, Prisma } from "@/app/generated/prisma";
 import { parse } from "date-fns";
 
 export const preprocessTags = (tags?: string[]) => {

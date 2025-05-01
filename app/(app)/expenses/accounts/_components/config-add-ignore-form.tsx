@@ -1,7 +1,7 @@
 "use client";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Prisma } from "@prisma/client";
+import { Prisma } from "@/app/generated/prisma";
 import React from "react";
 import { useForm } from "@tanstack/react-form";
 import { ConfigComparisionEnum, IConfigIgnoreOptions } from "@/types/expenses";
@@ -26,30 +26,30 @@ interface CompProps {
   rowData: Prisma.ExpenseTransactionCreateManyInput;
 }
 
-const ConfigAddIgnoreForm = ({ rowData }: CompProps) => {
-  const { mutate: addAccountConfigIgnoreFieldsFn } = useMutation({
-    mutationFn: async (data: IConfigIgnoreOptions) => {
-      return addAccountConfigIgnoreFields(rowData.account, [data]);
+const ConfigAddIgnoreForm = ( { rowData }: CompProps ) => {
+  const { mutate: addAccountConfigIgnoreFieldsFn } = useMutation( {
+    mutationFn: async ( data: IConfigIgnoreOptions ) => {
+      return addAccountConfigIgnoreFields( rowData.account, [ data ] );
     },
     onSuccess: () => {
-      toast.success("Filter added successfully");
+      toast.success( "Filter added successfully" );
     },
-  });
+  } );
 
-  const form = useForm<IConfigIgnoreOptions>({
+  const form = useForm<IConfigIgnoreOptions>( {
     defaultValues: {
       name: "description",
       comparision: "STARTS_WITH",
       value: rowData.description || "",
     },
-    onSubmit: async ({ value }) => {
-      addAccountConfigIgnoreFieldsFn(value);
+    onSubmit: async ( { value } ) => {
+      addAccountConfigIgnoreFieldsFn( value );
     },
-  });
+  } );
 
   return (
     <form
-      onSubmit={(e) => {
+      onSubmit={( e ) => {
         e.preventDefault();
         e.stopPropagation();
         form.handleSubmit();
@@ -57,7 +57,7 @@ const ConfigAddIgnoreForm = ({ rowData }: CompProps) => {
     >
       <div className="grid gap-4 py-4">
         <form.Field name="name">
-          {(field) => {
+          {( field ) => {
             return (
               <div className="space-y-1">
                 <Label htmlFor={field.name}>Field</Label>
@@ -69,7 +69,7 @@ const ConfigAddIgnoreForm = ({ rowData }: CompProps) => {
                     <SelectValue placeholder={field.name} />
                   </SelectTrigger>
                   <SelectContent>
-                    {generateFilterOptions(configTagNameOptions)}
+                    {generateFilterOptions( configTagNameOptions )}
                   </SelectContent>
                 </Select>
               </div>
@@ -77,13 +77,13 @@ const ConfigAddIgnoreForm = ({ rowData }: CompProps) => {
           }}
         </form.Field>
         <form.Field name="comparision">
-          {(field) => {
+          {( field ) => {
             return (
               <div className="space-y-1">
                 <Label htmlFor={field.name}>Comparision</Label>
                 <Select
-                  onValueChange={(v) =>
-                    field.handleChange(v as ConfigComparisionEnum)
+                  onValueChange={( v ) =>
+                    field.handleChange( v as ConfigComparisionEnum )
                   }
                   value={field.state.value || ""}
                 >
@@ -91,7 +91,7 @@ const ConfigAddIgnoreForm = ({ rowData }: CompProps) => {
                     <SelectValue placeholder={field.name} />
                   </SelectTrigger>
                   <SelectContent>
-                    {generateFilterOptions(configComparisionOptions)}
+                    {generateFilterOptions( configComparisionOptions )}
                   </SelectContent>
                 </Select>
               </div>
@@ -101,12 +101,12 @@ const ConfigAddIgnoreForm = ({ rowData }: CompProps) => {
         <form.Field
           name="value"
           validators={{
-            onSubmit: ({ value }) => {
+            onSubmit: ( { value } ) => {
               return value ? undefined : "Value is required";
             },
           }}
         >
-          {(field) => {
+          {( field ) => {
             return (
               <div className="space-y-1">
                 <Label htmlFor={field.name}>Value</Label>
@@ -114,14 +114,14 @@ const ConfigAddIgnoreForm = ({ rowData }: CompProps) => {
                   id={field.name}
                   name={field.name}
                   onBlur={field.handleBlur}
-                  onChange={(e) => field.handleChange(e.target.value)}
+                  onChange={( e ) => field.handleChange( e.target.value )}
                   type="text"
                   value={field.state.value}
                   placeholder={field.name}
                 />
                 {field.state.meta.errors ? (
                   <em className="text-destructive text-sm">
-                    {field.state.meta.errors.join(", ")}
+                    {field.state.meta.errors.join( ", " )}
                   </em>
                 ) : null}
               </div>
@@ -139,15 +139,15 @@ const ConfigAddIgnoreForm = ({ rowData }: CompProps) => {
   );
 };
 
-function generateFilterOptions(filterOptions?: Option[]) {
-  if (!filterOptions) return null;
+function generateFilterOptions( filterOptions?: Option[] ) {
+  if ( !filterOptions ) return null;
 
-  return filterOptions.map(({ value, label }) => (
+  return filterOptions.map( ( { value, label } ) => (
     <SelectItem key={value} value={value}>
       <div className="flex cursor-pointer items-center gap-2">
         <p>{label}</p>
       </div>
     </SelectItem>
-  ));
+  ) );
 }
 export default ConfigAddIgnoreForm;

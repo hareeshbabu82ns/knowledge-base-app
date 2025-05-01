@@ -1,5 +1,5 @@
 import { Badge } from "@/components/ui/badge";
-import { ExpenseAccount, ExpenseTransaction } from "@prisma/client";
+import { ExpenseAccount, ExpenseTransaction } from "@/app/generated/prisma";
 import { createColumnHelper } from "@tanstack/react-table";
 import { fetchAccounts, fetchTags } from "../accounts/actions";
 import { cn } from "@/lib/utils";
@@ -26,35 +26,35 @@ export type ExpenseTransactionWithAccount = ExpenseTransaction & {
 const columnHelper =
   createColumnHelper<Partial<ExpenseTransactionWithAccount>>();
 export const columns = [
-  columnHelper.accessor("id", {
+  columnHelper.accessor( "id", {
     id: "id",
     header: "ID",
-  }),
-  columnHelper.accessor("date", {
+  } ),
+  columnHelper.accessor( "date", {
     id: "date",
     size: 100,
     header: "Date",
     meta: { filterVariant: "dateRange", cellInputVariant: "date" },
-    cell: (info: any) => (
-      <p className="text-sm font-medium">{format(info.getValue(), "PP")}</p>
+    cell: ( info: any ) => (
+      <p className="text-sm font-medium">{format( info.getValue(), "PP" )}</p>
     ),
-  }),
-  columnHelper.accessor("description", {
+  } ),
+  columnHelper.accessor( "description", {
     id: "description",
     header: "Description",
     meta: { filterVariant: "text", cellInputVariant: "text" },
     size: 500,
-  }),
-  columnHelper.accessor("amount", {
+  } ),
+  columnHelper.accessor( "amount", {
     id: "amount",
     size: 50,
     header: "Amount",
     meta: { filterVariant: "range", cellInputVariant: "number" },
-    cell: ({ row }) => {
-      const amount = parseFloat(row.getValue("amount"));
-      const formatted = new Intl.NumberFormat("en-CA", {
+    cell: ( { row } ) => {
+      const amount = parseFloat( row.getValue( "amount" ) );
+      const formatted = new Intl.NumberFormat( "en-CA", {
         minimumFractionDigits: 2,
-      }).format(amount);
+      } ).format( amount );
 
       return (
         <div
@@ -69,8 +69,8 @@ export const columns = [
         </div>
       );
     },
-  }),
-  columnHelper.accessor("accountObj.name", {
+  } ),
+  columnHelper.accessor( "accountObj.name", {
     id: "accountObj",
     header: "Account",
     size: 50,
@@ -83,15 +83,15 @@ export const columns = [
       subObjectLabelField: "name",
       filterOptionsFn: async () => {
         const accounts = await fetchAccounts();
-        return accounts.map((account) => ({
+        return accounts.map( ( account ) => ( {
           label: account.name,
           value: account.id,
-        }));
+        } ) );
       },
     },
     // cell: (info: any) => info.getValue().name,
-  }),
-  columnHelper.accessor("tags", {
+  } ),
+  columnHelper.accessor( "tags", {
     id: "tags",
     header: "Tags",
     meta: {
@@ -100,23 +100,23 @@ export const columns = [
       fieldType: "array",
       filterOptionsFn: async () => {
         const tags = await fetchTags();
-        return tags.map((tag) => ({
+        return tags.map( ( tag ) => ( {
           label: tag.tag,
           value: tag.tag,
-        }));
+        } ) );
       },
     },
-    cell: (info: any) => (
+    cell: ( info: any ) => (
       <div className="flex flex-row gap-1 text-sm font-medium">
-        {info.getValue().map((tag: string, i: number) => (
+        {info.getValue().map( ( tag: string, i: number ) => (
           <Badge variant="outline" key={`${tag}-${i}`}>
             {tag}
           </Badge>
-        ))}
+        ) )}
       </div>
     ),
-  }),
-  columnHelper.accessor("type", {
+  } ),
+  columnHelper.accessor( "type", {
     id: "type",
     header: "Type",
     meta: {
@@ -124,12 +124,12 @@ export const columns = [
       filterVariant: "multiSelect",
       filterOptions: ExpenseTypeOptions,
     },
-  }),
-  columnHelper.display({
+  } ),
+  columnHelper.display( {
     id: "actions",
     header: "Actions",
     size: 50,
-    cell: ({ row, table, column }) => (
+    cell: ( { row, table, column } ) => (
       <>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -142,7 +142,7 @@ export const columns = [
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
             <DropdownMenuItem
               onClick={() =>
-                navigator.clipboard.writeText(row.original.description || "")
+                navigator.clipboard.writeText( row.original.description || "" )
               }
             >
               <Icons.booking className="mr-2 size-4" />
@@ -162,7 +162,7 @@ export const columns = [
             <DropdownMenuItem
               disabled={!table.options.meta?.deleteData}
               onClick={() => {
-                toast.error(`Delete Transaction? ${row.original.description}`, {
+                toast.error( `Delete Transaction? ${row.original.description}`, {
                   id: `expense-transaction-deletion-${row.id}`,
                   duration: Infinity,
                   closeButton: true,
@@ -173,17 +173,17 @@ export const columns = [
                       className="ml-auto"
                       onClick={() => {
                         row.getIsEditing() && row.toggleEditing();
-                        table.options.meta?.deleteData!({
+                        table.options.meta?.deleteData!( {
                           rowId: row.id,
                           rowData: row.original,
-                        });
-                        toast.dismiss(row.original.id);
+                        } );
+                        toast.dismiss( row.original.id );
                       }}
                     >
                       <Icons.trash className="size-4" />
                     </Button>
                   ),
-                });
+                } );
               }}
             >
               <Icons.trash className="mr-2 size-4" />
@@ -204,10 +204,10 @@ export const columns = [
                         onClick={async () => {
                           row.getIsEditing() && row.toggleEditing();
                           try {
-                            await ignoreExpenseTransaction(row.id);
-                            toast.success("Transaction moved to Ignored List");
-                          } catch (e) {
-                            console.error(e);
+                            await ignoreExpenseTransaction( row.id );
+                            toast.success( "Transaction moved to Ignored List" );
+                          } catch ( e ) {
+                            console.error( e );
                             toast.error(
                               "Failed to move transaction to Ignored List",
                             );
@@ -228,17 +228,17 @@ export const columns = [
         </DropdownMenu>
         <TransactionAmountSplitter
           row={row}
-          onSave={async (splits: number[]) => {
+          onSave={async ( splits: number[] ) => {
             row.getIsEditing() && row.toggleEditing();
             try {
-              await splitExpenseTransaction({
+              await splitExpenseTransaction( {
                 id: row.id,
-                splits: splits.map((s) => ({ amount: s })),
-              });
-              toast.success("Transaction splitted successfully");
-            } catch (e) {
-              console.error(e);
-              toast.error("Transaction split failed");
+                splits: splits.map( ( s ) => ( { amount: s } ) ),
+              } );
+              toast.success( "Transaction splitted successfully" );
+            } catch ( e ) {
+              console.error( e );
+              toast.error( "Transaction split failed" );
             }
           }}
         />
@@ -246,5 +246,5 @@ export const columns = [
     ),
     enableSorting: false,
     enableHiding: false,
-  }),
+  } ),
 ];

@@ -2,7 +2,7 @@
 import { auth } from "@/lib/auth";
 import config from "@/config/config";
 import { db } from "@/lib/db";
-import { ExpenseAccount, ExpenseTags, Prisma } from "@prisma/client";
+import { ExpenseAccount, ExpenseTags, Prisma } from "@/app/generated/prisma";
 import { join } from "path";
 import { readFile } from "fs/promises";
 import {

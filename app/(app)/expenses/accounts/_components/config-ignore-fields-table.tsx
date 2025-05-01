@@ -7,7 +7,7 @@ import { getAccountDetails, updateAccount } from "../actions";
 import { DataTableBasic } from "@/components/data-table/datatable-basic";
 import Loader from "@/components/shared/loader";
 import { createColumnHelper } from "@tanstack/react-table";
-import { Prisma } from "@prisma/client";
+import { Prisma } from "@/app/generated/prisma";
 import { Button } from "@/components/ui/button";
 import { Icons } from "@/components/shared/icons";
 import {
@@ -22,7 +22,7 @@ import { DeleteConfirmButton } from "@/components/DeleteConfirmButton";
 
 const columnHelper = createColumnHelper<IConfigIgnoreOptions>();
 const columns = [
-  columnHelper.accessor("name", {
+  columnHelper.accessor( "name", {
     id: "name",
     header: "Name",
     meta: {
@@ -32,8 +32,8 @@ const columns = [
         { label: "Description", value: "description" },
       ] as Option[],
     },
-  }),
-  columnHelper.accessor("comparision", {
+  } ),
+  columnHelper.accessor( "comparision", {
     id: "comparision",
     header: "Comparision",
     meta: {
@@ -41,25 +41,25 @@ const columns = [
       filterVariant: "select",
       filterOptions: configComparisionOptions,
     },
-    cell: (info: any) => {
+    cell: ( info: any ) => {
       const value = info.getValue();
-      if (!value) return null;
-      const option = configComparisionOptions.find((o) => o.value === value);
+      if ( !value ) return null;
+      const option = configComparisionOptions.find( ( o ) => o.value === value );
       return option?.label || value;
     },
-  }),
-  columnHelper.accessor("value", {
+  } ),
+  columnHelper.accessor( "value", {
     id: "value",
     header: "value",
     meta: {
       cellInputVariant: "text",
     },
-  }),
-  columnHelper.display({
+  } ),
+  columnHelper.display( {
     id: "actions",
     header: "Actions",
     size: 50,
-    cell: ({ row, table, column }) => (
+    cell: ( { row, table, column } ) => (
       <div className="flex flex-row gap-1">
         {row.getIsEditing() && (
           <Button
@@ -91,10 +91,10 @@ const columns = [
           toastId={`config-ignore-fields-deletion-${row.id}`}
           toastLabel={`Delete Ignore Config? ${row.original.name}`}
           onClick={() =>
-            table.options.meta?.deleteData!({
+            table.options.meta?.deleteData!( {
               rowId: row.id,
               rowData: row.original,
-            })
+            } )
           }
         >
           <Icons.trash className="size-8" />
@@ -102,7 +102,7 @@ const columns = [
       </div>
     ),
     enableSorting: false,
-  }),
+  } ),
 ];
 
 interface AccountIgnoreFieldsTableProps {
@@ -116,133 +116,133 @@ const defaultData: IConfigIgnoreOptions = {
   value: "",
 };
 
-const AccountIgnoreFieldsTable = ({
+const AccountIgnoreFieldsTable = ( {
   className,
   accountId,
-}: AccountIgnoreFieldsTableProps) => {
+}: AccountIgnoreFieldsTableProps ) => {
   const {
     data: account,
     isFetching,
     isLoading,
     refetch,
-  } = useQuery({
-    queryKey: ["account", accountId],
+  } = useQuery( {
+    queryKey: [ "account", accountId ],
     queryFn: async () => {
-      const account = await getAccountDetails(accountId);
+      const account = await getAccountDetails( accountId );
       return account;
     },
     enabled: accountId !== "new" && accountId !== "",
-  });
+  } );
 
-  const { mutate: addAccountIgnoreFields, isPending } = useMutation({
-    mutationFn: async (data: IConfigIgnoreOptions) => {
+  const { mutate: addAccountIgnoreFields, isPending } = useMutation( {
+    mutationFn: async ( data: IConfigIgnoreOptions ) => {
       const config = account?.config as unknown as IConfig;
       const newFileFields = [
-        ...(config.ignoreOps || []),
+        ...( config.ignoreOps || [] ),
         {
           ...data,
         },
       ];
       const newConfig = { ...config, ignoreOps: newFileFields };
-      await updateAccount(accountId, {
-        config: (newConfig as unknown as Prisma.JsonValue) || {},
-      });
+      await updateAccount( accountId, {
+        config: ( newConfig as unknown as Prisma.JsonValue ) || {},
+      } );
     },
     onSuccess: () => {
       refetch();
     },
-  });
+  } );
 
   const { mutate: updateAccountIgnoreFields, isPending: isUpdatePending } =
-    useMutation({
-      mutationFn: async ({
+    useMutation( {
+      mutationFn: async ( {
         index,
         data,
       }: {
         index: number;
         data: IConfigIgnoreOptions;
-      }) => {
+      } ) => {
         const config = account?.config as unknown as IConfig;
         const ignoreOps = config?.ignoreOps || [];
-        const newFileField = { ...(ignoreOps[index] || {}), ...data };
+        const newFileField = { ...( ignoreOps[ index ] || {} ), ...data };
         const newFileFields = [
-          ...ignoreOps.slice(0, index),
+          ...ignoreOps.slice( 0, index ),
           newFileField,
-          ...ignoreOps.slice(index + 1),
+          ...ignoreOps.slice( index + 1 ),
         ];
         // console.log("newFileFields", newFileFields);
         const newConfig = { ...config, ignoreOps: newFileFields };
-        await updateAccount(accountId, {
-          config: (newConfig as unknown as Prisma.JsonValue) || {},
-        });
+        await updateAccount( accountId, {
+          config: ( newConfig as unknown as Prisma.JsonValue ) || {},
+        } );
       },
       onSuccess: () => {
         refetch();
       },
-    });
+    } );
 
   const { mutate: deleteAccountIgnoreFields, isPending: isDeletePending } =
-    useMutation({
-      mutationFn: async (index: number) => {
+    useMutation( {
+      mutationFn: async ( index: number ) => {
         const config = account?.config as unknown as IConfig;
         const ignoreOps = config?.ignoreOps || [];
         const newFileFields = [
-          ...ignoreOps.slice(0, index),
-          ...ignoreOps.slice(index + 1),
+          ...ignoreOps.slice( 0, index ),
+          ...ignoreOps.slice( index + 1 ),
         ];
         const newConfig = { ...config, ignoreOps: newFileFields };
-        await updateAccount(accountId, {
-          config: (newConfig as unknown as Prisma.JsonValue) || {},
-        });
+        await updateAccount( accountId, {
+          config: ( newConfig as unknown as Prisma.JsonValue ) || {},
+        } );
       },
       onSuccess: () => {
         refetch();
       },
-    });
+    } );
 
-  if (isLoading || isFetching) return <Loader />;
+  if ( isLoading || isFetching ) return <Loader />;
 
   const config = account?.config as unknown as IConfig;
 
   return (
-    <div className={cn("mt-2 flex flex-1 flex-col", className)}>
+    <div className={cn( "mt-2 flex flex-1 flex-col", className )}>
       <DataTableBasic
         title="Ignore Fields"
         data={config.ignoreOps || []}
         columns={columns}
         enableMultiRowEdit={false}
         defaultPagination={{ pageSize: 10, pageIndex: 0 }}
-        defaultSorting={[{ id: "comparision", desc: false }]}
+        defaultSorting={[ { id: "comparision", desc: false } ]}
         defaultColumnVisibility={{}}
         refetch={() => refetch()}
         rowEditFormaAsDialog
-        rowEditForm={(props) => (
+        rowEditForm={( props ) => (
           <DataTableRowEditForm
             {...props}
             defaultData={defaultData}
             zodSchema={ConfigIgnoreFieldsSchema}
           />
         )}
-        updateData={({ rowId, rowData }) => {
-          const rowIndex = Number(rowId);
+        updateData={( { rowId, rowData } ) => {
+          const rowIndex = Number( rowId );
           // console.log("updateData", { rowIndex, columnId, value, rowData });
           rowIndex < 0
-            ? addAccountIgnoreFields(rowData)
-            : updateAccountIgnoreFields({ index: rowIndex, data: rowData });
+            ? addAccountIgnoreFields( rowData )
+            : updateAccountIgnoreFields( { index: rowIndex, data: rowData } );
         }}
-        updateCellData={({ rowId, rowData, columnId, value }) => {
-          const rowIndex = Number(rowId);
+        updateCellData={( { rowId, rowData, columnId, value } ) => {
+          const rowIndex = Number( rowId );
           // console.log("updateData", { rowIndex, columnId, value, rowData });
           const newFileField = {
             ...rowData,
-            ...{ [columnId]: value },
+            ...{ [ columnId ]: value },
           };
-          updateAccountIgnoreFields({ index: rowIndex, data: newFileField });
+          updateAccountIgnoreFields( { index: rowIndex, data: newFileField } );
         }}
-        deleteData={({ rowId, rowData }) => {
-          const rowIndex = Number(rowId);
+        deleteData={( { rowId, rowData } ) => {
+          const rowIndex = Number( rowId );
           // console.log("deleteData", { rowIndex, rowData });
-          deleteAccountIgnoreFields(rowIndex);
+          deleteAccountIgnoreFields( rowIndex );
         }}
       />
     </div>

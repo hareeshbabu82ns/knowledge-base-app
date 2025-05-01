@@ -7,7 +7,7 @@ import { fetchTags, getAccountDetails, updateAccount } from "../actions";
 import { DataTableBasic } from "@/components/data-table/datatable-basic";
 import Loader from "@/components/shared/loader";
 import { createColumnHelper, filterFns } from "@tanstack/react-table";
-import { Prisma } from "@prisma/client";
+import { Prisma } from "@/app/generated/prisma";
 import { Button } from "@/components/ui/button";
 import { Icons } from "@/components/shared/icons";
 import {
@@ -26,21 +26,21 @@ import { DeleteConfirmButton } from "@/components/DeleteConfirmButton";
 
 const columnHelper = createColumnHelper<IConfigTagOptions>();
 const columns = [
-  columnHelper.accessor("name", {
+  columnHelper.accessor( "name", {
     id: "name",
     header: "Name",
     meta: {
       cellInputVariant: "select",
       filterOptions: configTagNameOptions,
     },
-    cell: (info: any) => {
+    cell: ( info: any ) => {
       const value = info.getValue();
-      if (!value) return null;
-      const option = configTagNameOptions.find((o) => o.value === value);
+      if ( !value ) return null;
+      const option = configTagNameOptions.find( ( o ) => o.value === value );
       return option?.label || value;
     },
-  }),
-  columnHelper.accessor("comparision", {
+  } ),
+  columnHelper.accessor( "comparision", {
     id: "comparision",
     header: "Comparision",
     meta: {
@@ -48,22 +48,22 @@ const columns = [
       filterVariant: "select",
       filterOptions: configComparisionOptions,
     },
-    cell: (info: any) => {
+    cell: ( info: any ) => {
       const value = info.getValue();
-      if (!value) return null;
-      const option = configComparisionOptions.find((o) => o.value === value);
+      if ( !value ) return null;
+      const option = configComparisionOptions.find( ( o ) => o.value === value );
       return option?.label || value;
     },
-  }),
-  columnHelper.accessor("value", {
+  } ),
+  columnHelper.accessor( "value", {
     id: "value",
     header: "Value",
     meta: {
       cellInputVariant: "text",
       filterVariant: "text",
     },
-  }),
-  columnHelper.accessor("tags", {
+  } ),
+  columnHelper.accessor( "tags", {
     id: "tags",
     header: "Tags",
     filterFn: filterFns.arrIncludes,
@@ -73,35 +73,35 @@ const columns = [
       fieldType: "array",
       filterOptionsFn: async () => {
         const tags = await fetchTags();
-        return tags.map((tag) => ({
+        return tags.map( ( tag ) => ( {
           label: tag.tag,
           value: tag.tag,
-        }));
+        } ) );
       },
     },
-    cell: (info: any) => {
+    cell: ( info: any ) => {
       const value = info.getValue();
-      const tags = Array.isArray(value)
+      const tags = Array.isArray( value )
         ? value
         : value
-          ? (value as string).split(",")
+          ? ( value as string ).split( "," )
           : [];
       return (
         <div className="flex flex-row gap-1 text-sm font-medium">
-          {tags.map((tag: string, i: number) => (
+          {tags.map( ( tag: string, i: number ) => (
             <Badge variant="outline" key={`${tag}-${i}`}>
               {tag}
             </Badge>
-          ))}
+          ) )}
         </div>
       );
     },
-  }),
-  columnHelper.display({
+  } ),
+  columnHelper.display( {
     id: "actions",
     header: "Actions",
     size: 50,
-    cell: ({ row, table, column }) => (
+    cell: ( { row, table, column } ) => (
       <div className="flex flex-row gap-1">
         {row.getCanEdit() && (
           <Button
@@ -122,10 +122,10 @@ const columns = [
           toastId={`config-tags-deletion-${row.id}`}
           toastLabel={`Delete Tag Config? ${row.original.name}`}
           onClick={() =>
-            table.options.meta?.deleteData!({
+            table.options.meta?.deleteData!( {
               rowId: row.id,
               rowData: row.original,
-            })
+            } )
           }
         >
           <Icons.trash className="size-8" />
@@ -133,7 +133,7 @@ const columns = [
       </div>
     ),
     enableSorting: false,
-  }),
+  } ),
 ];
 
 interface AccountTagFieldsTableProps {
@@ -148,129 +148,129 @@ const defaultTagOpt: IConfigTagOptions = {
   tags: [],
 };
 
-const AccountTagFieldsTable = ({
+const AccountTagFieldsTable = ( {
   className,
   accountId,
-}: AccountTagFieldsTableProps) => {
+}: AccountTagFieldsTableProps ) => {
   const {
     data: account,
     isFetching,
     isLoading,
     refetch,
-  } = useQuery({
-    queryKey: ["account", accountId],
+  } = useQuery( {
+    queryKey: [ "account", accountId ],
     queryFn: async () => {
-      const account = await getAccountDetails(accountId);
+      const account = await getAccountDetails( accountId );
       return account;
     },
     enabled: accountId !== "new" && accountId !== "",
-  });
+  } );
 
-  const { mutate: addAccountTagFields, isPending } = useMutation({
-    mutationFn: async (data: IConfigTagOptions) => {
+  const { mutate: addAccountTagFields, isPending } = useMutation( {
+    mutationFn: async ( data: IConfigTagOptions ) => {
       const config = account?.config as unknown as IConfig;
       const newTagOps = [
-        ...(config.tagOps || []),
+        ...( config.tagOps || [] ),
         {
           ...data,
         },
       ];
       const newConfig = { ...config, tagOps: newTagOps };
-      await updateAccount(accountId, {
-        config: (newConfig as unknown as Prisma.JsonValue) || {},
-      });
+      await updateAccount( accountId, {
+        config: ( newConfig as unknown as Prisma.JsonValue ) || {},
+      } );
     },
     onSuccess: () => {
       refetch();
     },
-  });
+  } );
 
   const { mutate: updateAccountTagFields, isPending: isUpdatePending } =
-    useMutation({
-      mutationFn: async ({
+    useMutation( {
+      mutationFn: async ( {
         index,
         data,
       }: {
         index: number;
         data: IConfigTagOptions;
-      }) => {
+      } ) => {
         const config = account?.config as unknown as IConfig;
         const tagOpts = config?.tagOps || [];
-        const newTagOpt = { ...(tagOpts[index] || {}), ...data };
+        const newTagOpt = { ...( tagOpts[ index ] || {} ), ...data };
         const newTagOps = [
-          ...tagOpts.slice(0, index),
+          ...tagOpts.slice( 0, index ),
           newTagOpt,
-          ...tagOpts.slice(index + 1),
+          ...tagOpts.slice( index + 1 ),
         ];
         const newConfig = { ...config, tagOps: newTagOps };
-        await updateAccount(accountId, {
-          config: (newConfig as unknown as Prisma.JsonValue) || {},
-        });
+        await updateAccount( accountId, {
+          config: ( newConfig as unknown as Prisma.JsonValue ) || {},
+        } );
       },
       onSuccess: () => {
         refetch();
       },
-    });
+    } );
 
   const { mutate: deleteAccountTagFields, isPending: isDeletePending } =
-    useMutation({
-      mutationFn: async (index: number) => {
+    useMutation( {
+      mutationFn: async ( index: number ) => {
         const config = account?.config as unknown as IConfig;
         const tagOpts = config?.tagOps || [];
         const newTagOps = [
-          ...tagOpts.slice(0, index),
-          ...tagOpts.slice(index + 1),
+          ...tagOpts.slice( 0, index ),
+          ...tagOpts.slice( index + 1 ),
         ];
         const newConfig = { ...config, tagOps: newTagOps };
-        await updateAccount(accountId, {
-          config: (newConfig as unknown as Prisma.JsonValue) || {},
-        });
+        await updateAccount( accountId, {
+          config: ( newConfig as unknown as Prisma.JsonValue ) || {},
+        } );
       },
       onSuccess: () => {
         refetch();
       },
-    });
+    } );
 
-  if (isLoading || isFetching) return <Loader />;
+  if ( isLoading || isFetching ) return <Loader />;
 
   const config = account?.config as unknown as IConfig;
 
   return (
-    <div className={cn("mt-2 flex flex-1 flex-col", className)}>
+    <div className={cn( "mt-2 flex flex-1 flex-col", className )}>
       <DataTableBasic
         title="Tag Fields"
         data={config.tagOps || []}
         columns={columns}
         enableMultiRowEdit={false}
         defaultPagination={{ pageSize: 10, pageIndex: 0 }}
-        defaultSorting={[{ id: "value", desc: false }]}
+        defaultSorting={[ { id: "value", desc: false } ]}
         defaultColumnVisibility={{}}
         refetch={() => refetch()}
         rowEditFormaAsDialog
-        rowEditForm={(props) => (
+        rowEditForm={( props ) => (
           <DataTableRowEditForm
             {...props}
             defaultData={defaultTagOpt}
             zodSchema={ConfigTagFieldsSchema}
           />
         )}
-        updateData={({ rowId, rowData }) => {
-          const rowIndex = Number(rowId);
+        updateData={( { rowId, rowData } ) => {
+          const rowIndex = Number( rowId );
           rowIndex < 0
-            ? addAccountTagFields(rowData)
-            : updateAccountTagFields({ index: rowIndex, data: rowData });
+            ? addAccountTagFields( rowData )
+            : updateAccountTagFields( { index: rowIndex, data: rowData } );
         }}
-        updateCellData={({ rowId, rowData, columnId, value }) => {
-          const rowIndex = Number(rowId);
+        updateCellData={( { rowId, rowData, columnId, value } ) => {
+          const rowIndex = Number( rowId );
           const newTagOpt = {
             ...rowData,
-            ...{ [columnId]: value },
+            ...{ [ columnId ]: value },
           };
-          updateAccountTagFields({ index: rowIndex, data: rowData });
+          updateAccountTagFields( { index: rowIndex, data: rowData } );
         }}
-        deleteData={({ rowId }) => {
-          const rowIndex = Number(rowId);
-          deleteAccountTagFields(rowIndex);
+        deleteData={( { rowId } ) => {
+          const rowIndex = Number( rowId );
+          deleteAccountTagFields( rowIndex );
         }}
       />
     </div>
