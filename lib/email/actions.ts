@@ -3,6 +3,7 @@
 import { UserRole } from "@/app/generated/prisma";
 import { db } from "../db";
 import { Resend } from "resend";
+import { JSX } from "react";
 
 export async function sendMail({
   to,

@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
 import "react-datepicker/dist/react-datepicker.css";
-import "./globals.css";
-import { fontSans } from "@/lib/fonts";
+import { fontSans, fontMono } from "@/lib/fonts";
 import { cn } from "@/lib/utils";
 import { siteConfig } from "@/config/site";
 import { ThemeProvider } from "@/components/providers";
+
+import "./globals.css";
 
 export const metadata: Metadata = {
   title: {
@@ -23,16 +24,16 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default function RootLayout( {
   children,
 }: Readonly<{
   children: React.ReactNode;
-}>) {
+}> ) {
   return (
     <html lang="en" suppressHydrationWarning>
       <head />
       <body
-        className={cn("min-h-screen font-sans antialiased", fontSans.variable)}
+        className={cn( fontSans.variable, fontMono.variable, "min-h-screen antialiased bg-background text-foreground" )}
       >
         <ThemeProvider
           attribute="class"

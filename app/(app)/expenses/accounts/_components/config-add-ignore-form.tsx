@@ -36,10 +36,10 @@ const ConfigAddIgnoreForm = ( { rowData }: CompProps ) => {
     },
   } );
 
-  const form = useForm<IConfigIgnoreOptions>( {
+  const form = useForm( {
     defaultValues: {
       name: "description",
-      comparision: "STARTS_WITH",
+      comparision: "STARTS_WITH" as ConfigComparisionEnum,
       value: rowData.description || "",
     },
     onSubmit: async ( { value } ) => {
@@ -130,7 +130,7 @@ const ConfigAddIgnoreForm = ( { rowData }: CompProps ) => {
         </form.Field>
         <div className="mt-4 flex flex-row-reverse gap-2">
           <Button type="submit">Add Filter</Button>
-          <Button type="button" variant="outline" onClick={form.reset}>
+          <Button type="button" variant="outline" onClick={() => form.reset()}>
             Reset
           </Button>
         </div>

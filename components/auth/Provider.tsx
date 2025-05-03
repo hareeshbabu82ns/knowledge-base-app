@@ -3,13 +3,13 @@ import { ReactNode } from "react";
 import { apiRoutePrefix } from "@/config/routes";
 import { auth } from "@/lib/auth";
 
-export default async function NextAuthProvider({
+export default async function NextAuthProvider( {
   children,
 }: {
   children: ReactNode;
-}) {
+} ) {
   const session = await auth();
-  if (session && session.user) {
+  if ( session && session.user ) {
     session.user = {
       id: session.user.id,
       name: session.user.name,

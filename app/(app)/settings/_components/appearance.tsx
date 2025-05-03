@@ -1,10 +1,25 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import { DesktopIcon } from "@radix-ui/react-icons";
+import { CheckIcon, MoonIcon, SunIcon } from "lucide-react";
 import { useTheme } from "next-themes";
+import { useEffect, useState } from "react";
 
 export default function AppearanceSettings() {
-  const { setTheme } = useTheme();
+  const { theme, setTheme } = useTheme();
+  const [ mounted, setMounted ] = useState( false )
+
+  // Only render UI after mounted to avoid hydration issues
+  useEffect( () => {
+    setMounted( true )
+  }, [] )
+
+  if ( !mounted ) {
+    return null
+  }
+
   return (
     <div>
       <div className="my-4 space-y-4">
@@ -19,9 +34,9 @@ export default function AppearanceSettings() {
           asChild
           variant={"ghost"}
           className="size-fit"
-          onClick={() => setTheme("light")}
+          onClick={() => setTheme( "light" )}
         >
-          <div className="flex flex-col">
+          <div className="flex flex-col gap-3">
             <div className="border-muted hover:border-accent items-center rounded-md border-2 p-1">
               <div className="space-y-2 rounded-sm bg-[#ecedef] p-2">
                 <div className="space-y-2 rounded-md bg-white p-2 shadow-sm">
@@ -38,18 +53,19 @@ export default function AppearanceSettings() {
                 </div>
               </div>
             </div>
-            <span className="block w-full p-2 text-center font-normal">
+            <div className="gap-2 flex items-center justify-center rounded-md">
+              <SunIcon className={cn( "size-4", theme === 'light' ? 'text-primary text-2xl' : 'text-muted' )} />
               Light
-            </span>
+            </div>
           </div>
         </Button>
         <Button
           asChild
           variant={"ghost"}
-          onClick={() => setTheme("dark")}
+          onClick={() => setTheme( "dark" )}
           className="size-fit"
         >
-          <div className="flex flex-col">
+          <div className="flex flex-col gap-3">
             <div className="border-muted bg-popover hover:bg-accent hover:text-accent-foreground items-center rounded-md border-2 p-1">
               <div className="space-y-2 rounded-sm bg-neutral-950 p-2">
                 <div className="space-y-2 rounded-md bg-neutral-800 p-2 shadow-sm">
@@ -66,15 +82,16 @@ export default function AppearanceSettings() {
                 </div>
               </div>
             </div>
-            <span className="block w-full p-2 text-center font-normal">
+            <div className="gap-2 flex items-center justify-center rounded-md">
+              <MoonIcon className={cn( "size-4", theme === 'dark' ? 'text-primary text-2xl' : 'text-muted' )} />
               Dark
-            </span>
+            </div>
           </div>
         </Button>
         <Button
           asChild
           variant={"ghost"}
-          onClick={() => setTheme("system")}
+          onClick={() => setTheme( "system" )}
           className="size-fit"
         >
           <div className="flex flex-col">
@@ -94,9 +111,10 @@ export default function AppearanceSettings() {
                 </div>
               </div>
             </div>
-            <span className="block w-full p-2 text-center font-normal">
+            <div className="gap-2 flex items-center justify-center rounded-md">
+              <DesktopIcon className={cn( "size-4", theme === 'system' ? 'text-primary text-2xl' : 'text-muted' )} />
               System
-            </span>
+            </div>
           </div>
         </Button>
       </div>

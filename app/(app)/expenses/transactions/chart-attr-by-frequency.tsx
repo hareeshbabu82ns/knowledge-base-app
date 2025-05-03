@@ -6,7 +6,6 @@ import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -53,37 +52,37 @@ function prepareChartData(
 ) {
   const chartDataByFreq: any = {};
   const config: ChartConfig = {};
-  const dataSortedByAmount = data.sort((a, b) => b.amount - a.amount);
+  const dataSortedByAmount = data.sort( ( a, b ) => b.amount - a.amount );
   // console.log("data", data);
-  dataSortedByAmount.forEach((item) => {
+  dataSortedByAmount.forEach( ( item ) => {
     const key = item.attr;
     // const key = item.attr.replace(/\s+/g, "-").toLowerCase();
-    if (!config[key]) {
-      config[key] = {
+    if ( !config[ key ] ) {
+      config[ key ] = {
         label: item.label,
-        color: `hsl(var(--chart-${Object.keys(config).length + 1}))`,
+        color: `var(--chart-${Object.keys( config ).length + 1})`,
       };
     }
     const frequencyKey = (
       {
-        daily: format(item.date, "dd MMM yy"),
-        monthly: format(item.date, "MMM yy"),
-        yearly: format(item.date, "yyyy"),
-      } as { [key: string]: string }
-    )[frequency];
+        daily: format( item.date, "dd MMM yy" ),
+        monthly: format( item.date, "MMM yy" ),
+        yearly: format( item.date, "yyyy" ),
+      } as { [ key: string ]: string }
+    )[ frequency ];
 
-    if (!chartDataByFreq[frequencyKey]) {
-      chartDataByFreq[frequencyKey] = {
+    if ( !chartDataByFreq[ frequencyKey ] ) {
+      chartDataByFreq[ frequencyKey ] = {
         frequency: frequencyKey,
       };
     }
-    chartDataByFreq[frequencyKey] = {
-      ...chartDataByFreq[frequencyKey],
-      [key]: Math.round(item.amount),
+    chartDataByFreq[ frequencyKey ] = {
+      ...chartDataByFreq[ frequencyKey ],
+      [ key ]: Math.round( item.amount ),
     };
-  });
+  } );
 
-  const chartData = Object.values(chartDataByFreq);
+  const chartData = Object.values( chartDataByFreq );
   // console.log("chartData", chartData);
   return { data: chartData, config };
 }
@@ -94,41 +93,41 @@ function dataAttrByFreqency(
   frequency: "yearly" | "monthly" | "daily",
 ) {
   // console.log("transactions", transactions);
-  return Object.keys(transactions).reduce(
-    (acc, currAccKey) => {
-      const curr = transactions[currAccKey];
-      Object.keys(curr).forEach((fkey) => {
-        if (!fkey.startsWith(frequency ? `${frequency}-` : attribute)) return;
-        const currData = curr[fkey];
+  return Object.keys( transactions ).reduce(
+    ( acc, currAccKey ) => {
+      const curr = transactions[ currAccKey ];
+      Object.keys( curr ).forEach( ( fkey ) => {
+        if ( !fkey.startsWith( frequency ? `${frequency}-` : attribute ) ) return;
+        const currData = curr[ fkey ];
         // console.log("currData", currData);
         const freqKey = (
           {
-            daily: format(currData.date, "dd-MM-yy"),
-            monthly: format(currData.date, "MM-yy"),
-            yearly: format(currData.date, "yyyy"),
-          } as { [key: string]: string }
-        )[frequency];
+            daily: format( currData.date, "dd-MM-yy" ),
+            monthly: format( currData.date, "MM-yy" ),
+            yearly: format( currData.date, "yyyy" ),
+          } as { [ key: string ]: string }
+        )[ frequency ];
         const key = `${freqKey}-${currAccKey}`;
-        acc[key] = {
+        acc[ key ] = {
           attr: currAccKey,
-          label: currData[attribute],
+          label: currData[ attribute ],
           amount: currData.amount,
           date: (
             {
-              daily: startOfDay(currData.date),
-              monthly: startOfMonth(currData.date),
-              yearly: startOfYear(currData.date),
-            } as { [key: string]: Date }
-          )[frequency],
+              daily: startOfDay( currData.date ),
+              monthly: startOfMonth( currData.date ),
+              yearly: startOfYear( currData.date ),
+            } as { [ key: string ]: Date }
+          )[ frequency ],
         };
-      });
+      } );
       return acc;
     },
-    {} as { [key: string]: ChartAttrByDateData },
+    {} as { [ key: string ]: ChartAttrByDateData },
   );
 }
 
-export function ChartAttributeByFrequency({
+export function ChartAttributeByFrequency( {
   transactions,
   attribute,
   frequency = "monthly",
@@ -140,7 +139,7 @@ export function ChartAttributeByFrequency({
   frequency?: "yearly" | "monthly" | "daily";
   className?: string;
   chartContainerClassName?: string;
-}) {
+} ) {
   const chartData = prepareChartData(
     Object.values(
       dataAttrByFreqency(
@@ -158,7 +157,7 @@ export function ChartAttributeByFrequency({
   );
 
   return (
-    <Card className={cn("", className)}>
+    <Card className={cn( "", className )}>
       <CardHeader>
         <CardTitle>
           {attribute} by {frequency}
@@ -170,15 +169,15 @@ export function ChartAttributeByFrequency({
       <CardContent>
         <ChartContainer
           config={chartData.config}
-          className={cn("", chartContainerClassName)}
+          className={cn( "", chartContainerClassName )}
         >
           <BarChart accessibilityLayer data={chartData.data}>
             <CartesianGrid vertical={false} />
             <YAxis
               axisLine={true}
               tickLine={false}
-              tickFormatter={(value) =>
-                formatCurrency(value).replace(".00", "")
+              tickFormatter={( value ) =>
+                formatCurrency( value ).replace( ".00", "" )
               }
             />
             <XAxis
@@ -191,14 +190,14 @@ export function ChartAttributeByFrequency({
               cursor={false}
               content={<ChartTooltipContent indicator="dot" className="w-60" />}
             />
-            {Object.keys(chartData.config).map((key) => (
+            {Object.keys( chartData.config ).map( ( key ) => (
               <Bar
                 key={key}
                 dataKey={key}
                 fill={`var(--color-${key})`}
                 radius={4}
               />
-            ))}
+            ) )}
           </BarChart>
         </ChartContainer>
       </CardContent>

@@ -7,8 +7,6 @@ import { Card } from "@/components/ui/card";
 import { IRoute } from "@/types/types";
 import { useRouter } from "next/navigation";
 import React, { PropsWithChildren, useEffect } from "react";
-import { HiX } from "react-icons/hi";
-import { HiHomeModern as HiBolt } from "react-icons/hi2";
 import { HiOutlineArrowRightOnRectangle } from "react-icons/hi2";
 import { useSession } from "next-auth/react";
 import { signOut } from "@/lib/auth/actions";
@@ -18,24 +16,22 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from "../ui/sheet";
 
 export interface SidebarProps extends PropsWithChildren {
   routes: IRoute[];
-  [x: string]: any;
+  [ x: string ]: any;
 }
 interface SidebarLinksProps extends PropsWithChildren {
   routes: IRoute[];
-  [x: string]: any;
+  [ x: string ]: any;
 }
 
-function Sidebar(props: SidebarProps) {
-  const router = useRouter();
-  const session = useSession();
+function Sidebar( props: SidebarProps ) {
   const { routes } = props;
 
-  const fixedSidebar = useMediaQuery("(min-width: 1280px)");
-  const [open, setOpen] = React.useState(props.open);
+  const fixedSidebar = useMediaQuery( "(min-width: 1280px)" );
+  const [ open, setOpen ] = React.useState( props.open );
 
-  useEffect(() => {
-    setOpen(props.open);
-  }, [props.open]);
+  useEffect( () => {
+    setOpen( props.open );
+  }, [ props.open ] );
 
   // SIDEBAR
   return fixedSidebar ? (
@@ -60,17 +56,17 @@ function Sidebar(props: SidebarProps) {
   );
 }
 
-function SidebarContent(props: SidebarProps) {
+function SidebarContent( props: SidebarProps ) {
   const router = useRouter();
   const session = useSession();
   const { routes } = props;
 
   // SIDEBAR
   return (
-    <Card className={`h-svh w-full overflow-y-auto rounded-none pe-4`}>
+    <Card className={`h-svh w-full overflow-y-auto rounded-none pe-4 py-0`}>
       <div className="flex h-full flex-col justify-between">
         <div>
-          <div className={`mt-8 flex items-center justify-center`}>
+          <div className={`ml-4 mt-8 flex items-center`}>
             <div className="bg-primary text-primary-foreground me-2 flex size-10 items-center justify-center rounded-md">
               <Icons.logo className="size-5" />
             </div>
@@ -108,7 +104,7 @@ function SidebarContent(props: SidebarProps) {
               className="ml-auto flex size-[40px] cursor-pointer items-center justify-center rounded-full p-0 text-center text-sm font-medium"
               onClick={async () => {
                 await signOut();
-                router.push("/");
+                router.push( "/" );
               }}
             >
               <HiOutlineArrowRightOnRectangle

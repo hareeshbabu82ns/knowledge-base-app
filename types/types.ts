@@ -6,7 +6,7 @@ import {
 } from "@/components/data-table/datatable-feature-row-editing";
 import { Option } from "@/components/ui/multi-select";
 import { RowData } from "@tanstack/react-table";
-import { ComponentType } from "react";
+import { ComponentType, JSX } from "react";
 
 export interface PageMeta {
   title: string;

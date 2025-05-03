@@ -34,16 +34,16 @@ const chartConfig = {
   },
   principal: {
     label: "Principal",
-    color: "hsl(var(--chart-1))",
+    color: "var(--chart-1)",
   },
   interest: {
     label: "Interest",
-    color: "hsl(var(--chart-5))",
+    color: "var(--chart-5)",
   },
 } satisfies ChartConfig;
 
-function convertToChartData(data: PaymentScheduleYear[]) {
-  const stats = calculateStats(data);
+function convertToChartData( data: PaymentScheduleYear[] ) {
+  const stats = calculateStats( data );
   return [
     {
       paid: "Principal",
@@ -58,15 +58,15 @@ function convertToChartData(data: PaymentScheduleYear[]) {
   ];
 }
 
-export function ScheduleYearsPieChart({
+export function ScheduleYearsPieChart( {
   title,
   data,
 }: {
   title?: React.ReactNode;
   data: PaymentScheduleYear[];
-}) {
-  const chartStats = React.useMemo(() => calculateStats(data), [data]);
-  const chartData = React.useMemo(() => convertToChartData(data), [data]);
+} ) {
+  const chartStats = React.useMemo( () => calculateStats( data ), [ data ] );
+  const chartData = React.useMemo( () => convertToChartData( data ), [ data ] );
 
   const totalPaid = chartStats.totalPaid;
 
@@ -94,8 +94,8 @@ export function ScheduleYearsPieChart({
               strokeWidth={5}
             >
               <Label
-                content={({ viewBox }) => {
-                  if (viewBox && "cx" in viewBox && "cy" in viewBox) {
+                content={( { viewBox } ) => {
+                  if ( viewBox && "cx" in viewBox && "cy" in viewBox ) {
                     return (
                       <text
                         x={viewBox.cx}
@@ -112,7 +112,7 @@ export function ScheduleYearsPieChart({
                         </tspan>
                         <tspan
                           x={viewBox.cx}
-                          y={(viewBox.cy || 0) + 24}
+                          y={( viewBox.cy || 0 ) + 24}
                           className="fill-muted-foreground"
                         >
                           Total

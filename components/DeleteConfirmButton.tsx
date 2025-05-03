@@ -1,7 +1,6 @@
 import { toast } from "sonner";
-import { Button, ButtonProps } from "./ui/button";
-import { Icons } from "./shared/icons";
-import { cva } from "class-variance-authority";
+import { Button, buttonVariants } from "./ui/button";
+import { cva, VariantProps } from "class-variance-authority";
 // import { useToast } from "./ui/use-toast";
 // import { ToastAction } from "./ui/toast";
 
@@ -25,19 +24,20 @@ export const toastVariants = cva(
   },
 );
 
-export interface DeleteConfirmButtonProps extends ButtonProps {
+export interface DeleteConfirmButtonProps extends React.ComponentProps<"button"> {
   toastId: number | string;
   toastLabel?: string;
 }
 
-export const DeleteConfirmButton = ({
+export const DeleteConfirmButton = ( {
   toastId,
   toastLabel,
   variant,
   onClick,
   ...props
-}: DeleteConfirmButtonProps) => {
-  const toastVar = props.className?.includes("text-destructive")
+}: DeleteConfirmButtonProps &
+  VariantProps<typeof buttonVariants> ) => {
+  const toastVar = props.className?.includes( "text-destructive" )
     ? toast.error
     : toast.warning;
   // const { toast } = useToast();
@@ -46,7 +46,7 @@ export const DeleteConfirmButton = ({
       {...props}
       variant={variant}
       onClick={() => {
-        toastVar(toastLabel || "Confirm Deletion?", {
+        toastVar( toastLabel || "Confirm Deletion?", {
           id: toastId,
           // position: "top-center",
           duration: Infinity,
@@ -56,16 +56,16 @@ export const DeleteConfirmButton = ({
               size="icon"
               variant={variant}
               className="ml-auto"
-              onClick={(e) => {
-                onClick && onClick(e);
-                toast.dismiss(toastId);
+              onClick={( e ) => {
+                onClick && onClick( e );
+                toast.dismiss( toastId );
               }}
             >
               {/* <Icons.trash className="size-4" /> */}
               {props.children}
             </Button>
           ),
-        });
+        } );
       }}
     />
   );

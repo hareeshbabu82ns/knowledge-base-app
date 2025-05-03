@@ -94,7 +94,7 @@ const columns = [
             } )
           }
         >
-          <Icons.trash className="size-8" />
+          <Icons.trash className="size-4" />
         </DeleteConfirmButton>
       </div>
     ),

@@ -34,12 +34,12 @@ interface DataTableFiltersProps<TData> {
   debounce?: number;
 }
 
-export function DataTableFilters<TData>({
+export function DataTableFilters<TData>( {
   table,
   className,
   resetFilters,
   debounce = 1000,
-}: DataTableFiltersProps<TData>) {
+}: DataTableFiltersProps<TData> ) {
   return (
     <div
       className={cn(
@@ -58,15 +58,15 @@ export function DataTableFilters<TData>({
                   {table
                     .getAllColumns()
                     .filter(
-                      (column) => column.getCanHide() && column.getIsVisible(),
+                      ( column ) => column.getCanHide() && column.getIsVisible(),
                     )
-                    .map((column) => {
+                    .map( ( column ) => {
                       return (
                         <Badge key={column.id} className="capitalize">
                           {column.id}
                         </Badge>
                       );
-                    })}
+                    } )}
                 </div>
                 <ChevronDown className="ml-2 size-4" />
               </Button>
@@ -74,21 +74,21 @@ export function DataTableFilters<TData>({
             <DropdownMenuContent align="end">
               {table
                 .getAllColumns()
-                .filter((column) => column.getCanHide())
-                .map((column) => {
+                .filter( ( column ) => column.getCanHide() )
+                .map( ( column ) => {
                   return (
                     <DropdownMenuCheckboxItem
                       key={column.id}
                       className="capitalize"
                       checked={column.getIsVisible()}
-                      onCheckedChange={(value) =>
-                        column.toggleVisibility(!!value)
+                      onCheckedChange={( value ) =>
+                        column.toggleVisibility( !!value )
                       }
                     >
                       {column.id}
                     </DropdownMenuCheckboxItem>
                   );
-                })}
+                } )}
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
@@ -97,19 +97,19 @@ export function DataTableFilters<TData>({
           <Label htmlFor="rowsPerPage">Row per Page</Label>
           <Select
             value={`${table.getState().pagination.pageSize}`}
-            onValueChange={(value) => {
-              table.setPageSize(Number(value));
+            onValueChange={( value ) => {
+              table.setPageSize( Number( value ) );
             }}
           >
             <SelectTrigger id="rowsPerPage" className="">
               <SelectValue placeholder={table.getState().pagination.pageSize} />
             </SelectTrigger>
             <SelectContent side="top">
-              {[10, 20, 30, 40, 50].map((pageSize) => (
+              {[ 10, 20, 30, 40, 50 ].map( ( pageSize ) => (
                 <SelectItem key={pageSize} value={`${pageSize}`}>
                   {pageSize}
                 </SelectItem>
-              ))}
+              ) )}
             </SelectContent>
           </Select>
         </div>
@@ -124,9 +124,9 @@ export function DataTableFilters<TData>({
             className=""
             placeholder="Go to page"
             value={table.getState().pagination.pageIndex + 1}
-            onChange={(value) => {
-              const page = value ? Number(value) - 1 : 0;
-              table.setPageIndex(page);
+            onChange={( value ) => {
+              const page = value ? Number( value ) - 1 : 0;
+              table.setPageIndex( page );
             }}
           />
         </div>
@@ -138,6 +138,8 @@ export function DataTableFilters<TData>({
               size="icon"
               className="px-2"
               onClick={resetFilters}
+              title="Reset Filters"
+              aria-label="Reset Filters"
             >
               <Icons.reset className="size-5" />
             </Button>
@@ -147,8 +149,8 @@ export function DataTableFilters<TData>({
 
       {/* Column Filters */}
       <div className="@4xl/tfilters:grid-cols-3 @sm/tfilters:grid-cols-2 mt-4 grid grid-cols-1 items-end justify-between gap-6">
-        {table.getAllLeafColumns().map((column) => {
-          if (!column.getCanFilter() || !column.columnDef.meta?.filterVariant)
+        {table.getAllLeafColumns().map( ( column ) => {
+          if ( !column.getCanFilter() || !column.columnDef.meta?.filterVariant )
             return null;
           return (
             <div
@@ -156,12 +158,12 @@ export function DataTableFilters<TData>({
               className="flex w-full max-w-sm flex-col gap-2"
             >
               <Label htmlFor={column.id}>
-                {(column.columnDef.header as any) || column.id}
+                {( column.columnDef.header as any ) || column.id}
               </Label>
               <DataTableColumnFilter column={column} debounce={debounce} />
             </div>
           );
-        })}
+        } )}
         {/* {table.getLeafHeaders().map((header) => {
           if (!header.column.getCanFilter()) return null;
           return (
