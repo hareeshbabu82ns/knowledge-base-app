@@ -52,8 +52,8 @@ function prepareChartData(
 ) {
   const chartDataByFreq: any = {};
   const config: ChartConfig = {};
-  const dataSortedByAmount = data.sort( ( a, b ) => b.amount - a.amount );
-  // console.log("data", data);
+  // const dataSortedByAmount = data.sort( ( a, b ) => b.amount - a.amount );
+  const dataSortedByAmount = data;
   dataSortedByAmount.forEach( ( item ) => {
     const key = item.attr;
     // const key = item.attr.replace(/\s+/g, "-").toLowerCase();
@@ -83,7 +83,6 @@ function prepareChartData(
   } );
 
   const chartData = Object.values( chartDataByFreq );
-  // console.log("chartData", chartData);
   return { data: chartData, config };
 }
 
@@ -92,8 +91,8 @@ function dataAttrByFreqency(
   attribute: "account" | "type" | "tag",
   frequency: "yearly" | "monthly" | "daily",
 ) {
-  // console.log("transactions", transactions);
-  return Object.keys( transactions ).reduce(
+  // console.log( "transactions", transactions );
+  const data = Object.keys( transactions ).reduce(
     ( acc, currAccKey ) => {
       const curr = transactions[ currAccKey ];
       Object.keys( curr ).forEach( ( fkey ) => {
@@ -125,6 +124,60 @@ function dataAttrByFreqency(
     },
     {} as { [ key: string ]: ChartAttrByDateData },
   );
+
+  // Identify unique dates and attributes, and build the result map in a more efficient way
+  const allAttrDatesMap: { [ key: string ]: ChartAttrByDateData } = {};
+  const dateSet = new Set<Date>();
+  const attrSet = new Set<string>();
+
+  // First pass: collect data and track unique dates and attributes
+  Object.values( data ).forEach( item => {
+    const freqKey = (
+      {
+        daily: format( item.date, "dd-MM-yy" ),
+        monthly: format( item.date, "MM-yy" ),
+        yearly: format( item.date, "yyyy" ),
+      } as { [ key: string ]: string }
+    )[ frequency ];
+
+    const key = `${freqKey}-${item.attr}`;
+    dateSet.add( item.date );
+    attrSet.add( item.attr );
+  } );
+
+  // Fill in missing combinations
+  const dates = Array.from( dateSet ).sort( ( a, b ) => a.getTime() - b.getTime() );
+  const attrs = Array.from( attrSet ).sort( ( a, b ) => a.localeCompare( b ) );
+  dates.forEach( date => {
+    const freqKey = (
+      {
+        daily: format( date, "dd-MM-yy" ),
+        monthly: format( date, "MM-yy" ),
+        yearly: format( date, "yyyy" ),
+      } as { [ key: string ]: string }
+    )[ frequency ];
+
+    attrs.forEach( attr => {
+      const key = `${freqKey}-${attr}`;
+      const existingData = data[ key ];
+      if ( existingData ) {
+        allAttrDatesMap[ key ] = {
+          ...existingData
+        }
+      } else {
+        allAttrDatesMap[ key ] = {
+          attr,
+          label: attr,
+          amount: 0,
+          date,
+        };
+      }
+    } );
+  } );
+
+  // console.log( "allAttrDatesMap", allAttrDatesMap );
+
+  return allAttrDatesMap;
 }
 
 export function ChartAttributeByFrequency( {

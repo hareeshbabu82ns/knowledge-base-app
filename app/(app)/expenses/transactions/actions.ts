@@ -331,7 +331,7 @@ export const fetchTransactionStats = async ({
   // console.dir({ filters, where }, { depth: 3 });
 
   const transactions = await db.expenseTransaction.findMany({
-    orderBy: { date: "asc" },
+    orderBy: [{ date: "asc" }, { amount: "asc" }],
     where: { ...where, userId: session.user.id },
     select: {
       id: true,

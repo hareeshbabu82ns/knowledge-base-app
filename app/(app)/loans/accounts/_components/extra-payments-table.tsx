@@ -8,6 +8,7 @@ import {
   deleteLoanExtraPayments,
   fetchLoanExtraPayments,
   updateLoanExtraPayments,
+  uploadExtraPayments,
 } from "../actions";
 import { DataTableBasic } from "@/components/data-table/datatable-basic";
 import Loader from "@/components/shared/loader";
@@ -21,6 +22,7 @@ import DataTableRowEditForm from "@/components/data-table/datatable-row-edit-for
 import { LoanExtraPaymentSchema } from "@/lib/validations/loans";
 import { toast } from "sonner";
 import { DeleteConfirmButton } from "@/components/DeleteConfirmButton";
+import SingleFileUploadForm from "@/components/shared/single-file-upload-form";
 
 const defaultData: LoanExtraPayments = {
   id: "",
@@ -159,10 +161,16 @@ const ExtraPaymentsTable = ( { className, loanId }: ExtraPaymentsTableProps ) =>
       },
     } );
 
+  const { mutateAsync: uploadExtraPaymentsFn, isPending: isPendingUpload } =
+    useMutation( {
+      mutationFn: uploadExtraPayments,
+      mutationKey: [ "uploadExtraPayments" ],
+    } );
+
   if ( isLoading || isFetching ) return <Loader />;
 
   return (
-    <div className={cn( "mt-2 flex flex-1 flex-col", className )}>
+    <div className={cn( "mt-2 flex flex-1 flex-col gap-2", className )}>
       <DataTableBasic
         title="Extra Payments"
         data={extraPayments || []}
@@ -189,6 +197,21 @@ const ExtraPaymentsTable = ( { className, loanId }: ExtraPaymentsTableProps ) =>
           // console.log("deleteData", { rowId, rowData });
           const id = rowData?.id || rowId;
           if ( id ) deleteExtraPayment( id );
+        }}
+      />
+      <SingleFileUploadForm
+        label="Upload Extra Payments"
+        allowedTypes={[ "text/csv" ]}
+        disabled={isPendingUpload}
+        loading={isPendingUpload}
+        showPreviews={false}
+        onUploadSuccess={async ( url ) => {
+          return uploadExtraPaymentsFn( { url: url[ 0 ], loanId } ).then( () => {
+            refetch();
+            toast.success( "Extra Payments uploaded successfully!", {
+              id: "upload-extra-payments-success",
+            } );
+          } );
         }}
       />
     </div>

@@ -19,7 +19,6 @@ import { Icons } from "@/components/shared/icons";
 import { format } from "date-fns";
 import DataTableRowEditForm from "@/components/data-table/datatable-row-edit-form";
 import { LoanRoiSchema } from "@/lib/validations/loans";
-import { toast } from "sonner";
 import { DeleteConfirmButton } from "@/components/DeleteConfirmButton";
 
 const defaultRoi: LoanRates = {

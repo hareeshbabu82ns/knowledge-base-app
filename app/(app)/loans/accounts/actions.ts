@@ -3,13 +3,16 @@
 import { Option } from "@/components/ui/multi-select";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
+import config from "@/config/config";
 import {
   Loan,
   LoanExtraPayments,
   LoanRates,
   Prisma,
 } from "@/app/generated/prisma";
-import { connect } from "http2";
+import { join } from "path";
+import { readFile } from "fs/promises";
+import { parse } from "date-fns";
 
 // Loans
 export const fetchLoansDDLB = async () => {
@@ -168,4 +171,61 @@ export const deleteLoanRates = async (id: LoanRates["id"]) => {
   const dbLoanRates = await db.loanRates.delete({ where: { id } });
   if (!dbLoanRates) throw new Error("LoanRates not deleted");
   return dbLoanRates;
+};
+
+export const uploadExtraPayments = async ({
+  url,
+  loanId,
+}: {
+  url: string;
+  loanId: string;
+}) => {
+  const session = await auth();
+  if (!session?.user?.id) throw new Error("not logged in");
+
+  const file = join(config.dataFolder, url);
+  const data = await readFile(file, "utf-8");
+  const jsonData = parseLoanExtraPayments(data) as any;
+
+  const extraPayments: Prisma.LoanExtraPaymentsCreateManyInput[] = jsonData.map(
+    (item: any) => {
+      const { date, creditAmount, ...rest } = item;
+      return {
+        loanId,
+        date,
+        amount: creditAmount,
+        continue: false,
+      } as Prisma.LoanExtraPaymentsCreateManyInput;
+    },
+  );
+
+  const res = await db.loanExtraPayments.createMany({
+    data: extraPayments,
+  });
+
+  return res;
+};
+
+const parseLoanExtraPayments = (data: string) => {
+  const dataLines = data.split("\n").filter((line) => line.trim() !== "");
+  // data csv to json with following headers
+  // Transaction Date,Account Rtn,Account Number,Transaction Type,Customer Reference Number,Debit Amount,Credit Amount,Principal Balance Amount,Extended Text,Bank Reference Number
+  const dataWithoutHeader = dataLines.slice(1);
+  const dataParsed = dataWithoutHeader.map((line) => {
+    const columns = line.split(",");
+    return {
+      date: parse(columns[0].trim(), "MM/dd/yyyy", new Date()),
+      // date: new Date(columns[0].trim()),
+      accountRtn: columns[1].trim(),
+      accountNumber: columns[2].trim(),
+      transactionType: columns[3].trim(),
+      customerReferenceNumber: columns[4].trim(),
+      debitAmount: parseFloat(columns[5].trim()) || 0,
+      creditAmount: parseFloat(columns[6].trim()) || 0,
+      principalBalanceAmount: parseFloat(columns[7].trim()) || 0,
+      extendedText: columns[8].trim(),
+      bankReferenceNumber: columns[9].trim(),
+    };
+  });
+  return dataParsed;
 };

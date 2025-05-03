@@ -41,16 +41,16 @@ export enum FormFieldType {
   SKELETON = "skeleton",
 }
 
-function generateFilterOptions(filterOptions?: Option[]) {
-  if (!filterOptions) return null;
+function generateFilterOptions( filterOptions?: Option[] ) {
+  if ( !filterOptions ) return null;
 
-  return filterOptions.map(({ value, label }) => (
+  return filterOptions.map( ( { value, label } ) => (
     <SelectItem key={value} value={value}>
       <div className="flex cursor-pointer items-center gap-2">
         <p>{label}</p>
       </div>
     </SelectItem>
-  ));
+  ) );
 }
 
 interface CustomProps<TData> {
@@ -67,29 +67,29 @@ interface CustomProps<TData> {
   toMonth?: Date;
   showTimeSelect?: boolean;
   children?: React.ReactNode;
-  renderSkeleton?: (field: any) => React.ReactNode;
+  renderSkeleton?: ( field: any ) => React.ReactNode;
   className?: string;
   fieldClassName?: string;
   inputType?: React.HTMLInputTypeAttribute;
   inputMode?:
-    | "search"
-    | "text"
-    | "email"
-    | "tel"
-    | "url"
-    | "none"
-    | "numeric"
-    | "decimal"
-    | undefined;
+  | "search"
+  | "text"
+  | "email"
+  | "tel"
+  | "url"
+  | "none"
+  | "numeric"
+  | "decimal"
+  | undefined;
 }
 
-function RenderInput<TData>({
+function RenderInput<TData>( {
   field,
   props,
 }: {
   field: any;
   props: CustomProps<TData>;
-}) {
+} ) {
   const { cellInputVariant, fieldType, filterOptions, filterOptionsFn } =
     props.column.columnDef.meta ?? {};
 
@@ -99,21 +99,21 @@ function RenderInput<TData>({
     isError,
     data: options,
     error,
-  } = useQuery({
-    queryKey: ["filters", props.column.id],
+  } = useQuery( {
+    queryKey: [ "filters", props.column.id ],
     queryFn: async () => {
-      if (filterOptionsFn) {
+      if ( filterOptionsFn ) {
         return await filterOptionsFn();
-      } else if (filterOptions) {
+      } else if ( filterOptions ) {
         return filterOptions;
       } else {
         return [];
       }
     },
-  });
-  if (isLoading || isPending) return <Loader />;
+  } );
+  if ( isLoading || isPending ) return <Loader />;
 
-  switch (cellInputVariant) {
+  switch ( cellInputVariant ) {
     case "number":
     case "text":
       return (
@@ -127,15 +127,15 @@ function RenderInput<TData>({
             <Input
               placeholder={props.placeholder}
               {...field}
-              onChange={(e) => {
-                if (cellInputVariant === "number") {
-                  const val = Number(e.target.value);
-                  if (isNaN(val)) return;
-                  field.onChange(val);
-                } else if (fieldType === "array") {
-                  field.onChange(e.target.value.split(","));
+              onChange={( e ) => {
+                if ( cellInputVariant === "number" ) {
+                  const val = Number( e.target.value );
+                  if ( isNaN( val ) ) return;
+                  field.onChange( e.target.value );
+                } else if ( fieldType === "array" ) {
+                  field.onChange( e.target.value.split( "," ) );
                 } else {
-                  field.onChange(e.target.value);
+                  field.onChange( e.target.value );
                 }
               }}
               type={props.inputType}
@@ -207,7 +207,7 @@ function RenderInput<TData>({
               >
                 <Icons.calendar className="mr-2 size-4" />
                 {field.value ? (
-                  format(field.value, "PP")
+                  format( field.value, "PP" )
                 ) : (
                   <span>{props.placeholder || "Pick a date"}</span>
                 )}
@@ -218,7 +218,7 @@ function RenderInput<TData>({
                 mode="single"
                 captionLayout="dropdown-buttons"
                 selected={field.value}
-                onSelect={(date?: Date) => field.onChange(date)}
+                onSelect={( date?: Date ) => field.onChange( date )}
               />
             </PopoverContent>
           </Popover>
@@ -244,7 +244,7 @@ function RenderInput<TData>({
             <SelectTrigger>
               <SelectValue placeholder={props.placeholder} />
             </SelectTrigger>
-            <SelectContent>{generateFilterOptions(options)}</SelectContent>
+            <SelectContent>{generateFilterOptions( options )}</SelectContent>
           </Select>
         </FormControl>
       );
@@ -253,22 +253,22 @@ function RenderInput<TData>({
         <FormControl>
           <MultipleSelector
             className="w-full"
-            onChange={(v) => {
-              field.onChange(v.map((i) => i.value));
+            onChange={( v ) => {
+              field.onChange( v.map( ( i ) => i.value ) );
             }}
             placeholder={props.placeholder}
             value={
-              field.value?.map((i: string) =>
-                options?.find((o) => o.value === i),
+              field.value?.map( ( i: string ) =>
+                options?.find( ( o ) => o.value === i ),
               ) || []
             }
             options={options}
             commandProps={{
-              filter: (value, search, keywords) => {
+              filter: ( value, search, keywords ) => {
                 return options
-                  ?.find((o) => o.value === value)
+                  ?.find( ( o ) => o.value === value )
                   ?.label?.toLowerCase()
-                  .includes(search.toLowerCase())
+                  .includes( search.toLowerCase() )
                   ? 1
                   : 0;
               },
@@ -277,21 +277,21 @@ function RenderInput<TData>({
         </FormControl>
       );
     case "skeleton":
-      return props.renderSkeleton ? props.renderSkeleton(field) : null;
+      return props.renderSkeleton ? props.renderSkeleton( field ) : null;
     default:
       return null;
   }
 }
 
-function DatatableCustomFormField<TData>(props: CustomProps<TData>) {
+function DatatableCustomFormField<TData>( props: CustomProps<TData> ) {
   const { control, name, label, className } = props;
 
   return (
     <FormField
       control={control}
       name={name}
-      render={({ field }) => (
-        <FormItem className={cn("relative flex-1", className)}>
+      render={( { field } ) => (
+        <FormItem className={cn( "relative flex-1", className )}>
           <RenderInput field={field} props={props} />
           {props.column.columnDef.meta?.cellInputVariant !== "checkbox" &&
             label && (
