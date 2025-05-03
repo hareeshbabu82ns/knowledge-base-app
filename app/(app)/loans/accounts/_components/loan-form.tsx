@@ -213,7 +213,7 @@ export const LoanForm = ( { id, data, type }: LoanFormProps ) => {
           />
         )}
 
-        <div className="flex flex-col gap-6">
+        <div className="flex flex-col gap-8">
           <div className="@lg/details:flex-row @lg/details:gap-2 flex flex-col gap-6">
             <CustomFormField
               fieldType={FormFieldType.INPUT}
@@ -225,7 +225,7 @@ export const LoanForm = ( { id, data, type }: LoanFormProps ) => {
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-4 space-y-3">
             <CustomFormField
               fieldType={FormFieldType.SELECT}
               control={form.control}

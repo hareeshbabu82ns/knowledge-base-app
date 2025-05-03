@@ -140,7 +140,7 @@ export const ConfigFileFieldsSchema = z.object({
   ),
   ignore: z.boolean(),
   negated: z.boolean(),
-  timeColumnIndex: z.number().int().min(0),
+  timeColumnIndex: z.coerce.number().int().min(0),
 });
 
 export const ConfigIgnoreFieldsSchema = z.object({

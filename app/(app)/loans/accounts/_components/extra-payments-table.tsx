@@ -167,6 +167,7 @@ const ExtraPaymentsTable = ( { className, loanId }: ExtraPaymentsTableProps ) =>
         title="Extra Payments"
         data={extraPayments || []}
         columns={columns}
+        getRowId={( row ) => row.id}
         defaultSorting={[ { id: "date", desc: true } ]}
         defaultColumnVisibility={{ id: false }}
         refetch={() => refetch()}
@@ -186,7 +187,8 @@ const ExtraPaymentsTable = ( { className, loanId }: ExtraPaymentsTableProps ) =>
         }}
         deleteData={( { rowId, rowData } ) => {
           // console.log("deleteData", { rowId, rowData });
-          deleteExtraPayment( rowId );
+          const id = rowData?.id || rowId;
+          if ( id ) deleteExtraPayment( id );
         }}
       />
     </div>

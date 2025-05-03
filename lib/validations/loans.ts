@@ -3,12 +3,12 @@ import * as z from "zod";
 const LoanBaseSchema = z.object({
   name: z.string().min(5).max(100),
   description: z.string().max(5000).optional(),
-  amount: z.number().min(1),
+  amount: z.coerce.number().min(1),
   startDate: z.date(),
-  durationMonths: z.number().min(1),
+  durationMonths: z.coerce.number().min(1),
   frequency: z.enum(["MONTHLY", "BIWEEKLY"]),
-  interestRate: z.number().min(0.5),
-  emi: z.number().min(0),
+  interestRate: z.coerce.number().min(0.5),
+  emi: z.coerce.number().min(0),
 });
 
 export const LoanSchema = LoanBaseSchema.extend({
@@ -30,11 +30,11 @@ export function getLoanSchema(type: "create" | "update") {
 
 export const LoanRoiSchema = z.object({
   date: z.date(),
-  rate: z.number().min(1),
+  rate: z.coerce.number().min(1),
 });
 
 export const LoanExtraPaymentSchema = z.object({
   date: z.date(),
-  amount: z.number().min(1),
+  amount: z.coerce.number().min(1),
   continue: z.boolean(),
 });

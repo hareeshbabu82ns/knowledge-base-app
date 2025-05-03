@@ -12,48 +12,48 @@ interface DataTableRowSelectionFormProps<TData>
   className?: string;
 }
 
-export default function DataTableRowSelectionForm<TData>({
+export default function DataTableRowSelectionForm<TData>( {
   table,
   editingRows,
   defaultData,
   className,
-}: DataTableRowSelectionFormProps<TData>) {
-  const [rowData, setRowData] = React.useState<TData>(defaultData);
-  useEffect(() => {
-    const rowId = Object.keys(editingRows)[0] || null;
+}: DataTableRowSelectionFormProps<TData> ) {
+  const [ rowData, setRowData ] = React.useState<TData>( defaultData );
+  useEffect( () => {
+    const rowId = Object.keys( editingRows )[ 0 ] || null;
     setRowData(
-      rowId ? table.getRowModel().rowsById[rowId].original : defaultData,
+      rowId ? table.getRowModel().rowsById[ rowId ].original : defaultData,
     );
-  }, [defaultData, editingRows, table]);
+  }, [ defaultData, editingRows, table ] );
   // console.log({ rowData, editingRows });
-  const rowId = Object.keys(editingRows)[0] || null;
+  const rowId = Object.keys( editingRows )[ 0 ] || null;
 
   return (
-    <div className={cn("grid grid-cols-2 gap-4 p-2", className)}>
-      {table.getAllLeafColumns().map((column) => {
+    <div className={cn( "grid grid-cols-2 gap-4 gap-y-8 p-2", className )}>
+      {table.getAllLeafColumns().map( ( column ) => {
         return column.columnDef.meta?.cellInputVariant ? (
           <DataTableFormInput
             key={column.id}
             column={column}
             table={table}
-            onChange={(data) => setRowData((v) => ({ ...v, ...data }))}
+            onChange={( data ) => setRowData( ( v ) => ( { ...v, ...data } ) )}
             rowData={rowData}
-            value={rowData[column.id as keyof TData]}
+            value={rowData[ column.id as keyof TData ]}
           />
         ) : null;
-      })}
+      } )}
       <div className="col-span-2 flex justify-end gap-4">
         {table.options.meta?.updateData && (
           <Button
             variant="outline"
             size="sm"
             onClick={() => {
-              console.log({ rowId, rowData });
+              console.log( { rowId, rowData } );
               // table.updateRow(rowId, rowData);
-              table.options.meta?.updateData!({
+              table.options.meta?.updateData!( {
                 rowId: rowId || "-1",
                 rowData: rowData,
-              });
+              } );
             }}
           >
             {rowId ? "Save" : "Add"}
