@@ -67,9 +67,10 @@ function SidebarContent( props: SidebarProps ) {
       <div className="flex h-full flex-col justify-between">
         <div>
           <div className={`ml-4 mt-8 flex items-center`}>
-            <div className="bg-primary text-primary-foreground me-2 flex size-10 items-center justify-center rounded-md">
+            <img src="/icon-512.png" alt="KBase Logo" className="size-8 mr-2" />
+            {/* <div className="bg-primary text-primary-foreground me-2 flex size-10 items-center justify-center rounded-md">
               <Icons.logo className="size-5" />
-            </div>
+            </div> */}
             <h5 className="text-card-foreground me-2 text-2xl font-bold leading-5">
               Knowledge Base
             </h5>

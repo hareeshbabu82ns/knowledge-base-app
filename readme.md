@@ -48,18 +48,18 @@ npm run dev
 
 ## Icon Generation
 
+![Settings](/public/assets/icon-kitchen-settings.png)
+
 - tool: https://icon.kitchen
-- source image: `app-icon-original-512x512.png`
+- source image: `/public/assets/KBase App Icon.png`
 - Settings:
   - Icons Set: Web Icons
-  - Scaling: Center
-  - Mast: True
-  - Color: #B4DBD4
-  - Effect: Cast shadow
-  - Padding: 15%
-  - Bg Type: Gradient
-  - Gradient: #497A6E, #36574E, 45deg
-  - fav icon: Circle
+  - Scaling: Crop
+  - Mask: False
+  - Padding: 2%
+  - Bg Type: Color
+  - Bg Color: #070F31
+  - fav icon: Squircle
 
 ### commit with tags
 

@@ -61,7 +61,7 @@ import { PiArrowsSplitFill } from "react-icons/pi";
 export type Icon = typeof LucideIcon;
 
 export const Icons = {
-  logo: ({ ...props }: LucideProps) => (
+  logo: ( { ...props }: LucideProps ) => (
     <svg
       className="size-6"
       aria-hidden="true"
@@ -131,7 +131,7 @@ export const Icons = {
   split: PiArrowsSplitFill,
   archive: MdArchive,
   expenses: BanknoteIcon,
-  accounts: ({ ...props }: LucideProps) => (
+  accounts: ( { ...props }: LucideProps ) => (
     <svg
       className="size-6 text-gray-800 dark:text-white"
       aria-hidden="true"
@@ -153,7 +153,7 @@ export const Icons = {
   transactions: FaIndianRupeeSign,
   calculate: FaCalculator,
 
-  sidebarMenu: ({ ...props }: LucideProps) => (
+  sidebarMenu: ( { ...props }: LucideProps ) => (
     <svg
       aria-hidden="true"
       fill="currentColor"
@@ -168,7 +168,7 @@ export const Icons = {
       ></path>
     </svg>
   ),
-  facebook: ({ ...props }: LucideProps) => (
+  facebook: ( { ...props }: LucideProps ) => (
     <svg
       aria-hidden="true"
       focusable="false"
@@ -187,7 +187,7 @@ export const Icons = {
       />
     </svg>
   ),
-  gitHub: ({ ...props }: LucideProps) => (
+  gitHub: ( { ...props }: LucideProps ) => (
     <svg
       aria-hidden="true"
       focusable="false"
