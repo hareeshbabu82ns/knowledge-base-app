@@ -47,119 +47,181 @@ export function calculateEMISplits({
   interestRateChanges: InterestRateChange[];
   emiPaid?: number;
 }): { schedule: PaymentSchedule[]; scheduleYear: PaymentScheduleYear[] } {
-  // const endTermDate = addMonths(startDate, loanTermMonths);
-  // const totalWeeks = differenceInCalendarWeeks(endTermDate, startDate);
-  // const loanTermBiWeeks = Math.ceil(totalWeeks / 2);
   const totalPayments =
     paymentFrequency === "MONTHLY"
       ? loanTermMonths
       : Math.ceil((loanTermMonths / 12) * 26);
 
+  // Sort extra payments and interest rate changes by date for proper processing
+  const sortedExtraPayments = [...extraPayments].sort(
+    (a, b) => a.date.getTime() - b.date.getTime(),
+  );
+
+  const sortedInterestRateChanges = [...interestRateChanges].sort(
+    (a, b) => a.date.getTime() - b.date.getTime(),
+  );
+
+  // Initialize with starting interest rate
+  let currentInterestRate = annualInterestRate;
   let interestRate =
     paymentFrequency === "MONTHLY"
-      ? annualInterestRate / 12 / 100
-      : annualInterestRate / 26 / 100;
+      ? currentInterestRate / 12 / 100
+      : currentInterestRate / 26 / 100;
 
   const paymentSchedule: PaymentSchedule[] = [];
   const paymentScheduleYear: Record<string, PaymentScheduleYear> = {};
 
   let remainingBalance = principal;
   let currentDate = new Date(startDate);
-  let endDate =
-    paymentFrequency === "MONTHLY"
-      ? addMonths(currentDate, 1)
-      : addWeeks(currentDate, 2);
 
-  const emi =
+  // Calculate initial EMI
+  let emi =
     emiPaid ||
-    (remainingBalance *
-      interestRate *
-      Math.pow(1 + interestRate, totalPayments)) /
-      (Math.pow(1 + interestRate, totalPayments) - 1);
+    calculateInitialEMI(remainingBalance, interestRate, totalPayments);
 
-  for (let i = 1; remainingBalance > 0.0; i++) {
-    // for (let i = 1; i <= totalPayments; i++) {
-    const scheduleYear = paymentScheduleYear[
-      currentDate.getFullYear().toString()
-    ] || {
+  let paymentNumber = 1;
+  let remainingPayments = totalPayments;
+
+  // Continue until the loan is fully paid off
+  while (remainingBalance > 0.01) {
+    // Get year for the current payment for annual aggregation
+    const year = currentDate.getFullYear();
+    const yearKey = year.toString();
+
+    // Initialize or get the year summary object
+    const scheduleYear = paymentScheduleYear[yearKey] || {
       paymentNumber: 0,
       paymentAmount: 0,
       principalPaid: 0,
       interestPaid: 0,
       remainingBalance: 0,
-      year: currentDate.getFullYear(),
+      year: year,
     };
 
-    // Check for interest rate changes
-    const rateChange = interestRateChanges.find(
-      (change) => change.date <= currentDate,
-    );
-    if (rateChange) {
-      interestRate =
-        paymentFrequency === "MONTHLY"
-          ? rateChange.rate / 12 / 100
-          : rateChange.rate / 26 / 100;
-    }
-
-    // Calculate EMI
-    // const emi =
-    //   (remainingBalance *
-    //     interestRate *
-    //     Math.pow(1 + interestRate, totalPayments - i + 1)) /
-    //   (Math.pow(1 + interestRate, totalPayments - i + 1) - 1);
-
-    // if (emi < 0.0) {
-    //   break;
-    // }
-
-    // Check for extra payments
-    const extraPayment = extraPayments.find(
-      (payment) => payment.date >= currentDate && payment.date <= endDate,
-    );
-
-    const extraPaymentAmount = extraPayment ? extraPayment.amount : 0;
-    // remainingBalance -= extraPayment.amount;
-
-    const interestPaid = remainingBalance * interestRate;
-    const principalPaid = emi - interestPaid + extraPaymentAmount;
-    remainingBalance -= principalPaid;
-    remainingBalance = remainingBalance < 0.0 ? 0 : remainingBalance;
-
-    paymentSchedule.push({
-      paymentNumber: i,
-      paymentAmount: emi + extraPaymentAmount,
-      principalPaid: principalPaid,
-      interestPaid: interestPaid,
-      remainingBalance: remainingBalance,
-      paymentDate: new Date(currentDate),
-    });
-
-    scheduleYear.paymentNumber = i;
-    scheduleYear.paymentAmount += emi + extraPaymentAmount;
-    scheduleYear.principalPaid += principalPaid;
-    scheduleYear.interestPaid += interestPaid;
-    scheduleYear.remainingBalance = remainingBalance;
-    paymentScheduleYear[currentDate.getFullYear().toString()] = scheduleYear;
-
-    if (remainingBalance <= 0.0) break;
-
-    // Update the current date for the next payment
-    currentDate = endDate;
-    endDate =
+    // Calculate end date for this payment period
+    const endDate =
       paymentFrequency === "MONTHLY"
         ? addMonths(currentDate, 1)
         : addWeeks(currentDate, 2);
-    // if (paymentFrequency === "MONTHLY") {
-    //   currentDate.setMonth(currentDate.getMonth() + 1);
-    // } else {
-    //   currentDate.setDate(currentDate.getDate() + 14);
-    // }
+
+    // Check for interest rate changes that would apply to this payment
+    // Find rate changes that occurred before or on the current payment date
+    // but after the previous payment date (or since loan start for first payment)
+    const applicableRateChanges = sortedInterestRateChanges.filter((change) => {
+      // For the current payment period, we only want changes that:
+      // 1. Are on or before the current payment date (to affect this payment)
+      // 2. Are strictly after the previous payment date
+      //    (or after loan start date for first payment)
+      const previousPaymentDate =
+        paymentNumber === 1
+          ? new Date(startDate.getTime() - 1) // Just before loan start
+          : paymentSchedule[paymentNumber - 2].paymentDate;
+
+      return (
+        change.date.getTime() <= currentDate.getTime() &&
+        change.date.getTime() > previousPaymentDate.getTime()
+      );
+    });
+
+    if (applicableRateChanges.length > 0) {
+      // Apply the latest applicable interest rate change
+      const latestRateChange =
+        applicableRateChanges[applicableRateChanges.length - 1];
+      currentInterestRate = latestRateChange.rate;
+      interestRate =
+        paymentFrequency === "MONTHLY"
+          ? currentInterestRate / 12 / 100
+          : currentInterestRate / 26 / 100;
+
+      // Recalculate EMI based on new rate if not using a fixed payment amount
+      if (!emiPaid) {
+        emi = calculateInitialEMI(
+          remainingBalance,
+          interestRate,
+          remainingPayments,
+        );
+      }
+    }
+
+    // Calculate interest for this payment
+    const interestPaid = remainingBalance * interestRate;
+
+    // Regular principal payment
+    let principalPaid = emi - interestPaid;
+    let paymentAmount = emi;
+
+    // Check for extra payments that fall within this payment period
+    const applicableExtraPayments = sortedExtraPayments.filter(
+      (payment) => payment.date >= currentDate && payment.date < endDate,
+    );
+
+    let extraPaymentAmount = 0;
+    if (applicableExtraPayments.length > 0) {
+      // Sum all applicable extra payments
+      extraPaymentAmount = applicableExtraPayments.reduce(
+        (sum, payment) => sum + payment.amount,
+        0,
+      );
+      principalPaid += extraPaymentAmount;
+      paymentAmount += extraPaymentAmount;
+    }
+
+    // Calculate new remaining balance
+    remainingBalance -= principalPaid;
+
+    // Ensure remainingBalance doesn't go below zero
+    if (remainingBalance < 0) {
+      // Adjust principal paid to match the actual remaining balance
+      principalPaid += remainingBalance; // This will make principalPaid smaller
+      paymentAmount = interestPaid + principalPaid;
+      remainingBalance = 0;
+    }
+
+    // Add to payment schedule
+    paymentSchedule.push({
+      paymentNumber,
+      paymentAmount,
+      principalPaid,
+      interestPaid,
+      remainingBalance,
+      paymentDate: new Date(currentDate),
+    });
+
+    // Update yearly summary
+    scheduleYear.paymentNumber = paymentNumber;
+    scheduleYear.paymentAmount += paymentAmount;
+    scheduleYear.principalPaid += principalPaid;
+    scheduleYear.interestPaid += interestPaid;
+    scheduleYear.remainingBalance = remainingBalance;
+    paymentScheduleYear[yearKey] = scheduleYear;
+
+    // Break if loan is fully paid
+    if (remainingBalance <= 0) break;
+
+    // Move to next payment period
+    currentDate = endDate;
+    paymentNumber++;
+    remainingPayments--;
   }
 
   return {
     schedule: paymentSchedule,
     scheduleYear: Object.values(paymentScheduleYear),
   };
+}
+
+// Helper function to calculate initial EMI based on remaining balance, interest rate and payments
+function calculateInitialEMI(
+  principal: number,
+  periodicInterestRate: number,
+  totalPayments: number,
+): number {
+  return (
+    (principal *
+      periodicInterestRate *
+      Math.pow(1 + periodicInterestRate, totalPayments)) /
+    (Math.pow(1 + periodicInterestRate, totalPayments) - 1)
+  );
 }
 
 export function calculateStats(schedule: PaymentScheduleYear[]) {
