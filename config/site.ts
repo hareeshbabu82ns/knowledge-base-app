@@ -24,7 +24,7 @@ export type SiteConfig = {
 export const siteConfig = {
   name: "HKBase",
   description: "Knowledge Base App",
-  url: "https://hkbase.local.terabits.io/",
+  url: "https://kbase.local.terabits.io/",
   address: "Calgary, AB, Canada",
   links: {
     email: "hareeshbabu82@gmail.com",
