@@ -95,7 +95,7 @@ export const signOut = async () => {
 };
 
 export type SignUpResponse =
-  | { status: "success"; message: string }
+  | { status: "success"; message: string; userId: string }
   | { status: "error"; error: string };
 
 export const signUp = async (
@@ -175,30 +175,16 @@ export const signUp = async (
       });
     }
 
-    // Automatically sign in the user
-    const signInResult = await naSignIn("credentials", {
-      email,
-      password,
-      redirect: false,
-    });
-
-    if (signInResult?.error) {
-      const message = isUpdatingOAuthUser
-        ? "Password added successfully! Please sign in to continue."
-        : "Account created successfully! Please sign in to continue.";
-      return {
-        status: "success",
-        message,
-      };
-    }
-
+    // Don't automatically sign in - TOTP setup is required first
+    // Return userId so the signup flow can set up TOTP before signing in
     const successMessage = isUpdatingOAuthUser
-      ? "Password added to your account! You can now sign in with email and password."
-      : "Account created and signed in successfully!";
+      ? "Password added to your account! Now set up two-factor authentication."
+      : "Account created successfully! Now set up two-factor authentication.";
 
     return {
       status: "success",
       message: successMessage,
+      userId: user.id,
     };
   } catch (error) {
     console.error("SignUp error:", error);

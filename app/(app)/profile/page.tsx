@@ -3,6 +3,7 @@
 import { useSession } from "next-auth/react";
 import ProfileForm from "./_components/profile-form";
 import PasswordUpdateForm from "./_components/password-update-form";
+import TotpManagement from "./_components/totp-management";
 import UserManagement from "./_components/user-management";
 import { Separator } from "@/components/ui/separator";
 
@@ -24,6 +25,10 @@ export default function ProfilePage() {
       <Separator />
 
       <PasswordUpdateForm hasPassword={true} />
+
+      <Separator />
+
+      <TotpManagement />
 
       {isAdmin && (
         <>

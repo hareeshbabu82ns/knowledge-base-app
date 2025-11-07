@@ -26,6 +26,11 @@ model User {
   // Optional for WebAuthn support
   Authenticator Authenticator[]
 
+  // TOTP (Time-based One-Time Password) fields
+  totpSecret      String? // Encrypted TOTP secret
+  totpEnabled     Boolean  @default(false)
+  totpBackupCodes String[] @default([]) // Array of hashed backup codes
+
   createdAt                 DateTime                    @default(now())
   updatedAt                 DateTime                    @updatedAt
   ExpenseAccount            ExpenseAccount[]

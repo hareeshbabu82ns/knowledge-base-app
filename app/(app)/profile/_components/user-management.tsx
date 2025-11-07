@@ -51,6 +51,7 @@ import {
   deleteUser,
   setUserPassword,
 } from "@/app/actions/profile-actions";
+import { disableTOTP, getTOTPStatus } from "@/app/actions/totp-actions";
 import { toast } from "sonner";
 import { useState } from "react";
 import {
@@ -62,6 +63,7 @@ import {
   KeyRound,
   Eye,
   EyeOff,
+  ShieldCheckIcon,
 } from "lucide-react";
 import { formatDistance } from "date-fns";
 
@@ -69,6 +71,10 @@ export default function UserManagement() {
   const queryClient = useQueryClient();
   const [deleteUserId, setDeleteUserId] = useState<string | null>(null);
   const [passwordResetUser, setPasswordResetUser] = useState<{
+    id: string;
+    name: string | null;
+  } | null>(null);
+  const [totpResetUser, setTotpResetUser] = useState<{
     id: string;
     name: string | null;
   } | null>(null);
@@ -145,6 +151,22 @@ export default function UserManagement() {
     },
   });
 
+  const totpResetMutation = useMutation({
+    mutationFn: (userId: string) => disableTOTP({ userId }),
+    onSuccess: (data) => {
+      if (data.status === "success") {
+        toast.success("Two-factor authentication has been reset");
+        setTotpResetUser(null);
+      } else {
+        toast.error(data.error);
+      }
+    },
+    onError: (error: Error) => {
+      console.error("TOTP reset error:", error);
+      toast.error("Failed to reset TOTP");
+    },
+  });
+
   const handleToggleRole = (userId: string, currentRole: string) => {
     const newRole = currentRole === "ADMIN" ? "USER" : "ADMIN";
     roleUpdateMutation.mutate({ userId, role: newRole });
@@ -174,6 +196,11 @@ export default function UserManagement() {
       newPassword,
       confirmPassword,
     });
+  };
+
+  const handleResetTotp = () => {
+    if (!totpResetUser) return;
+    totpResetMutation.mutate(totpResetUser.id);
   };
 
   if (isLoading) {
@@ -286,6 +313,17 @@ export default function UserManagement() {
                           >
                             <KeyRound className="mr-2 size-4" />
                             Set Password
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() =>
+                              setTotpResetUser({
+                                id: user.id,
+                                name: user.name,
+                              })
+                            }
+                          >
+                            <ShieldCheckIcon className="mr-2 size-4" />
+                            Reset 2FA
                           </DropdownMenuItem>
                           <DropdownMenuItem
                             onClick={() => setDeleteUserId(user.id)}
@@ -444,6 +482,37 @@ export default function UserManagement() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* TOTP Reset Confirmation Dialog */}
+      <AlertDialog
+        open={!!totpResetUser}
+        onOpenChange={(open) => !open && setTotpResetUser(null)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              Reset Two-Factor Authentication?
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              This will disable two-factor authentication for{" "}
+              <strong>{totpResetUser?.name || "this user"}</strong>. They will
+              need to set it up again when they next sign in.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleResetTotp}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {totpResetMutation.isPending && (
+                <Loader2 className="mr-2 size-4 animate-spin" />
+              )}
+              Reset 2FA
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 }

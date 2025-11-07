@@ -18,13 +18,21 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/components/ui/use-toast";
 import { signInEmail } from "@/lib/auth/actions";
+import { checkTOTPByEmail } from "@/app/actions/totp-actions";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { CheckCircle2, InfoIcon, LockIcon } from "lucide-react";
+import {
+  CheckCircle2,
+  InfoIcon,
+  LockIcon,
+  ShieldCheckIcon,
+} from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 
 export default function LoginForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [totpCode, setTotpCode] = useState("");
+  const [showTotpInput, setShowTotpInput] = useState(false);
   const [isCredentialsLoading, setIsCredentialsLoading] = useState(false);
   const [magicEmail, setMagicEmail] = useState("");
   const [emailToken, setEmailToken] = useState("");
@@ -45,32 +53,93 @@ export default function LoginForm() {
       return;
     }
 
-    setIsCredentialsLoading(true);
-    try {
-      const result = await signIn("credentials", {
-        email,
-        password,
-        redirect: false,
-      });
+    // If TOTP input is not shown yet, check if user has TOTP enabled
+    if (!showTotpInput) {
+      setIsCredentialsLoading(true);
+      try {
+        // Check if user has TOTP enabled
+        const totpStatus = await checkTOTPByEmail(email);
 
-      if (result?.error) {
+        if (totpStatus.status === "success" && totpStatus.data.totpEnabled) {
+          // User has TOTP enabled, show TOTP input
+          setShowTotpInput(true);
+          toast({
+            title: "Two-Factor Authentication Required",
+            description:
+              "Please enter your 6-digit code from your authenticator app",
+          });
+          setIsCredentialsLoading(false);
+          return;
+        }
+
+        // User doesn't have TOTP, proceed with normal sign-in
+        const result = await signIn("credentials", {
+          email,
+          password,
+          redirect: false,
+        });
+
+        if (result?.error) {
+          toast({
+            title: "Authentication failed",
+            description: "Invalid email or password",
+            variant: "destructive",
+          });
+        } else if (result?.ok) {
+          window.location.href = "/dashboard";
+        }
+      } catch (e) {
+        console.error("Credentials sign-in error:", e);
         toast({
-          title: "Authentication failed",
-          description: "Invalid email or password",
+          title: "Error signing in",
+          description: e instanceof Error ? e.message : "Please try again",
           variant: "destructive",
         });
-      } else if (result?.ok) {
-        window.location.href = "/dashboard";
+      } finally {
+        setIsCredentialsLoading(false);
       }
-    } catch (e) {
-      console.error("Credentials sign-in error:", e);
-      toast({
-        title: "Error signing in",
-        description: e instanceof Error ? e.message : "Please try again",
-        variant: "destructive",
-      });
-    } finally {
-      setIsCredentialsLoading(false);
+    } else {
+      // TOTP input is shown, verify with TOTP code or backup code
+      if (!totpCode || (totpCode.length !== 6 && totpCode.length !== 8)) {
+        toast({
+          title: "Invalid code",
+          description:
+            "Please enter a 6-digit TOTP code or 8-character backup code",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      setIsCredentialsLoading(true);
+      try {
+        const result = await signIn("credentials", {
+          email,
+          password,
+          totpCode,
+          redirect: false,
+        });
+
+        if (result?.error) {
+          toast({
+            title: "Authentication failed",
+            description:
+              "Invalid verification code. Please try again or use a backup code.",
+            variant: "destructive",
+          });
+          setTotpCode("");
+        } else if (result?.ok) {
+          window.location.href = "/dashboard";
+        }
+      } catch (e) {
+        console.error("TOTP verification error:", e);
+        toast({
+          title: "Error verifying code",
+          description: e instanceof Error ? e.message : "Please try again",
+          variant: "destructive",
+        });
+      } finally {
+        setIsCredentialsLoading(false);
+      }
     }
   };
 
@@ -213,7 +282,7 @@ export default function LoginForm() {
                   placeholder="name@example.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  disabled={isCredentialsLoading}
+                  disabled={isCredentialsLoading || showTotpInput}
                   required
                 />
               </div>
@@ -226,10 +295,45 @@ export default function LoginForm() {
                   placeholder="Enter your password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  disabled={isCredentialsLoading}
+                  disabled={isCredentialsLoading || showTotpInput}
                   required
                 />
               </div>
+
+              {showTotpInput && (
+                <div className="space-y-2">
+                  <Alert className="border-blue-500 bg-blue-50 dark:bg-blue-950">
+                    <ShieldCheckIcon className="size-4 text-blue-600" />
+                    <AlertDescription className="text-blue-700 dark:text-blue-300">
+                      Enter your 6-digit code from your authenticator app or use
+                      an 8-character backup code
+                    </AlertDescription>
+                  </Alert>
+                  <Label htmlFor="totpCode">Authentication Code</Label>
+                  <Input
+                    id="totpCode"
+                    type="text"
+                    placeholder="000000 or ABCD1234"
+                    value={totpCode}
+                    onChange={(e) =>
+                      setTotpCode(
+                        e.target.value
+                          .replace(/[^0-9A-Fa-f]/g, "")
+                          .slice(0, 8)
+                          .toUpperCase(),
+                      )
+                    }
+                    disabled={isCredentialsLoading}
+                    maxLength={8}
+                    autoFocus
+                    required
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    6 digits from your authenticator app or 8-character backup
+                    code
+                  </p>
+                </div>
+              )}
 
               <Button
                 type="submit"
@@ -240,15 +344,30 @@ export default function LoginForm() {
                 {isCredentialsLoading ? (
                   <>
                     <Icons.spinner className="mr-2 size-4 animate-spin" />
-                    Signing in...
+                    {showTotpInput ? "Verifying..." : "Signing in..."}
                   </>
                 ) : (
                   <>
                     <Icons.login className="mr-2 size-4" />
-                    Sign In
+                    {showTotpInput ? "Verify & Sign In" : "Sign In"}
                   </>
                 )}
               </Button>
+
+              {showTotpInput && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full"
+                  onClick={() => {
+                    setShowTotpInput(false);
+                    setTotpCode("");
+                  }}
+                  disabled={isCredentialsLoading}
+                >
+                  Back to Password
+                </Button>
+              )}
             </form>
           </TabsContent>
 

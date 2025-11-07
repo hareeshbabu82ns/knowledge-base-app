@@ -55,6 +55,7 @@ export const authOptions: NextAuthConfig = {
       credentials: {
         email: { label: "Email", type: "email" },
         password: { label: "Password", type: "password" },
+        totpCode: { label: "TOTP Code", type: "text" },
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) {
@@ -76,6 +77,26 @@ export const authOptions: NextAuthConfig = {
 
         if (!isPasswordValid) {
           throw new Error("Invalid email or password");
+        }
+
+        // Check if TOTP is enabled for this user
+        if (dbUser.totpEnabled && dbUser.totpSecret) {
+          // TOTP is enabled, verify the code
+          if (!credentials.totpCode) {
+            throw new Error("TOTP verification required");
+          }
+
+          // Dynamically import TOTP verification functions
+          const { verifyUserTOTP } = await import("@/app/actions/totp-actions");
+
+          const totpResult = await verifyUserTOTP({
+            userId: dbUser.id,
+            token: credentials.totpCode as string,
+          });
+
+          if (totpResult.status !== "success") {
+            throw new Error("Invalid TOTP code");
+          }
         }
 
         return {
