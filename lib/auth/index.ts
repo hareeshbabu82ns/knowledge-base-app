@@ -23,19 +23,24 @@ export const authOptions: NextAuthConfig = {
       from: process.env.SMTP_FROM,
       async sendVerificationRequest(params) {
         const { identifier: to, url } = params;
-        const dbUser = await db.user.findFirst({
-          where: { email: to },
-        });
-        await sendMail({
-          to: [to],
-          subject: `Sign in to ${siteConfig.name}`,
-          react: MagicLoginLinkEmail({
-            name: dbUser?.name,
-            email: dbUser?.email || to,
-            url,
-          }),
-          includeAdmins: false,
-        });
+        try {
+          const dbUser = await db.user.findFirst({
+            where: { email: to },
+          });
+          await sendMail({
+            to: [to],
+            subject: `Sign in to ${siteConfig.name}`,
+            react: MagicLoginLinkEmail({
+              name: dbUser?.name,
+              email: dbUser?.email || to,
+              url,
+            }),
+            includeAdmins: false,
+          });
+        } catch (error) {
+          console.error("Error sending verification email:", error);
+          throw new Error("Failed to send verification email");
+        }
       },
     }),
     GoogleProvider,

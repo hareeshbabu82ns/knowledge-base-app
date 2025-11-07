@@ -1,11 +1,10 @@
 "use client";
 import { TooltipTrigger } from "@radix-ui/react-tooltip";
-import Link from "next/link";
 import { signIn } from "next-auth/react";
 import { useState } from "react";
 import { Icons } from "@/components/shared/icons";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -18,7 +17,6 @@ import { Label } from "@/components/ui/label";
 import { Tooltip, TooltipContent } from "@/components/ui/tooltip";
 import { useToast } from "@/components/ui/use-toast";
 import { signInEmail } from "@/lib/auth/actions";
-import { cn } from "@/lib/utils";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { InfoIcon, LockIcon, MailIcon } from "lucide-react";
 
@@ -26,6 +24,9 @@ export default function LoginForm() {
   const [email, setEmail] = useState("");
   const [emailToken, setEmailToken] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isSendingEmail, setIsSendingEmail] = useState(false);
+  const [isSubmittingToken, setIsSubmittingToken] = useState(false);
+  const [emailSent, setEmailSent] = useState(false);
   const { toast } = useToast();
 
   const sendEmailToken = async () => {
@@ -38,22 +39,76 @@ export default function LoginForm() {
       return;
     }
 
-    setIsLoading(true);
+    setIsSendingEmail(true);
     try {
-      await signInEmail(email);
-      toast({
-        title: "Magic link sent! ✉️",
-        description:
-          "Check your email for the login link. If not received in 15 minutes, please contact Admin.",
-      });
+      const result = await signInEmail(email);
+
+      if (result.status === "success") {
+        setEmailSent(true);
+        toast({
+          title: "Magic link sent! ✉️",
+          description: result.message,
+        });
+      } else {
+        toast({
+          title: "Error sending magic link",
+          description: result.error,
+          variant: "destructive",
+        });
+      }
     } catch (e) {
+      console.error("Email send error:", e);
       toast({
-        title: "Error sending email",
-        description: e instanceof Error ? e.message : "Please try again",
+        title: "Error sending magic link",
+        description: e instanceof Error ? e.message : "Please try again later",
         variant: "destructive",
       });
     } finally {
-      setIsLoading(false);
+      setIsSendingEmail(false);
+    }
+  };
+
+  const handleTokenSubmit = async () => {
+    if (!email || !emailToken) {
+      toast({
+        title: "Missing information",
+        description: "Please enter both email and token",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsSubmittingToken(true);
+    try {
+      // Use NextAuth's signIn with the resend provider
+      const result = await signIn("resend", {
+        email,
+        token: emailToken,
+        callbackUrl: "/dashboard",
+        redirect: false,
+      });
+
+      // Check for errors
+      if (result && "error" in result && result.error) {
+        toast({
+          title: "Authentication failed",
+          description:
+            "Invalid or expired token. Please request a new magic link.",
+          variant: "destructive",
+        });
+        setIsSubmittingToken(false);
+      } else if (result && "url" in result) {
+        // Success - redirect
+        window.location.href = result.url || "/dashboard";
+      }
+    } catch (e) {
+      console.error("Token submit error:", e);
+      toast({
+        title: "Error signing in",
+        description: "Please check your token and try again",
+        variant: "destructive",
+      });
+      setIsSubmittingToken(false);
     }
   };
 
@@ -108,7 +163,9 @@ export default function LoginForm() {
         <Alert>
           <InfoIcon className="size-4" />
           <AlertDescription>
-            Email login is currently only supported on web browsers
+            <strong>How it works:</strong> Enter your email to receive a magic
+            link. You can either click the link in the email or copy the token
+            and paste it here.
           </AlertDescription>
         </Alert>
 
@@ -129,9 +186,9 @@ export default function LoginForm() {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                disabled={isLoading}
+                disabled={isSendingEmail}
                 onKeyDown={(e) => {
-                  if (e.key === "Enter") sendEmailToken();
+                  if (e.key === "Enter" && !isSendingEmail) sendEmailToken();
                 }}
               />
             </div>
@@ -143,10 +200,14 @@ export default function LoginForm() {
                     variant="secondary"
                     size="icon"
                     onClick={sendEmailToken}
-                    disabled={isLoading || !email}
+                    disabled={isSendingEmail || !email}
                     title="Send Magic Link"
                   >
-                    <Icons.email className="size-4" />
+                    {isSendingEmail ? (
+                      <Icons.spinner className="size-4 animate-spin" />
+                    ) : (
+                      <Icons.email className="size-4" />
+                    )}
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>Send magic link to email</TooltipContent>
@@ -154,37 +215,48 @@ export default function LoginForm() {
             </div>
           </div>
 
+          {emailSent && (
+            <Alert className="border-green-500 bg-green-50 dark:bg-green-950">
+              <Icons.check className="size-4 text-green-600" />
+              <AlertDescription className="text-green-700 dark:text-green-300">
+                Magic link sent! Check your email inbox and spam folder.
+              </AlertDescription>
+            </Alert>
+          )}
+
           <div className="flex flex-row gap-2">
             <div className="grid grow gap-2">
-              <Label htmlFor="emailToken">Token (if received)</Label>
+              <Label htmlFor="emailToken">Token (from email)</Label>
               <Input
                 id="emailToken"
                 type="text"
                 placeholder="Enter token from email"
                 value={emailToken}
                 onChange={(e) => setEmailToken(e.target.value)}
-                disabled={isLoading}
+                disabled={isSubmittingToken}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !isSubmittingToken)
+                    handleTokenSubmit();
+                }}
               />
             </div>
             <div className="grid gap-2">
               <Label className="opacity-0">Login</Label>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Link
+                  <Button
+                    variant="secondary"
+                    size="icon"
+                    onClick={handleTokenSubmit}
+                    disabled={isSubmittingToken || !emailToken || !email}
                     title="Login with Token"
-                    href={
-                      emailToken && email
-                        ? `/api/auth/callback/resend?callbackUrl=/dashboard&token=${emailToken}&email=${email}`
-                        : "#"
-                    }
-                    className={cn(
-                      buttonVariants({ variant: "secondary", size: "icon" }),
-                      (!emailToken || !email) &&
-                        "pointer-events-none opacity-50",
-                    )}
                   >
-                    <Icons.login className="size-4" />
-                  </Link>
+                    {isSubmittingToken ? (
+                      <Icons.spinner className="size-4 animate-spin" />
+                    ) : (
+                      <Icons.login className="size-4" />
+                    )}
+                  </Button>
                 </TooltipTrigger>
                 <TooltipContent>Login with token</TooltipContent>
               </Tooltip>
