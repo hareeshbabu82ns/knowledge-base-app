@@ -3,6 +3,7 @@ import NextAuth, { NextAuthConfig } from "next-auth";
 import { Adapter } from "next-auth/adapters";
 // import CredentialsProvider from "next-auth/providers/credentials"
 import GoogleProvider from "next-auth/providers/google";
+import GitHubProvider from "next-auth/providers/github";
 import ResendProvider from "next-auth/providers/resend";
 import MagicLoginLinkEmail from "@/components/emails/MagicLoginLinkEmail";
 import WelcomeEmail from "@/components/emails/WelcomeEmail";
@@ -38,6 +39,7 @@ export const authOptions: NextAuthConfig = {
       },
     }),
     GoogleProvider,
+    GitHubProvider,
     // CredentialsProvider({
     //   name: "Credentials",
     //   credentials: {
