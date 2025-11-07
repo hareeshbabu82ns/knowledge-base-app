@@ -9,6 +9,7 @@ import {
   AccordionTrigger,
 } from "../ui/accordion";
 import { cn } from "@/lib/utils";
+import { usePathname } from "next/navigation";
 
 export type NavLinkProps = NextLinkProps &
   PropsWithChildren & {
@@ -24,6 +25,8 @@ function NavLink({
   childNavLinks,
   ...props
 }: any) {
+  const pathname = usePathname();
+
   const memoizedStyles = useMemo(
     () => ({
       borderRadius: borderRadius || 0,
@@ -39,10 +42,14 @@ function NavLink({
       </NextLink>
     );
   } else {
+    // Check if current path starts with the accordion's href to keep it open
+    const isOpen = pathname?.startsWith(props.href);
+
     return (
       <Accordion
         type="single"
-        defaultValue={props.href}
+        defaultValue={isOpen ? props.href : undefined}
+        value={isOpen ? props.href : undefined}
         collapsible
         className={cn(className, "w-full")}
       >

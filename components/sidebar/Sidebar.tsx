@@ -35,18 +35,12 @@ function Sidebar(props: SidebarProps) {
 
   // SIDEBAR
   return fixedSidebar ? (
-    // <div
-    //   // eslint-disable-next-line tailwindcss/enforces-negative-arbitrary-values
-    //   className={`lg:!z-99 fixed !z-[99] min-h-full w-[300px] transition-all md:!z-[99] xl:!z-0 ${
-    //     props.variant === "auth" ? "xl:hidden" : "xl:block"
-    //   } ${props.open ? "" : "-translate-x-[120%] xl:translate-x-[unset]"}`}
-    // >
-    <div className="fixed left-0 top-0 min-h-full w-80">
+    <div className="fixed left-0 top-0 z-40 h-screen w-80">
       <SidebarContent {...props} routes={routes} />
     </div>
   ) : (
     <Sheet open={open} onOpenChange={setOpen}>
-      <SheetContent side="left" className="p-0">
+      <SheetContent side="left" className="w-80 p-0">
         <SheetHeader className="hidden">
           <SheetTitle>Knowledge Base</SheetTitle>
         </SheetHeader>
@@ -63,42 +57,39 @@ function SidebarContent(props: SidebarProps) {
 
   // SIDEBAR
   return (
-    <Card className={`h-svh w-full overflow-y-auto rounded-none pe-4 py-0`}>
+    <Card
+      className={`h-screen w-full overflow-hidden rounded-none border-r py-0`}
+    >
       <div className="flex h-full flex-col justify-between">
-        <div>
-          <div className={`ml-4 mt-8 flex items-center`}>
+        <div className="flex min-h-0 flex-1 flex-col">
+          <div className={`ml-4 mt-8 flex items-center px-4`}>
             <img
               src="/icon-512.png"
               alt="HKBase Logo"
-              className="size-8 mr-2"
+              className="mr-2 size-8"
             />
-            {/* <div className="bg-primary text-primary-foreground me-2 flex size-10 items-center justify-center rounded-md">
-              <Icons.logo className="size-5" />
-            </div> */}
-            <h5 className="text-card-foreground me-2 text-2xl font-bold leading-5">
+            <h5 className="me-2 text-2xl font-bold leading-5 text-card-foreground">
               Knowledge Base
             </h5>
           </div>
           {/* Nav item */}
-          <ul className="mt-8">
-            <Links routes={routes} />
-          </ul>
+          <nav className="mt-8 flex-1 overflow-y-auto overflow-x-hidden px-4">
+            <ul>
+              <Links routes={routes} />
+            </ul>
+          </nav>
         </div>
-        {/* Free Horizon Card    */}
-        <div className="mb-2 mt-4">
-          {/* <div className="flex justify-center">
-              <SidebarCard />
-            </div> */}
-          {/* Sidebar profile info */}
-          <div className="mt-5 flex w-full items-center rounded-none border-t p-4">
-            <a href="/profile">
-              <Avatar className="min-h-10 min-w-10">
+        {/* Sidebar profile info */}
+        <div className="mt-4 flex-shrink-0 border-t">
+          <div className="flex w-full items-center p-4">
+            <a href="/profile" className="flex-shrink-0">
+              <Avatar className="size-10">
                 <AvatarImage src={session?.data?.user.image ?? ""} />
                 <AvatarFallback className="font-bold">US</AvatarFallback>
               </Avatar>
             </a>
-            <a href="/profile">
-              <p className="ml-2 mr-3 flex items-center text-sm font-semibold leading-none">
+            <a href="/profile" className="min-w-0 flex-1">
+              <p className="ml-2 mr-3 truncate text-sm font-semibold leading-none">
                 {session?.data?.user.name
                   ? session?.data?.user.name
                   : "User Not Found"}
@@ -106,7 +97,7 @@ function SidebarContent(props: SidebarProps) {
             </a>
             <Button
               variant="outline"
-              className="ml-auto flex size-[40px] cursor-pointer items-center justify-center rounded-full p-0 text-center text-sm font-medium"
+              className="ml-auto flex size-[40px] flex-shrink-0 cursor-pointer items-center justify-center rounded-full p-0 text-center text-sm font-medium"
               onClick={async () => {
                 await signOut();
                 router.push("/");

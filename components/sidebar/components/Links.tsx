@@ -19,7 +19,19 @@ export function SidebarLinks(props: SidebarLinksProps) {
   // verifies if routeName is the one active (in browser input)
   const activeRoute = useCallback(
     (routeName: string) => {
-      return pathname?.includes(routeName) && pathname?.endsWith(routeName);
+      // Exact match for the route
+      return pathname === routeName;
+    },
+    [pathname],
+  );
+
+  // Check if any child route is active
+  const hasActiveChild = useCallback(
+    (routes: IRoute[]) => {
+      return routes.some((route) => {
+        const fullPath = route.layout ? route.layout + route.path : route.path;
+        return pathname === fullPath;
+      });
     },
     [pathname],
   );
@@ -40,17 +52,23 @@ export function SidebarLinks(props: SidebarLinksProps) {
           </li>
         );
       } else {
+        const fullPath = route.layout ? route.layout + route.path : route.path;
+        const isActive = activeRoute(fullPath);
+        // Only highlight parent if it has NO children and is active
+        // OR if it has children but we're on the parent's exact path
+        const isHighlighted = route.items ? isActive : isActive;
+
         return (
           <li
             key={key}
             className={`flex w-full max-w-full items-center justify-between rounded-lg py-3 pl-8 ${
-              activeRoute(route.path.toLowerCase())
+              isHighlighted
                 ? "bg-accent text-accent-foreground font-semibold"
                 : "font-medium"
             }`}
           >
             <NavLink
-              href={route.layout ? route.layout + route.path : route.path}
+              href={fullPath}
               key={key}
               className="w-full"
               childNavLinks={
@@ -60,7 +78,7 @@ export function SidebarLinks(props: SidebarLinksProps) {
               <div className="flex w-full items-center justify-center gap-3">
                 <div
                   className={`text ${
-                    activeRoute(route.path.toLowerCase())
+                    isHighlighted
                       ? "text-accent-foreground font-semibold"
                       : "font-medium"
                   } `}
@@ -69,7 +87,7 @@ export function SidebarLinks(props: SidebarLinksProps) {
                 </div>
                 <p
                   className={`mr-auto text-sm ${
-                    activeRoute(route.path.toLowerCase())
+                    isHighlighted
                       ? "text-accent-foreground font-semibold"
                       : "font-medium"
                   }`}
@@ -86,24 +104,23 @@ export function SidebarLinks(props: SidebarLinksProps) {
   // this function creates the links from the secondary accordions (for example auth -> sign-in -> default)
   const createAccordionLinks = (routes: IRoute[]) => {
     return routes.map((route: IRoute, key: number) => {
+      const fullPath = route.layout + route.path;
+      const isActive = activeRoute(fullPath);
+
       return (
         <li
           key={key}
           className={`flex w-full max-w-full items-center justify-between rounded-lg py-3 pl-3 ${
-            activeRoute(route.path.toLowerCase())
+            isActive
               ? "bg-accent text-accent-foreground font-semibold"
               : "font-medium"
           }`}
         >
-          <NavLink
-            href={route.layout + route.path}
-            key={key}
-            className="w-full"
-          >
+          <NavLink href={fullPath} key={key} className="w-full">
             <div className="flex w-full items-center justify-center gap-3">
               <div
                 className={`${
-                  activeRoute((route.layout + route.path).toLowerCase())
+                  isActive
                     ? "text-accent-foreground font-semibold"
                     : "font-medium"
                 } `}
@@ -112,8 +129,8 @@ export function SidebarLinks(props: SidebarLinksProps) {
               </div>
               <p
                 className={`mr-auto text-xs ${
-                  activeRoute(route.path.toLowerCase())
-                    ? "text-secondary-foreground font-semibold"
+                  isActive
+                    ? "text-accent-foreground font-semibold"
                     : "font-medium"
                 }`}
               >
