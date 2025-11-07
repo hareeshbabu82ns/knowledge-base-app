@@ -16,22 +16,22 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from "../ui/sheet";
 
 export interface SidebarProps extends PropsWithChildren {
   routes: IRoute[];
-  [ x: string ]: any;
+  [x: string]: any;
 }
 interface SidebarLinksProps extends PropsWithChildren {
   routes: IRoute[];
-  [ x: string ]: any;
+  [x: string]: any;
 }
 
-function Sidebar( props: SidebarProps ) {
+function Sidebar(props: SidebarProps) {
   const { routes } = props;
 
-  const fixedSidebar = useMediaQuery( "(min-width: 1280px)" );
-  const [ open, setOpen ] = React.useState( props.open );
+  const fixedSidebar = useMediaQuery("(min-width: 1280px)");
+  const [open, setOpen] = React.useState(props.open);
 
-  useEffect( () => {
-    setOpen( props.open );
-  }, [ props.open ] );
+  useEffect(() => {
+    setOpen(props.open);
+  }, [props.open]);
 
   // SIDEBAR
   return fixedSidebar ? (
@@ -56,7 +56,7 @@ function Sidebar( props: SidebarProps ) {
   );
 }
 
-function SidebarContent( props: SidebarProps ) {
+function SidebarContent(props: SidebarProps) {
   const router = useRouter();
   const session = useSession();
   const { routes } = props;
@@ -67,7 +67,11 @@ function SidebarContent( props: SidebarProps ) {
       <div className="flex h-full flex-col justify-between">
         <div>
           <div className={`ml-4 mt-8 flex items-center`}>
-            <img src="/icon-512.png" alt="HKBase Logo" className="size-8 mr-2" />
+            <img
+              src="/icon-512.png"
+              alt="HKBase Logo"
+              className="size-8 mr-2"
+            />
             {/* <div className="bg-primary text-primary-foreground me-2 flex size-10 items-center justify-center rounded-md">
               <Icons.logo className="size-5" />
             </div> */}
@@ -87,13 +91,13 @@ function SidebarContent( props: SidebarProps ) {
             </div> */}
           {/* Sidebar profile info */}
           <div className="mt-5 flex w-full items-center rounded-none border-t p-4">
-            <a href="/settings">
+            <a href="/profile">
               <Avatar className="min-h-10 min-w-10">
                 <AvatarImage src={session?.data?.user.image ?? ""} />
                 <AvatarFallback className="font-bold">US</AvatarFallback>
               </Avatar>
             </a>
-            <a href="/settings">
+            <a href="/profile">
               <p className="ml-2 mr-3 flex items-center text-sm font-semibold leading-none">
                 {session?.data?.user.name
                   ? session?.data?.user.name
@@ -105,7 +109,7 @@ function SidebarContent( props: SidebarProps ) {
               className="ml-auto flex size-[40px] cursor-pointer items-center justify-center rounded-full p-0 text-center text-sm font-medium"
               onClick={async () => {
                 await signOut();
-                router.push( "/" );
+                router.push("/");
               }}
             >
               <HiOutlineArrowRightOnRectangle

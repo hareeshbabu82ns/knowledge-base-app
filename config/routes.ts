@@ -1,6 +1,6 @@
 export const publicRoutes = ["/", "/sign-in", "/sign-up"];
 
-export const privateRoutes = ["/dashboard", "/users", "/settings"];
+export const privateRoutes = ["/dashboard", "/users", "/settings", "/profile"];
 
 export const apiRoutePrefix = "/api/auth";
 

@@ -98,6 +98,9 @@ export async function fetchDashboardStats(): Promise<DashboardStats | null> {
         date: true,
         type: true,
         account: true,
+        accountObj: {
+          select: { name: true },
+        },
       },
     }),
     // Monthly expenses for last 6 months
@@ -184,7 +187,7 @@ export async function fetchDashboardStats(): Promise<DashboardStats | null> {
     },
     recentTransactions: recentTransactions.map((t) => ({
       ...t,
-      account: t.account || "N/A",
+      account: t.accountObj?.name || t.account || "N/A",
     })),
     monthlyExpenses: monthlyExpensesArray,
     expensesByType: expensesByType.map((item) => ({

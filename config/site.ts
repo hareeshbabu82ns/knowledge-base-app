@@ -47,6 +47,10 @@ export const siteConfig = {
       href: "/files",
     },
     {
+      title: "Profile",
+      href: "/profile",
+    },
+    {
       title: "Settings",
       href: "/settings",
     },

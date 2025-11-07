@@ -98,6 +98,12 @@ export const routes: IRoute[] = [
     disabled: true,
   },
   {
+    name: "Profile",
+    path: "/profile",
+    icon: <HiOutlineUser className="size-4 stroke-2 text-inherit" />,
+    collapse: false,
+  },
+  {
     name: "Settings",
     path: "/settings",
     icon: <HiOutlineCog8Tooth className="size-4 stroke-2 text-inherit" />,
