@@ -106,7 +106,8 @@ export default function SignupForm() {
         </div>
         <CardTitle className="text-xl">Sign Up</CardTitle>
         <CardDescription>
-          Enter your information to create an account
+          Enter your information to create an account. If you previously signed
+          up with Google, you can add a password here.
         </CardDescription>
       </CardHeader>
       <CardContent>

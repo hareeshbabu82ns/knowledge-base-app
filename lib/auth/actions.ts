@@ -4,9 +4,10 @@
 // import { redirect } from "next/navigation"
 import { differenceInMinutes, format, subDays } from "date-fns";
 import { z } from "zod";
+import bcrypt from "bcryptjs";
 import { siteConfig } from "@/config/site";
 import { db } from "@/lib/db";
-import { UserSigninSchema } from "@/lib/validations/user";
+import { UserSigninSchema, UserSignupSchema } from "@/lib/validations/user";
 import { signIn as naSignIn, signOut as naSignOut } from ".";
 
 export type SignInEmailResponse =
@@ -87,4 +88,107 @@ export const signOut = async () => {
   await naSignOut();
   // revalidatePath("/")
   // redirect("/")
+};
+
+export type SignUpResponse =
+  | { status: "success"; message: string }
+  | { status: "error"; error: string };
+
+export const signUp = async (
+  values: z.infer<typeof UserSignupSchema>,
+): Promise<SignUpResponse> => {
+  try {
+    // Validate input fields
+    const validatedFields = UserSignupSchema.safeParse(values);
+
+    if (!validatedFields.success) {
+      const errors = validatedFields.error.errors
+        .map((err) => err.message)
+        .join(", ");
+      return { status: "error", error: errors };
+    }
+
+    const { name, email, password } = validatedFields.data;
+
+    // Check if user already exists
+    const existingUser = await db.user.findUnique({
+      where: { email },
+    });
+
+    // Hash password
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    let user;
+    let isUpdatingOAuthUser = false;
+
+    if (existingUser) {
+      // User exists - check if they have a password
+      if (existingUser.password) {
+        // User already has credentials set up
+        return {
+          status: "error",
+          error:
+            "An account with this email already exists. Please sign in instead.",
+        };
+      }
+
+      // User exists but doesn't have a password (OAuth user)
+      // Add password to their account to enable credentials login
+      isUpdatingOAuthUser = true;
+      user = await db.user.update({
+        where: { email },
+        data: {
+          password: hashedPassword,
+          name: name || existingUser.name, // Update name if provided, otherwise keep existing
+          emailVerified: existingUser.emailVerified || new Date(), // Keep existing verification or set new
+        },
+      });
+    } else {
+      // Create new user
+      user = await db.user.create({
+        data: {
+          name,
+          email,
+          password: hashedPassword,
+          role: "USER",
+          emailVerified: new Date(), // Auto-verify for credentials signup
+        },
+      });
+    }
+
+    // Automatically sign in the user
+    const signInResult = await naSignIn("credentials", {
+      email,
+      password,
+      redirect: false,
+    });
+
+    if (signInResult?.error) {
+      const message = isUpdatingOAuthUser
+        ? "Password added successfully! Please sign in to continue."
+        : "Account created successfully! Please sign in to continue.";
+      return {
+        status: "success",
+        message,
+      };
+    }
+
+    const successMessage = isUpdatingOAuthUser
+      ? "Password added to your account! You can now sign in with email and password."
+      : "Account created and signed in successfully!";
+
+    return {
+      status: "success",
+      message: successMessage,
+    };
+  } catch (error) {
+    console.error("SignUp error:", error);
+    return {
+      status: "error",
+      error:
+        error instanceof Error
+          ? error.message
+          : "An unexpected error occurred. Please try again.",
+    };
+  }
 };

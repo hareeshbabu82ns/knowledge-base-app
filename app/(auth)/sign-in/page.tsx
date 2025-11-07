@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { signIn } from "next-auth/react";
+import Link from "next/link";
 import { Icons } from "@/components/shared/icons";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -436,6 +437,16 @@ export default function LoginForm() {
               </span>
             </div>
           </div>
+        </div>
+
+        <div className="mt-4 text-center text-sm">
+          Don&apos;t have an account?{" "}
+          <Link
+            href="/sign-up"
+            className="font-medium text-primary underline underline-offset-4 hover:text-primary/80"
+          >
+            Sign up
+          </Link>
         </div>
       </CardContent>
     </Card>
