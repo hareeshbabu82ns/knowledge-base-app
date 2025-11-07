@@ -5,6 +5,7 @@ import { IRoute } from "@/types/types";
 import { usePathname, useRouter } from "next/navigation";
 import { PropsWithChildren, useCallback } from "react";
 import { FaCircle } from "react-icons/fa";
+import { useSession } from "next-auth/react";
 
 interface SidebarLinksProps extends PropsWithChildren {
   routes: IRoute[];
@@ -13,8 +14,23 @@ interface SidebarLinksProps extends PropsWithChildren {
 
 export function SidebarLinks(props: SidebarLinksProps) {
   const pathname = usePathname();
+  const { data: session } = useSession();
+  const userRole = session?.user?.role;
 
   const { routes, onOpen } = props;
+
+  // Filter routes based on user role
+  const filterRoutesByRole = useCallback(
+    (routes: IRoute[]): IRoute[] => {
+      return routes.filter((route) => {
+        // If route has no role requirement, show it
+        if (!route.requiredRole) return true;
+        // If route requires a role, check if user has it
+        return userRole === route.requiredRole;
+      });
+    },
+    [userRole],
+  );
 
   // verifies if routeName is the one active (in browser input)
   const activeRoute = useCallback(
@@ -38,7 +54,9 @@ export function SidebarLinks(props: SidebarLinksProps) {
 
   // this function creates the links and collapses that appear in the sidebar (left menu)
   const createLinks = (routes: IRoute[]) => {
-    return routes.map((route, key) => {
+    const filteredRoutes = filterRoutesByRole(routes);
+
+    return filteredRoutes.map((route, key) => {
       if (route.disabled) {
         return (
           <li

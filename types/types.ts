@@ -27,6 +27,7 @@ export interface IRoute {
   items?: IRoute[];
   rightElement?: boolean;
   invisible?: boolean;
+  requiredRole?: "ADMIN" | "USER";
 }
 
 declare global {

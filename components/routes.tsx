@@ -91,11 +91,11 @@ export const routes: IRoute[] = [
     disabled: true,
   },
   {
-    name: "Users List",
-    path: "/dashboard/users-list",
+    name: "Users",
+    path: "/users",
     icon: <HiOutlineUsers className="size-4 stroke-2 text-inherit" />,
     collapse: false,
-    disabled: true,
+    requiredRole: "ADMIN",
   },
   {
     name: "Profile",

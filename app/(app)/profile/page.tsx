@@ -4,12 +4,10 @@ import { useSession } from "next-auth/react";
 import ProfileForm from "./_components/profile-form";
 import PasswordUpdateForm from "./_components/password-update-form";
 import TotpManagement from "./_components/totp-management";
-import UserManagement from "./_components/user-management";
 import { Separator } from "@/components/ui/separator";
 
 export default function ProfilePage() {
   const { data: session } = useSession();
-  const isAdmin = session?.user?.role === "ADMIN";
 
   return (
     <div className="space-y-6">
@@ -29,13 +27,6 @@ export default function ProfilePage() {
       <Separator />
 
       <TotpManagement />
-
-      {isAdmin && (
-        <>
-          <Separator />
-          <UserManagement />
-        </>
-      )}
     </div>
   );
 }
