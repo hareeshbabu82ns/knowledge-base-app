@@ -8,6 +8,10 @@ import bcrypt from "bcryptjs";
 import { siteConfig } from "@/config/site";
 import { db } from "@/lib/db";
 import { UserSigninSchema, UserSignupSchema } from "@/lib/validations/user";
+import {
+  validateSignupEmail,
+  isAdminEmail,
+} from "@/lib/auth/signup-validation";
 import { signIn as naSignIn, signOut as naSignOut } from ".";
 
 export type SignInEmailResponse =
@@ -110,6 +114,16 @@ export const signUp = async (
 
     const { name, email, password } = validatedFields.data;
 
+    // Validate signup email restrictions
+    const emailValidation = await validateSignupEmail(email);
+    if (!emailValidation.isAllowed) {
+      return {
+        status: "error",
+        error:
+          emailValidation.error || "This email is not authorized to sign up.",
+      };
+    }
+
     // Check if user already exists
     const existingUser = await db.user.findUnique({
       where: { email },
@@ -117,6 +131,10 @@ export const signUp = async (
 
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Check if user should be admin
+    const shouldBeAdmin = await isAdminEmail(email);
+    const userRole = shouldBeAdmin ? "ADMIN" : "USER";
 
     let user;
     let isUpdatingOAuthUser = false;
@@ -141,6 +159,7 @@ export const signUp = async (
           password: hashedPassword,
           name: name || existingUser.name, // Update name if provided, otherwise keep existing
           emailVerified: existingUser.emailVerified || new Date(), // Keep existing verification or set new
+          role: userRole, // Update role if they should be admin
         },
       });
     } else {
@@ -150,7 +169,7 @@ export const signUp = async (
           name,
           email,
           password: hashedPassword,
-          role: "USER",
+          role: userRole,
           emailVerified: new Date(), // Auto-verify for credentials signup
         },
       });

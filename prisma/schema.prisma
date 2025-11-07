@@ -170,6 +170,22 @@ model ExpenseTags {
 
 /// **** Expenses  ****
 
+/// **** App Settings ****
+
+model AppSettings {
+  id                   String   @id @default(auto()) @map("_id") @db.ObjectId
+  allowedSignupEmails  String[] @default([]) // List of specific emails allowed to sign up
+  allowedSignupDomains String[] @default([]) // List of email domains allowed to sign up (e.g., "company.com")
+  restrictSignup       Boolean  @default(false) // Whether to restrict signups based on the lists above
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("app_settings")
+}
+
+/// **** App Settings ****
+
 /// **** Loans ****
 
 enum PaymentFrequency {

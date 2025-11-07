@@ -12,6 +12,10 @@ import { siteConfig } from "@/config/site";
 import { authOptionsPartial } from "@/lib/auth/utils";
 import { db } from "@/lib/db";
 import { sendMail } from "@/lib/email/actions";
+import {
+  validateSignupEmail,
+  isAdminEmail,
+} from "@/lib/auth/signup-validation";
 
 export const authOptions: NextAuthConfig = {
   ...authOptionsPartial,
@@ -85,6 +89,32 @@ export const authOptions: NextAuthConfig = {
     }),
   ],
   callbacks: {
+    // Validate signup restrictions for OAuth and magic link providers
+    async signIn({ user, account }) {
+      // Skip validation for credentials provider (handled in signUp action)
+      if (account?.provider === "credentials") {
+        return true;
+      }
+
+      // Check if this is a new user signup (user doesn't exist in DB yet)
+      const existingUser = await db.user.findUnique({
+        where: { email: user.email || undefined },
+      });
+
+      // If user already exists, allow sign in
+      if (existingUser) {
+        return true;
+      }
+
+      // For new OAuth signups, validate email restrictions
+      const emailValidation = await validateSignupEmail(user.email || "");
+      if (!emailValidation.isAllowed) {
+        // Return false to prevent signup
+        return false;
+      }
+
+      return true;
+    },
     // jwt is called with `user` on sign-in, and with `token` on subsequent requests
     // so save user details in token for later use
     jwt: async ({ token, user, trigger }) => {
@@ -95,7 +125,25 @@ export const authOptions: NextAuthConfig = {
         token.name = user.name;
         token.email = user.email;
         token.image = user.image || siteConfig.defaultUserImg;
-        token.role = user.role;
+
+        // Check if user email is in ADMIN_EMAILS list and assign admin role
+        const shouldBeAdmin = await isAdminEmail(user.email || "");
+
+        if (shouldBeAdmin && user.role !== "ADMIN") {
+          // Update user role to ADMIN if they're in the admin list
+          try {
+            await db.user.update({
+              where: { id: user.id },
+              data: { role: "ADMIN" },
+            });
+            token.role = "ADMIN";
+          } catch (error) {
+            console.error("Failed to update user role to ADMIN:", error);
+            token.role = user.role;
+          }
+        } else {
+          token.role = user.role;
+        }
         // console.log("jwt user details updated")
       }
 
