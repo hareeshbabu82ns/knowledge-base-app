@@ -1,57 +1,186 @@
-### init project
+# HKBase - Knowledge Base Application
+
+A full-stack financial knowledge base application built with Next.js, featuring secure authentication, two-factor authentication (TOTP), and comprehensive user management.
+
+## Features
+
+- 🔐 **Secure Authentication**: Email/password and OAuth (Google) sign-in
+- 🔒 **Two-Factor Authentication**: Mandatory TOTP for password-based accounts
+- 👥 **User Management**: Admin controls for user roles and account management
+- 🎨 **Modern UI**: Built with Tailwind CSS and Shadcn components
+- 📱 **Responsive Design**: Mobile-first approach with dark/light mode support
+- 💾 **MongoDB Database**: Prisma ORM for type-safe database operations
+
+## Documentation
+
+📚 **[Complete Documentation](docs/DOCUMENTATION.md)** - Comprehensive guide covering:
+
+- User Authentication & Signup
+- OAuth Account Merging
+- Two-Factor Authentication (TOTP)
+- Admin & Signup Restrictions
+- User Profile & Management
+
+## Quick Start
+
+### Prerequisites
+
+- Node.js 18+ and pnpm
+- MongoDB database (local or cloud)
+
+### Installation
 
 ```sh
-pnpm create next-app@latest kbase --typescript --tailwind --eslint
+# Clone the repository
+git clone <repository-url>
+cd knowledge-base-app
 
-git config --local commit.gpgsign false
-git config --local user.email hareeshbabu82ns@gmail.com
+# Install dependencies
+pnpm install
+
+# Set up environment variables
+cp .env.sample .env
+# Edit .env with your configuration
 ```
+
+### Database Setup
 
 ```sh
-pnpm dlx shadcn-ui@latest init
-pnpm dlx shadcn-ui@latest add -a
+# Generate Prisma client
+pnpm db:gen
+
+# Run migrations (if applicable)
+pnpm db:migrate
+
+# Open Prisma Studio to view data
+pnpm db:studio
 ```
+
+### Development
 
 ```sh
-npm i prisma -D
+# Start development server
+pnpm dev
 
-npm i next-auth @auth/core @prisma/client @auth/prisma-adapter
-npm i @t3-oss/env-nextjs
-npm i zod react-hook-form resend zustand
+# Preview email templates
+pnpm dev:emails
 ```
 
-- Add Environment Variables to your `.env` can use `.env.sample` for ref
-- google auth https://console.cloud.google.com/apis/credentials
-- github auth https://github.com/settings/apps
+Visit `http://localhost:3000` to see the application.
 
-- optional, if running local db
+### Optional: Local MongoDB
 
 ```sh
 docker compose up -d
 ```
 
-```sh
-npm run db:gen # generates prisma client
-npm run db:migrate # not valid for mongodb
-npm run db:studio # opens db explorer
+## Environment Variables
 
-npm run dev:emails # email template designer
+Create a `.env` file with the following variables:
 
-npm run dev
+```env
+# Database
+DATABASE_URL="mongodb://..."
+
+# NextAuth
+NEXTAUTH_URL="http://localhost:3000"
+NEXTAUTH_SECRET="your-secret-key"
+
+# Admin Configuration
+ADMIN_EMAILS="admin@example.com"
+
+# TOTP Configuration
+TOTP_ENCRYPTION_KEY="<base64-encoded-32-byte-key>"
+
+# OAuth (Optional)
+GOOGLE_CLIENT_ID="your-client-id"
+GOOGLE_CLIENT_SECRET="your-client-secret"
+
+# Email (Optional)
+SMTP_FROM="noreply@yourdomain.com"
+RESEND_API_KEY="your-resend-api-key"
 ```
 
-- Config Ref: https://github.com/Blazity/next-enterprise
-- UI Ref
-  - [shadcn-nextjs-boilerplate](https://github.com/horizon-ui/shadcn-nextjs-boilerplate)
-  - [flowbite](https://flowbite.com/docs/components/pagination/)
-  - [React Icons](https://react-icons.github.io/react-icons/search/#q=)
+Generate TOTP encryption key:
+
+```sh
+openssl rand -base64 32
+```
+
+## Tech Stack
+
+- **Framework**: Next.js 14+ with App Router
+- **Language**: TypeScript 5.0+
+- **Database**: MongoDB with Prisma ORM
+- **Authentication**: NextAuth.js with TOTP support
+- **Styling**: Tailwind CSS
+- **UI Components**: Shadcn/ui
+- **Forms**: React Hook Form with Zod validation
+- **State Management**: TanStack Query
+
+## Project Structure
+
+```
+knowledge-base-app/
+├── app/                    # Next.js App Router
+│   ├── (auth)/            # Authentication routes
+│   ├── (app)/             # Protected app routes
+│   ├── actions/           # Server actions
+│   └── api/               # API routes
+├── components/            # React components
+│   ├── ui/                # Reusable UI components
+│   └── features/          # Feature-specific components
+├── lib/                   # Utility functions
+│   ├── auth/              # Authentication utilities
+│   ├── db/                # Database client
+│   └── validations/       # Zod schemas
+├── prisma/                # Prisma schema and migrations
+├── docs/                  # Documentation
+└── public/                # Static assets
+```
+
+## Scripts
+
+```sh
+pnpm dev          # Start development server
+pnpm build        # Build for production
+pnpm start        # Start production server
+pnpm lint         # Run ESLint
+pnpm db:gen       # Generate Prisma client
+pnpm db:migrate   # Run database migrations
+pnpm db:studio    # Open Prisma Studio
+pnpm dev:emails   # Preview email templates
+```
+
+## Authentication Setup
+
+### OAuth Providers
+
+- **Google**: https://console.cloud.google.com/apis/credentials
+- **GitHub**: https://github.com/settings/apps
+
+Add credentials to your `.env` file.
+
+### Admin Users
+
+Set admin emails in `.env`:
+
+```env
+ADMIN_EMAILS="admin@example.com,manager@company.com"
+```
+
+Seed admin users:
+
+```sh
+pnpm tsx scripts/seed-admins.ts
+```
 
 ## Icon Generation
 
 ![Settings](/public/assets/icon-kitchen-settings.png)
 
-- tool: https://icon.kitchen
-- source image: `/public/assets/KBase App Icon.png`
+- Tool: https://icon.kitchen
+- Source image: `/public/assets/KBase App Icon.png`
 - Settings:
   - Icons Set: Web Icons
   - Scaling: Crop
@@ -59,23 +188,51 @@ npm run dev
   - Padding: 2%
   - Bg Type: Color
   - Bg Color: #070F31
-  - fav icon: Squircle
+  - Fav icon: Squircle
 
-### commit with tags
+## Git & Version Control
 
 ```sh
+# Configure git (if needed)
+git config --local commit.gpgsign false
+git config --local user.email your-email@example.com
+
+# Commit changes
 git add .
-git commit -m "update instructions"
+git commit -m "your commit message"
 git push origin main
 
-# push single tag
-git tag -a v1.0.0 -m "tag instructions"
+# Tagging
+git tag -a v1.0.0 -m "tag description"
 git push origin v1.0.0
 
-# push multiple tags
-git tag -a v1.0.0 -m "tag instructions"
-git tag -a v1 -m "tag instructions"
+# Push multiple tags
 git push origin --tags
 
-pnpm run release:patch # pushes to origin and tags together
+# Using release script
+pnpm run release:patch  # Auto-tags and pushes
 ```
+
+## References
+
+- Config: https://github.com/Blazity/next-enterprise
+- UI Components:
+  - [shadcn-nextjs-boilerplate](https://github.com/horizon-ui/shadcn-nextjs-boilerplate)
+  - [Flowbite](https://flowbite.com/docs/components/pagination/)
+  - [React Icons](https://react-icons.github.io/react-icons/search/#q=)
+
+## License
+
+See [LICENSE](LICENSE) file for details.
+
+## Contributing
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## Support
+
+For issues, questions, or contributions, please refer to the [documentation](docs/DOCUMENTATION.md) or open an issue on GitHub.

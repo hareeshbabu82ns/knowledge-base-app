@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useSession } from "next-auth/react";
 import {
   Card,
@@ -61,9 +61,33 @@ export default function TotpManagement() {
   const [backupCodes, setBackupCodes] = useState<string[]>([]);
   const [copiedCodes, setCopiedCodes] = useState(false);
 
+  // Refs for autofocus
+  const setupInputRef = useRef<HTMLInputElement>(null);
+  const regenerateInputRef = useRef<HTMLInputElement>(null);
+
   useEffect(() => {
     loadTotpStatus();
   }, []);
+
+  // Auto-focus setup dialog input when opened
+  useEffect(() => {
+    if (showSetupDialog && setupInputRef.current) {
+      const timer = setTimeout(() => {
+        setupInputRef.current?.focus();
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [showSetupDialog]);
+
+  // Auto-focus regenerate dialog input when opened
+  useEffect(() => {
+    if (showRegenerateDialog && regenerateInputRef.current) {
+      const timer = setTimeout(() => {
+        regenerateInputRef.current?.focus();
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [showRegenerateDialog]);
 
   const loadTotpStatus = async () => {
     const result = await getTOTPStatus();
@@ -360,6 +384,7 @@ export default function TotpManagement() {
                 <Label htmlFor="setup-totp-code">Enter 6-digit code</Label>
                 <Input
                   id="setup-totp-code"
+                  ref={setupInputRef}
                   type="text"
                   placeholder="000000"
                   value={totpCode}
@@ -368,7 +393,6 @@ export default function TotpManagement() {
                   }
                   maxLength={6}
                   className="text-center text-2xl tracking-widest"
-                  autoFocus
                 />
               </div>
             </div>
@@ -496,6 +520,7 @@ export default function TotpManagement() {
             <Label htmlFor="regenerate-totp-code">TOTP Code</Label>
             <Input
               id="regenerate-totp-code"
+              ref={regenerateInputRef}
               type="text"
               placeholder="000000"
               value={totpCode}
@@ -504,7 +529,6 @@ export default function TotpManagement() {
               }
               maxLength={6}
               className="text-center text-xl tracking-widest"
-              autoFocus
             />
             <p className="text-xs text-muted-foreground">
               Enter the 6-digit code from your authenticator app
