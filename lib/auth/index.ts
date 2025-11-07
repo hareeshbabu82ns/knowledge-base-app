@@ -1,10 +1,11 @@
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import NextAuth, { NextAuthConfig } from "next-auth";
 import { Adapter } from "next-auth/adapters";
-// import CredentialsProvider from "next-auth/providers/credentials"
+import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
 import GitHubProvider from "next-auth/providers/github";
 import ResendProvider from "next-auth/providers/resend";
+import bcrypt from "bcryptjs";
 import MagicLoginLinkEmail from "@/components/emails/MagicLoginLinkEmail";
 import WelcomeEmail from "@/components/emails/WelcomeEmail";
 import { siteConfig } from "@/config/site";
@@ -45,28 +46,43 @@ export const authOptions: NextAuthConfig = {
     }),
     GoogleProvider,
     GitHubProvider,
-    // CredentialsProvider({
-    //   name: "Credentials",
-    //   credentials: {
-    //     email: { label: "Email", type: "email" },
-    //     password: { label: "Password", type: "password" },
-    //   },
-    //   async authorize(credentials): Promise<User | null> {
-    //     const dbUser = await db.user.findFirst({
-    //       where: { email: credentials.email || "" },
-    //     })
-    //     if (dbUser && dbUser.password === credentials.password) {
-    //       // console.log("auth success", dbUser)
-    //       return {
-    //         id: dbUser.id,
-    //         name: dbUser.name,
-    //         email: dbUser.email,
-    //         image: dbUser.image,
-    //       }
-    //     }
-    //     return null
-    //   },
-    // }),
+    CredentialsProvider({
+      name: "credentials",
+      credentials: {
+        email: { label: "Email", type: "email" },
+        password: { label: "Password", type: "password" },
+      },
+      async authorize(credentials) {
+        if (!credentials?.email || !credentials?.password) {
+          throw new Error("Email and password are required");
+        }
+
+        const dbUser = await db.user.findFirst({
+          where: { email: credentials.email as string },
+        });
+
+        if (!dbUser || !dbUser.password) {
+          throw new Error("Invalid email or password");
+        }
+
+        const isPasswordValid = await bcrypt.compare(
+          credentials.password as string,
+          dbUser.password,
+        );
+
+        if (!isPasswordValid) {
+          throw new Error("Invalid email or password");
+        }
+
+        return {
+          id: dbUser.id,
+          name: dbUser.name,
+          email: dbUser.email,
+          image: dbUser.image,
+          role: dbUser.role,
+        };
+      },
+    }),
   ],
   callbacks: {
     // jwt is called with `user` on sign-in, and with `token` on subsequent requests
