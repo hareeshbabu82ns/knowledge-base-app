@@ -486,7 +486,7 @@ export const fetchTransactionStats = async ({
   };
 };
 const ImpTags = [
-  "Income",
+  // "Income",
   "Food",
   "Utilities",
   "Housing",

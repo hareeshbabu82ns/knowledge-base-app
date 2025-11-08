@@ -21,9 +21,7 @@ import {
   ChartLegend,
   ChartLegendContent,
 } from "@/components/ui/chart";
-import { Label, Pie, PieChart } from "recharts";
 import { TrendingDown, TrendingUp } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
 
 const chartConfig = {
   expenses: {
@@ -33,12 +31,6 @@ const chartConfig = {
   income: {
     label: "Income",
     color: "var(--chart-2)",
-  },
-} satisfies ChartConfig;
-
-const pieChartConfig = {
-  amount: {
-    label: "Amount",
   },
 } satisfies ChartConfig;
 
@@ -84,14 +76,11 @@ const Page = () => {
     );
   }
 
-  const totalExpensesByType = stats.expensesByType.reduce(
-    (sum, item) => sum + item.amount,
-    0,
-  );
-
-  const expenseTypeChartData = stats.expensesByType.map((item, index) => ({
-    type: item.type,
-    amount: item.amount,
+  const expenseTagChartData = stats.expensesByTag.map((item, index) => ({
+    tag: item.tag,
+    averageAmount: item.averageAmount,
+    totalAmount: item.totalAmount,
+    count: item.count,
     fill: `var(--chart-${(index % 5) + 1})`,
   }));
 
@@ -106,7 +95,7 @@ const Page = () => {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 md:grid-cols-3">
         {/* Total Expenses Card */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -188,7 +177,8 @@ const Page = () => {
             </p>
           </CardContent>
         </Card>
-
+      </div>
+      <div className="grid gap-4 md:grid-cols-2">
         {/* Total Loans Card */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -267,62 +257,64 @@ const Page = () => {
           </CardContent>
         </Card>
 
-        {/* Expenses by Type Pie Chart */}
+        {/* Average Expenses by Tag Bar Chart */}
         <Card>
           <CardHeader>
-            <CardTitle>Expenses by Type</CardTitle>
-            <CardDescription>Distribution of expense types</CardDescription>
+            <CardTitle>Average Expenses by Tag</CardTitle>
+            <CardDescription>Last 6 months average per tag</CardDescription>
           </CardHeader>
           <CardContent>
-            {expenseTypeChartData.length > 0 ? (
-              <ChartContainer config={pieChartConfig} className="mx-auto">
-                <PieChart>
+            {expenseTagChartData.length > 0 ? (
+              <ChartContainer config={chartConfig}>
+                <BarChart
+                  data={expenseTagChartData}
+                  layout="vertical"
+                  margin={{ left: 20 }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" horizontal={false} />
+                  <XAxis type="number" tickLine={false} axisLine={false} />
+                  <YAxis
+                    dataKey="tag"
+                    type="category"
+                    tickLine={false}
+                    axisLine={false}
+                    width={100}
+                  />
                   <ChartTooltip
                     cursor={false}
-                    content={<ChartTooltipContent hideLabel />}
+                    content={({ active, payload }) => {
+                      if (active && payload && payload.length) {
+                        const data = payload[0].payload;
+                        return (
+                          <div className="rounded-lg border bg-background p-2 shadow-sm">
+                            <div className="grid gap-2">
+                              <div className="font-semibold">{data.tag}</div>
+                              <div className="text-xs text-muted-foreground">
+                                Average: {formatCurrency(data.averageAmount)}
+                              </div>
+                              <div className="text-xs text-muted-foreground">
+                                Total: {formatCurrency(data.totalAmount)}
+                              </div>
+                              <div className="text-xs text-muted-foreground">
+                                Count: {data.count} transactions
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      }
+                      return null;
+                    }}
                   />
-                  <Pie
-                    data={expenseTypeChartData}
-                    dataKey="amount"
-                    nameKey="type"
-                    innerRadius={60}
-                    strokeWidth={5}
-                  >
-                    <Label
-                      content={({ viewBox }) => {
-                        if (viewBox && "cx" in viewBox && "cy" in viewBox) {
-                          return (
-                            <text
-                              x={viewBox.cx}
-                              y={viewBox.cy}
-                              textAnchor="middle"
-                              dominantBaseline="middle"
-                            >
-                              <tspan
-                                x={viewBox.cx}
-                                y={viewBox.cy}
-                                className="fill-foreground text-3xl font-bold"
-                              >
-                                {formatCurrency(totalExpensesByType)}
-                              </tspan>
-                              <tspan
-                                x={viewBox.cx}
-                                y={(viewBox.cy || 0) + 24}
-                                className="fill-muted-foreground"
-                              >
-                                Total
-                              </tspan>
-                            </text>
-                          );
-                        }
-                      }}
-                    />
-                  </Pie>
-                </PieChart>
+                  <Bar
+                    dataKey="averageAmount"
+                    fill="var(--color-expenses)"
+                    radius={[0, 8, 8, 0]}
+                  />
+                </BarChart>
               </ChartContainer>
             ) : (
               <div className="flex h-[200px] items-center justify-center text-muted-foreground">
-                No expense type data available
+                No tag data available
               </div>
             )}
           </CardContent>

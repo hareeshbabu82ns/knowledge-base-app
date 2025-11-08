@@ -45,6 +45,12 @@ export type DashboardStats = {
     amount: number;
     count: number;
   }[];
+  expensesByTag: {
+    tag: string;
+    averageAmount: number;
+    totalAmount: number;
+    count: number;
+  }[];
 };
 
 export async function fetchDashboardStats(): Promise<DashboardStats | null> {
@@ -106,6 +112,7 @@ export async function fetchDashboardStats(): Promise<DashboardStats | null> {
     expensesByType,
     expensesByAccount,
     expenseAccountsList,
+    expenseTransactionsWithTags,
   ] = await Promise.all([
     // Current month expense transactions
     db.expenseTransaction.aggregate({
@@ -206,6 +213,18 @@ export async function fetchDashboardStats(): Promise<DashboardStats | null> {
         userId,
       },
     }),
+    // All expense transactions with tags for the last 6 months
+    db.expenseTransaction.findMany({
+      where: {
+        userId,
+        type: "Expense",
+        date: { gte: sixMonthsAgo },
+      },
+      select: {
+        tags: true,
+        amount: true,
+      },
+    }),
   ]);
 
   // Fetch loan stats
@@ -273,6 +292,48 @@ export async function fetchDashboardStats(): Promise<DashboardStats | null> {
     }))
     .sort((a, b) => new Date(a.month).getTime() - new Date(b.month).getTime());
 
+  // Process expenses by tag - calculate average expenses per tag
+  const tagDataMap = new Map<string, { total: number; count: number }>();
+  expenseTransactionsWithTags.forEach((transaction) => {
+    if (transaction.tags && transaction.tags.length > 0) {
+      transaction.tags.forEach((tag) => {
+        const currentData = tagDataMap.get(tag) || { total: 0, count: 0 };
+        currentData.total += transaction.amount;
+        currentData.count += 1;
+        tagDataMap.set(tag, currentData);
+      });
+    }
+  });
+
+  const ImpTags = [
+    // "Income",
+    // "Food",
+    "Groceries",
+    "DineOut",
+    "Coffee/Snacks",
+    "Utilities",
+    "Transportation",
+    "Cornerstone House",
+    "Healthcare",
+    "Personal Care",
+    "Entertainment",
+    "Subscriptions",
+    "Online Shopping",
+    // "Untagged_Expense",
+    // "Untagged_Income",
+  ];
+
+  const expensesByTagArray = Array.from(tagDataMap.entries())
+    .map(([tag, data]) => ({
+      tag,
+      averageAmount: data.count > 0 ? data.total / 6 : 0,
+      totalAmount: data.total,
+      count: data.count,
+    }))
+    .sort((a, b) => b.averageAmount - a.averageAmount)
+    .filter((item) => ImpTags.includes(item.tag));
+  // .slice(0, 10); // Limit to top 10 tags by average
+
   return {
     expenses: {
       totalAmount: currentExpenseTotal,
@@ -309,5 +370,6 @@ export async function fetchDashboardStats(): Promise<DashboardStats | null> {
       amount: item._sum.amount || 0,
       count: item._count,
     })),
+    expensesByTag: expensesByTagArray,
   };
 }
