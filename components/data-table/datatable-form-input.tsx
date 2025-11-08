@@ -383,6 +383,7 @@ export default function DataTableFormInput<TData>({
                 className="rounded-xs border shadow-sm w-56"
                 captionLayout="dropdown"
                 selected={dateValue}
+                defaultMonth={dateValue}
                 onSelect={(date?: Date) => {
                   setCellValue(date);
                   onChange({ [column.id]: date });

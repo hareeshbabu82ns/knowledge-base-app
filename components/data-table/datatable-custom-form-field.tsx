@@ -407,6 +407,7 @@ function RenderInput<TData, TFieldValues extends FieldValues = any>({
                 className="rounded-xs border shadow-sm w-56"
                 captionLayout="dropdown"
                 selected={field.value}
+                defaultMonth={field.value}
                 onSelect={(date?: Date) => field.onChange(date)}
               />
             </PopoverContent>

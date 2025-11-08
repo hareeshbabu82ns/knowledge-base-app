@@ -221,6 +221,7 @@ export default function DataTableColumnFilter({
                 className="rounded-xs border shadow-sm w-56"
                 captionLayout="dropdown"
                 selected={dateValue}
+                defaultMonth={dateValue}
                 onSelect={(date?: Date) => {
                   column.setFilterValue(date);
                 }}
