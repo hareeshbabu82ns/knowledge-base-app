@@ -22,9 +22,13 @@ import { format } from "date-fns";
 import { Calendar } from "@/components/ui/calendar";
 import { DateRange } from "react-day-picker";
 import MultipleSelector, { Option } from "@/components/ui/multi-select";
+import React, { useCallback } from "react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
-function generateFilterOptions(filterOptions?: Option[]) {
-  if (!filterOptions) return null;
+function generateFilterOptions(
+  filterOptions?: Option[],
+): React.ReactElement[] | null {
+  if (!filterOptions || filterOptions.length === 0) return null;
 
   return filterOptions.map(({ value, label }) => (
     <SelectItem key={value} value={value}>
@@ -47,29 +51,61 @@ export default function DataTableColumnFilter({
   const { filterVariant, filterOptions, filterOptionsFn } =
     column.columnDef.meta ?? {};
 
+  // Only fetch options for select and multiSelect variants
+  const needsOptions =
+    filterVariant === "select" || filterVariant === "multiSelect";
+
+  // Memoize query function to prevent unnecessary re-renders
+  const queryFn = useCallback(async (): Promise<Option[]> => {
+    if (filterOptionsFn) {
+      const result = await filterOptionsFn();
+      return result ?? [];
+    } else if (filterOptions) {
+      return filterOptions;
+    }
+    return [];
+  }, [filterOptionsFn, filterOptions]);
+
   const {
     isLoading,
     isPending,
     isError,
-    data: options,
+    data: options = [],
     error,
-  } = useQuery({
+  } = useQuery<Option[], Error>({
     queryKey: ["filters", column.id],
-    queryFn: async () => {
-      if (filterOptionsFn) {
-        return await filterOptionsFn();
-      } else if (filterOptions) {
-        return filterOptions;
-      } else {
-        return [];
-      }
-    },
+    queryFn,
+    enabled: needsOptions && !!(filterOptionsFn || filterOptions),
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    retry: 2,
   });
-  if (isLoading || isPending) return <div>Loading...</div>;
+
+  // Loading state - only for variants that need options
+  if (needsOptions && (isLoading || isPending)) {
+    return (
+      <div className="flex items-center justify-center p-2">
+        <Icons.spinner className="size-4 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
+
+  // Error state - only for variants that need options
+  if (needsOptions && isError) {
+    return (
+      <Alert variant="destructive" className="p-2">
+        <AlertDescription className="text-xs">
+          {error?.message || "Failed to load filter options"}
+        </AlertDescription>
+      </Alert>
+    );
+  }
 
   switch (filterVariant) {
     case "range":
-      const rangeValue = columnFilterValue as [number, number];
+      const rangeValue = (columnFilterValue as [number, number]) ?? [
+        undefined,
+        undefined,
+      ];
       return (
         <div className="flex space-x-2">
           <DebouncedInput
@@ -77,12 +113,15 @@ export default function DataTableColumnFilter({
             type="text"
             inputMode="numeric"
             value={rangeValue?.[0] ?? ""}
-            onChange={(value) =>
-              column.setFilterValue((old: [number, number]) => [
-                value,
-                old?.[1],
-              ])
-            }
+            onChange={(value) => {
+              const numValue = value ? Number(value) : undefined;
+              column.setFilterValue(
+                (old: [number | undefined, number | undefined]) => [
+                  numValue,
+                  old?.[1],
+                ],
+              );
+            }}
             placeholder={`Min`}
             className="w-16 flex-1 rounded border shadow"
           />
@@ -91,12 +130,15 @@ export default function DataTableColumnFilter({
             type="text"
             inputMode="numeric"
             value={rangeValue?.[1] ?? ""}
-            onChange={(value) =>
-              column.setFilterValue((old: [number, number]) => [
-                old?.[0],
-                value,
-              ])
-            }
+            onChange={(value) => {
+              const numValue = value ? Number(value) : undefined;
+              column.setFilterValue(
+                (old: [number | undefined, number | undefined]) => [
+                  old?.[0],
+                  numValue,
+                ],
+              );
+            }}
             placeholder={`Max`}
             className="w-16 flex-1 rounded border shadow"
           />
@@ -132,22 +174,22 @@ export default function DataTableColumnFilter({
         </div>
       );
     case "multiSelect":
-      const optionValue = columnFilterValue as Option[];
+      const optionValue = (columnFilterValue as Option[]) ?? [];
       return (
         <div className="flex flex-row items-center justify-between gap-1">
           <MultipleSelector
             className="w-full"
-            onChange={(e) => {
-              column.setFilterValue(e);
+            onChange={(selectedOptions) => {
+              column.setFilterValue(selectedOptions);
             }}
             placeholder="multi select..."
             value={optionValue}
             options={options}
             commandProps={{
-              filter: (value, search, keywords) => {
-                return options
-                  ?.find((o) => o.value === value)
-                  ?.label?.toLowerCase()
+              filter: (value, search) => {
+                const option = options.find((o) => o.value === value);
+                return option?.label
+                  ?.toLowerCase()
                   .includes(search.toLowerCase())
                   ? 1
                   : 0;
@@ -157,7 +199,7 @@ export default function DataTableColumnFilter({
         </div>
       );
     case "date":
-      const dateValue = columnFilterValue as Date;
+      const dateValue = columnFilterValue as Date | undefined;
       return (
         <div className="flex w-full flex-row items-center justify-between gap-1">
           <Popover>
@@ -166,15 +208,11 @@ export default function DataTableColumnFilter({
                 variant={"outline"}
                 className={cn(
                   "w-full justify-start text-left font-normal",
-                  !columnFilterValue && "text-muted-foreground",
+                  !dateValue && "text-muted-foreground",
                 )}
               >
                 <Icons.calendar className="mr-2 size-4" />
-                {columnFilterValue ? (
-                  format(dateValue, "PP")
-                ) : (
-                  <span>Pick a date</span>
-                )}
+                {dateValue ? format(dateValue, "PP") : <span>Pick a date</span>}
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0">
@@ -192,7 +230,9 @@ export default function DataTableColumnFilter({
         </div>
       );
     case "dateRange":
-      const dateRangeValue = columnFilterValue as [Date, Date];
+      const dateRangeValue = columnFilterValue as
+        | [Date | undefined, Date | undefined]
+        | undefined;
       return (
         <div className="flex w-full flex-row items-center justify-between gap-1">
           <Popover>
@@ -202,17 +242,17 @@ export default function DataTableColumnFilter({
                 variant={"outline"}
                 className={cn(
                   "w-full justify-start text-left font-normal",
-                  !columnFilterValue && "text-muted-foreground",
+                  !dateRangeValue && "text-muted-foreground",
                 )}
               >
                 {dateRangeValue?.[0] ? (
                   dateRangeValue?.[1] ? (
                     <>
-                      {format(dateRangeValue?.[0], "LLL dd, y")} -{" "}
-                      {format(dateRangeValue?.[1], "LLL dd, y")}
+                      {format(dateRangeValue[0], "LLL dd, y")} -{" "}
+                      {format(dateRangeValue[1], "LLL dd, y")}
                     </>
                   ) : (
-                    format(dateRangeValue?.[0], "LLL dd, y")
+                    format(dateRangeValue[0], "LLL dd, y")
                   )
                 ) : (
                   <span>Pick a date</span>
@@ -229,7 +269,11 @@ export default function DataTableColumnFilter({
                   to: dateRangeValue?.[1],
                 }}
                 onSelect={(dateRange?: DateRange) => {
-                  column.setFilterValue([dateRange?.from, dateRange?.to]);
+                  const newRange: [Date | undefined, Date | undefined] = [
+                    dateRange?.from,
+                    dateRange?.to,
+                  ];
+                  column.setFilterValue(newRange);
                 }}
                 numberOfMonths={2}
               />

@@ -1,7 +1,7 @@
 "use client";
 
 import { Table } from "@tanstack/react-table";
-
+import React from "react";
 import { cn } from "@/lib/utils";
 import DebouncedInput from "@/components/DebouncedInput";
 import { Label } from "@/components/ui/label";
@@ -34,12 +34,42 @@ interface DataTableFiltersProps<TData> {
   debounce?: number;
 }
 
-export function DataTableFilters<TData>( {
+export function DataTableFilters<TData>({
   table,
   className,
   resetFilters,
   debounce = 1000,
-}: DataTableFiltersProps<TData> ) {
+}: DataTableFiltersProps<TData>) {
+  // Memoize visible columns to prevent re-renders
+  const visibleColumns = React.useMemo(
+    () =>
+      table
+        .getAllColumns()
+        .filter((column) => column.getCanHide() && column.getIsVisible()),
+    [table],
+  );
+
+  // Memoize hideable columns
+  const hideableColumns = React.useMemo(
+    () => table.getAllColumns().filter((column) => column.getCanHide()),
+    [table],
+  );
+
+  // Memoize filterable columns
+  const filterableColumns = React.useMemo(
+    () =>
+      table
+        .getAllLeafColumns()
+        .filter(
+          (column) =>
+            column.getCanFilter() && column.columnDef.meta?.filterVariant,
+        ),
+    [table],
+  );
+
+  const pageSize = table.getState().pagination.pageSize;
+  const pageIndex = table.getState().pagination.pageIndex;
+
   return (
     <div
       className={cn(
@@ -55,40 +85,26 @@ export function DataTableFilters<TData>( {
             <DropdownMenuTrigger id="columnVisibility" asChild>
               <Button variant="outline" className="flex justify-between">
                 <div className="no-scrollbar flex w-1 flex-1 gap-2 overflow-x-scroll">
-                  {table
-                    .getAllColumns()
-                    .filter(
-                      ( column ) => column.getCanHide() && column.getIsVisible(),
-                    )
-                    .map( ( column ) => {
-                      return (
-                        <Badge key={column.id} className="capitalize">
-                          {column.id}
-                        </Badge>
-                      );
-                    } )}
+                  {visibleColumns.map((column) => (
+                    <Badge key={column.id} className="capitalize">
+                      {column.id}
+                    </Badge>
+                  ))}
                 </div>
                 <ChevronDown className="ml-2 size-4" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              {table
-                .getAllColumns()
-                .filter( ( column ) => column.getCanHide() )
-                .map( ( column ) => {
-                  return (
-                    <DropdownMenuCheckboxItem
-                      key={column.id}
-                      className="capitalize"
-                      checked={column.getIsVisible()}
-                      onCheckedChange={( value ) =>
-                        column.toggleVisibility( !!value )
-                      }
-                    >
-                      {column.id}
-                    </DropdownMenuCheckboxItem>
-                  );
-                } )}
+              {hideableColumns.map((column) => (
+                <DropdownMenuCheckboxItem
+                  key={column.id}
+                  className="capitalize"
+                  checked={column.getIsVisible()}
+                  onCheckedChange={(value) => column.toggleVisibility(!!value)}
+                >
+                  {column.id}
+                </DropdownMenuCheckboxItem>
+              ))}
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
@@ -96,20 +112,23 @@ export function DataTableFilters<TData>( {
         <div className="grid w-full max-w-sm items-center gap-1.5">
           <Label htmlFor="rowsPerPage">Row per Page</Label>
           <Select
-            value={`${table.getState().pagination.pageSize}`}
-            onValueChange={( value ) => {
-              table.setPageSize( Number( value ) );
+            value={`${pageSize}`}
+            onValueChange={(value) => {
+              const newPageSize = Number(value);
+              if (!isNaN(newPageSize) && newPageSize > 0) {
+                table.setPageSize(newPageSize);
+              }
             }}
           >
             <SelectTrigger id="rowsPerPage" className="">
-              <SelectValue placeholder={table.getState().pagination.pageSize} />
+              <SelectValue placeholder={pageSize} />
             </SelectTrigger>
             <SelectContent side="top">
-              {[ 10, 20, 30, 40, 50 ].map( ( pageSize ) => (
-                <SelectItem key={pageSize} value={`${pageSize}`}>
-                  {pageSize}
+              {[10, 20, 30, 40, 50].map((size) => (
+                <SelectItem key={size} value={`${size}`}>
+                  {size}
                 </SelectItem>
-              ) )}
+              ))}
             </SelectContent>
           </Select>
         </div>
@@ -123,10 +142,17 @@ export function DataTableFilters<TData>( {
             inputMode="numeric"
             className=""
             placeholder="Go to page"
-            value={table.getState().pagination.pageIndex + 1}
-            onChange={( value ) => {
-              const page = value ? Number( value ) - 1 : 0;
-              table.setPageIndex( page );
+            value={pageIndex + 1}
+            onChange={(value) => {
+              if (!value) return;
+              const pageNum = Number(value);
+              if (isNaN(pageNum)) return;
+
+              const page = Math.max(
+                0,
+                Math.min(pageNum - 1, table.getPageCount() - 1),
+              );
+              table.setPageIndex(page);
             }}
           />
         </div>
@@ -149,21 +175,22 @@ export function DataTableFilters<TData>( {
 
       {/* Column Filters */}
       <div className="@4xl/tfilters:grid-cols-3 @sm/tfilters:grid-cols-2 mt-4 grid grid-cols-1 items-end justify-between gap-6">
-        {table.getAllLeafColumns().map( ( column ) => {
-          if ( !column.getCanFilter() || !column.columnDef.meta?.filterVariant )
-            return null;
+        {filterableColumns.map((column) => {
+          const headerLabel =
+            typeof column.columnDef.header === "string"
+              ? column.columnDef.header
+              : column.id;
+
           return (
             <div
               key={column.id}
               className="flex w-full max-w-sm flex-col gap-2"
             >
-              <Label htmlFor={column.id}>
-                {( column.columnDef.header as any ) || column.id}
-              </Label>
+              <Label htmlFor={column.id}>{headerLabel}</Label>
               <DataTableColumnFilter column={column} debounce={debounce} />
             </div>
           );
-        } )}
+        })}
         {/* {table.getLeafHeaders().map((header) => {
           if (!header.column.getCanFilter()) return null;
           return (

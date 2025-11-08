@@ -33,6 +33,7 @@ import DataTableCellInput from "./datatable-cell-input";
 import { RowEditFeature, RowEditState } from "./datatable-feature-row-editing";
 import { RowSelectionFormProps } from "./types";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
+import { toast } from "sonner";
 
 interface DataTableProps<TData> {
   data: TData[];
@@ -46,14 +47,20 @@ interface DataTableProps<TData> {
   refetch?: () => void;
   isFiltersOpen?: boolean;
   actions?: React.ReactNode;
-  updateData?: (data: { rowId: string; rowData: TData }) => void;
+  updateData?: (data: {
+    rowId: string;
+    rowData: TData;
+  }) => void | Promise<void>;
   updateCellData?: (data: {
     rowId: string;
     rowData: TData;
     columnId: string;
     value: unknown;
-  }) => void;
-  deleteData?: (data: { rowId: string; rowData?: TData }) => void;
+  }) => void | Promise<void>;
+  deleteData?: (data: {
+    rowId: string;
+    rowData?: TData;
+  }) => void | Promise<void>;
   enableMultiRowEdit?: boolean;
   rowEditForm?: ColumnDefTemplate<RowSelectionFormProps<TData>>;
   rowEditFormaAsDialog?: boolean;
@@ -89,11 +96,8 @@ export function DataTableBasic<TData>({
   rowEditFormaAsDialog = false,
   getRowId,
 }: DataTableProps<TData>) {
-  const [data, _setData] = React.useState(() => [...tableData]);
-
-  React.useEffect(() => {
-    _setData([...tableData]);
-  }, [tableData]);
+  // Memoize data to prevent unnecessary re-renders
+  const data = React.useMemo(() => tableData, [tableData]);
 
   const [sorting, setSorting] = React.useState(defaultSorting);
   const [pagination, setPagination] = React.useState(defaultPagination);
@@ -121,14 +125,57 @@ export function DataTableBasic<TData>({
     [editingRows],
   );
 
+  // Wrap mutation functions with error handling
+  const wrappedUpdateData = React.useCallback(
+    async (data: { rowId: string; rowData: TData }) => {
+      try {
+        if (updateData) {
+          await updateData(data);
+          toast.success("Item updated successfully");
+          refetch?.();
+        }
+      } catch (error) {
+        console.error("Update error:", error);
+        toast.error(
+          error instanceof Error ? error.message : "Failed to update item",
+        );
+      }
+    },
+    [updateData, refetch],
+  );
+
+  const wrappedDeleteData = React.useCallback(
+    async (data: { rowId: string; rowData?: TData }) => {
+      try {
+        if (deleteData) {
+          await deleteData(data);
+          toast.success("Item deleted successfully");
+          refetch?.();
+        }
+      } catch (error) {
+        console.error("Delete error:", error);
+        toast.error(
+          error instanceof Error ? error.message : "Failed to delete item",
+        );
+      }
+    },
+    [deleteData, refetch],
+  );
+
+  // Memoize table meta to prevent unnecessary re-renders
+  const tableMeta = React.useMemo(
+    () => ({
+      updateData: updateData ? wrappedUpdateData : undefined,
+      deleteData: deleteData ? wrappedDeleteData : undefined,
+    }),
+    [updateData, deleteData, wrappedUpdateData, wrappedDeleteData],
+  );
+
   const table = useReactTable({
     _features: [RowEditFeature],
     data,
     columns,
-    meta: {
-      updateData,
-      deleteData,
-    },
+    meta: tableMeta,
     state: {
       sorting,
       pagination,
@@ -161,10 +208,17 @@ export function DataTableBasic<TData>({
     defaultSorting,
   ]);
 
-  const editingRowId = Object.keys(editingRows)[0] || undefined;
-  const editingRowData = editingRowId
-    ? table.getRowModel().rowsById[editingRowId].original
-    : undefined;
+  // Memoize editing row data to prevent unnecessary re-renders
+  const editingRowId = React.useMemo(
+    () => Object.keys(editingRows)[0] || undefined,
+    [editingRows],
+  );
+
+  const editingRowData = React.useMemo(() => {
+    if (!editingRowId) return undefined;
+    const row = table.getRowModel().rowsById[editingRowId];
+    return row?.original;
+  }, [editingRowId, table]);
 
   return (
     <div className={cn("rounded-md border", className)}>

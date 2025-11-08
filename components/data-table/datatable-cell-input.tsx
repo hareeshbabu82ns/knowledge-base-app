@@ -22,11 +22,15 @@ import { Calendar } from "@/components/ui/calendar";
 import { DateRange } from "react-day-picker";
 import MultipleSelector, { Option } from "@/components/ui/multi-select";
 import { Input } from "../ui/input";
-import { useState } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import { Switch } from "../ui/switch";
+import { Alert, AlertDescription } from "../ui/alert";
+import { toast } from "sonner";
 
-function generateFilterOptions(filterOptions?: Option[]) {
-  if (!filterOptions) return null;
+function generateFilterOptions(
+  filterOptions?: Option[],
+): React.ReactElement[] | null {
+  if (!filterOptions || filterOptions.length === 0) return null;
 
   return filterOptions.map(({ value, label }) => (
     <SelectItem key={value} value={value}>
@@ -50,61 +54,111 @@ export default function DataTableCellInput<TData>({
 }: DataTableCellInputProps<TData>) {
   const [cellValue, setCellValue] = useState(getValue());
 
+  // Sync with external value changes
+  useEffect(() => {
+    setCellValue(getValue());
+  }, [getValue]);
+
   const {
     cellInputVariant: filterVariant,
     filterOptions,
     filterOptionsFn,
   } = column.columnDef.meta ?? {};
 
+  // Memoize query function to prevent unnecessary re-renders
+  const queryFn = useCallback(async (): Promise<Option[]> => {
+    if (filterOptionsFn) {
+      const result = await filterOptionsFn();
+      return result ?? [];
+    } else if (filterOptions) {
+      return filterOptions;
+    }
+    return [];
+  }, [filterOptionsFn, filterOptions]);
+
+  // Only fetch options for select and multiSelect variants
+  const needsOptions =
+    filterVariant === "select" || filterVariant === "multiSelect";
+
   const {
     isLoading,
     isPending,
     isError,
-    data: options,
+    data: options = [],
     error,
-  } = useQuery({
+  } = useQuery<Option[], Error>({
     queryKey: ["filters", column.id],
-    queryFn: async () => {
-      if (filterOptionsFn) {
-        return await filterOptionsFn();
-      } else if (filterOptions) {
-        return filterOptions;
-      } else {
-        return [];
+    queryFn,
+    enabled: needsOptions && !!(filterOptionsFn || filterOptions),
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    retry: 2,
+  });
+
+  // Wrapper for update with error handling
+  const updateCellData = useCallback(
+    async (value: unknown) => {
+      try {
+        if (table.options.meta?.updateCellData) {
+          await table.options.meta.updateCellData({
+            rowId: row.id,
+            rowData: row.original,
+            columnId: column.id,
+            value,
+          });
+        }
+      } catch (error) {
+        console.error("Cell update error:", error);
+        toast.error(
+          error instanceof Error ? error.message : "Failed to update cell",
+        );
       }
     },
-  });
-  if (isLoading || isPending) return <div>Loading...</div>;
+    [table.options.meta, row.id, row.original, column.id],
+  );
+
+  // Loading state - only for variants that need options
+  if (needsOptions && (isLoading || isPending)) {
+    return (
+      <div className="flex items-center justify-center p-2">
+        <Icons.spinner className="size-4 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
+
+  // Error state - only for variants that need options
+  if (needsOptions && isError) {
+    return (
+      <Alert variant="destructive" className="p-2">
+        <AlertDescription className="text-xs">
+          {error?.message || "Failed to load options"}
+        </AlertDescription>
+      </Alert>
+    );
+  }
 
   switch (filterVariant) {
     case "number":
       const numValue = cellValue as number;
+      const originalNumValue = getValue() as number;
       return (
         <div className="flex space-x-2">
           <Input
             type="text"
             inputMode="numeric"
-            value={numValue}
+            value={numValue ?? ""}
             onChange={(e) => {
-              if (isNaN(Number(e.target.value))) return;
-              setCellValue(e.target.value);
+              const value = e.target.value;
+              if (value && isNaN(Number(value))) return;
+              setCellValue(value);
             }}
-            onBlur={
-              table.options.meta?.updateCellData
-                ? (e) => {
-                    if (isNaN(Number(e.target.value))) return;
-                    const numVal = Number(e.target.value);
-                    if (numVal !== numValue) {
-                      table.options.meta?.updateCellData!({
-                        rowId: row.index.toString(),
-                        rowData: row.original,
-                        columnId: column.id,
-                        value: numVal,
-                      });
-                    }
-                  }
-                : undefined
-            }
+            onBlur={(e) => {
+              const value = e.target.value;
+              if (value && isNaN(Number(value))) return;
+              const numVal = value ? Number(value) : undefined;
+              if (numVal !== originalNumValue) {
+                updateCellData(numVal);
+              }
+            }}
             placeholder={`Enter ${column.id}`}
             className="w-16 flex-1 rounded border shadow"
           />
@@ -115,15 +169,10 @@ export default function DataTableCellInput<TData>({
       return (
         <div className="flex justify-center">
           <Switch
-            checked={boolValue}
+            checked={boolValue ?? false}
             onCheckedChange={(value) => {
               setCellValue(value);
-              table.options.meta?.updateCellData!({
-                rowId: row.index.toString(),
-                rowData: row.original,
-                columnId: column.id,
-                value,
-              });
+              updateCellData(value);
             }}
           />
         </div>
@@ -134,17 +183,12 @@ export default function DataTableCellInput<TData>({
           <Select
             onValueChange={(value) => {
               setCellValue(value);
-              table.options.meta?.updateCellData!({
-                rowId: row.index.toString(),
-                rowData: row.original,
-                columnId: column.id,
-                value,
-              });
+              updateCellData(value);
             }}
             value={cellValue?.toString()}
           >
             <SelectTrigger>
-              <SelectValue placeholder="select filter" />
+              <SelectValue placeholder="select option" />
             </SelectTrigger>
             <SelectContent>{generateFilterOptions(options)}</SelectContent>
           </Select>
@@ -153,8 +197,9 @@ export default function DataTableCellInput<TData>({
               variant="ghost"
               size="icon"
               className="size-5"
-              onClick={(e) => {
+              onClick={() => {
                 setCellValue(undefined);
+                updateCellData(undefined);
               }}
             >
               <Icons.close className="size-4" />
@@ -163,22 +208,23 @@ export default function DataTableCellInput<TData>({
         </div>
       );
     case "multiSelect":
-      const optionValue = cellValue as Option[];
+      const optionValue = (cellValue as Option[]) ?? [];
       return (
         <div className="flex flex-row items-center justify-between gap-1">
           <MultipleSelector
             className="w-full"
-            onChange={(e) => {
-              setCellValue(e);
+            onChange={(selectedOptions) => {
+              setCellValue(selectedOptions);
+              updateCellData(selectedOptions);
             }}
             placeholder="multi select..."
             value={optionValue}
             options={options}
             commandProps={{
-              filter: (value, search, keywords) => {
-                return options
-                  ?.find((o) => o.value === value)
-                  ?.label?.toLowerCase()
+              filter: (value, search) => {
+                const option = options.find((o) => o.value === value);
+                return option?.label
+                  ?.toLowerCase()
                   .includes(search.toLowerCase())
                   ? 1
                   : 0;
@@ -188,7 +234,7 @@ export default function DataTableCellInput<TData>({
         </div>
       );
     case "date":
-      const dateValue = cellValue as Date;
+      const dateValue = cellValue as Date | undefined;
       return (
         <div className="flex w-full flex-row items-center justify-between gap-1">
           <Popover>
@@ -197,11 +243,11 @@ export default function DataTableCellInput<TData>({
                 variant={"outline"}
                 className={cn(
                   "w-full justify-start text-left font-normal",
-                  !cellValue && "text-muted-foreground",
+                  !dateValue && "text-muted-foreground",
                 )}
               >
                 <Icons.calendar className="mr-2 size-4" />
-                {cellValue ? format(dateValue, "PP") : <span>Pick a date</span>}
+                {dateValue ? format(dateValue, "PP") : <span>Pick a date</span>}
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-full p-0">
@@ -212,12 +258,7 @@ export default function DataTableCellInput<TData>({
                 selected={dateValue}
                 onSelect={(date?: Date) => {
                   setCellValue(date);
-                  table.options.meta?.updateCellData!({
-                    rowId: row.index.toString(),
-                    rowData: row.original,
-                    columnId: column.id,
-                    value: date,
-                  });
+                  updateCellData(date);
                 }}
               />
             </PopoverContent>
@@ -225,7 +266,9 @@ export default function DataTableCellInput<TData>({
         </div>
       );
     case "dateRange":
-      const dateRangeValue = cellValue as [Date, Date];
+      const dateRangeValue = cellValue as
+        | [Date | undefined, Date | undefined]
+        | undefined;
       return (
         <div className="flex w-full flex-row items-center justify-between gap-1">
           <Popover>
@@ -235,17 +278,17 @@ export default function DataTableCellInput<TData>({
                 variant={"outline"}
                 className={cn(
                   "w-full justify-start text-left font-normal",
-                  !cellValue && "text-muted-foreground",
+                  !dateRangeValue && "text-muted-foreground",
                 )}
               >
                 {dateRangeValue?.[0] ? (
                   dateRangeValue?.[1] ? (
                     <>
-                      {format(dateRangeValue?.[0], "LLL dd, y")} -{" "}
-                      {format(dateRangeValue?.[1], "LLL dd, y")}
+                      {format(dateRangeValue[0], "LLL dd, y")} -{" "}
+                      {format(dateRangeValue[1], "LLL dd, y")}
                     </>
                   ) : (
-                    format(dateRangeValue?.[0], "LLL dd, y")
+                    format(dateRangeValue[0], "LLL dd, y")
                   )
                 ) : (
                   <span>Pick a date</span>
@@ -262,7 +305,12 @@ export default function DataTableCellInput<TData>({
                   to: dateRangeValue?.[1],
                 }}
                 onSelect={(dateRange?: DateRange) => {
-                  setCellValue([dateRange?.from, dateRange?.to]);
+                  const newRange: [Date | undefined, Date | undefined] = [
+                    dateRange?.from,
+                    dateRange?.to,
+                  ];
+                  setCellValue(newRange);
+                  updateCellData(newRange);
                 }}
                 numberOfMonths={2}
               />
@@ -278,25 +326,19 @@ export default function DataTableCellInput<TData>({
           <Input
             className="w-full rounded border shadow"
             onChange={(e) => setCellValue(e.target.value)}
-            onBlur={
-              table.options.meta?.updateCellData
-                ? (e) => {
-                    // const inValue = e.target.value;
-                    if (value !== oldValue) {
-                      const fieldTypeValue =
-                        column.columnDef.meta?.fieldType === "array"
-                          ? value.split(",")
-                          : value;
-                      table.options.meta?.updateCellData!({
-                        rowId: row.index.toString(),
-                        rowData: row.original,
-                        columnId: column.id,
-                        value: fieldTypeValue,
-                      });
-                    }
-                  }
-                : undefined
-            }
+            onBlur={(e) => {
+              const inputValue = e.target.value;
+              if (inputValue !== oldValue) {
+                const fieldTypeValue =
+                  column.columnDef.meta?.fieldType === "array"
+                    ? inputValue
+                        .split(",")
+                        .map((v) => v.trim())
+                        .filter(Boolean)
+                    : inputValue;
+                updateCellData(fieldTypeValue);
+              }
+            }}
             placeholder={`Enter ${column.id}`}
             value={value}
           />

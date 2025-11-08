@@ -33,6 +33,11 @@ export function DataTablePagination<TData>({
   showGoToPage = false,
   className,
 }: DataTablePaginationProps<TData>) {
+  const pageCount = table.getPageCount();
+  const rowCount = table.getRowCount();
+  const currentPage = table.getState().pagination.pageIndex + 1;
+  const pageSize = table.getState().pagination.pageSize;
+
   return (
     <div
       className={cn(
@@ -52,18 +57,21 @@ export function DataTablePagination<TData>({
             Rows per page
           </p>
           <Select
-            value={`${table.getState().pagination.pageSize}`}
+            value={`${pageSize}`}
             onValueChange={(value) => {
-              table.setPageSize(Number(value));
+              const newPageSize = Number(value);
+              if (!isNaN(newPageSize) && newPageSize > 0) {
+                table.setPageSize(newPageSize);
+              }
             }}
           >
             <SelectTrigger className="h-8 w-[70px]">
-              <SelectValue placeholder={table.getState().pagination.pageSize} />
+              <SelectValue placeholder={pageSize} />
             </SelectTrigger>
             <SelectContent side="top">
-              {[10, 20, 30, 40, 50].map((pageSize) => (
-                <SelectItem key={pageSize} value={`${pageSize}`}>
-                  {pageSize}
+              {[10, 20, 30, 40, 50].map((size) => (
+                <SelectItem key={size} value={`${size}`}>
+                  {size}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -71,10 +79,10 @@ export function DataTablePagination<TData>({
         </div>
         <div className="flex items-center justify-center gap-1 text-sm font-medium">
           <span className="@lg/tfooter:block hidden">Page :</span>
-          <span>{table.getState().pagination.pageIndex + 1}</span>
+          <span>{currentPage}</span>
           <span>of</span>
-          <span>{table.getPageCount()}</span>
-          <span>({table.getRowCount()})</span>
+          <span>{pageCount || 1}</span>
+          <span>({rowCount})</span>
         </div>
         <div className="flex items-center space-x-2">
           <Button
@@ -103,7 +111,14 @@ export function DataTablePagination<TData>({
               placeholder="Go to page"
               value={table.getState().pagination.pageIndex + 1}
               onChange={(value) => {
-                const page = value ? Number(value) - 1 : 0;
+                if (!value) return;
+                const pageNum = Number(value);
+                if (isNaN(pageNum)) return;
+
+                const page = Math.max(
+                  0,
+                  Math.min(pageNum - 1, table.getPageCount() - 1),
+                );
                 table.setPageIndex(page);
               }}
             />
