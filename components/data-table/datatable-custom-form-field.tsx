@@ -297,7 +297,7 @@ function DatatableCustomFormField<TData>(props: CustomProps<TData>) {
           {props.column.columnDef.meta?.cellInputVariant !== "checkbox" &&
             label && (
               <FormLabel
-                className="bg-background absolute start-1 top-2 z-10 origin-[0] -translate-y-6 scale-90 px-1 duration-300"
+                className="bg-background absolute start-1 top-2 z-10 origin-left -translate-y-6 scale-90 px-1 duration-300"
                 htmlFor={name}
               >
                 {/* {props.required ? `${label} *` : label} */}

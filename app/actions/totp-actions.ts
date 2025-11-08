@@ -143,7 +143,7 @@ export async function enableTOTP(
     if (error instanceof z.ZodError) {
       return {
         status: "error",
-        error: `Validation error: ${error.errors.map((e) => e.message).join(", ")}`,
+        error: `Validation error: ${error.issues.map((e) => e.message).join(", ")}`,
       };
     }
     return { status: "error", error: "Failed to enable TOTP" };
@@ -215,7 +215,7 @@ export async function verifyUserTOTP(
     if (error instanceof z.ZodError) {
       return {
         status: "error",
-        error: `Validation error: ${error.errors.map((e) => e.message).join(", ")}`,
+        error: `Validation error: ${error.issues.map((e) => e.message).join(", ")}`,
       };
     }
     return { status: "error", error: "Failed to verify TOTP" };
@@ -303,7 +303,7 @@ export async function disableTOTP(
     if (error instanceof z.ZodError) {
       return {
         status: "error",
-        error: `Validation error: ${error.errors.map((e) => e.message).join(", ")}`,
+        error: `Validation error: ${error.issues.map((e) => e.message).join(", ")}`,
       };
     }
     return { status: "error", error: "Failed to disable TOTP" };
@@ -375,7 +375,7 @@ export async function regenerateBackupCodes(
     if (error instanceof z.ZodError) {
       return {
         status: "error",
-        error: `Validation error: ${error.errors.map((e) => e.message).join(", ")}`,
+        error: `Validation error: ${error.issues.map((e) => e.message).join(", ")}`,
       };
     }
     return { status: "error", error: "Failed to regenerate backup codes" };

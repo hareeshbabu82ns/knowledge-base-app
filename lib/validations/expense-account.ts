@@ -6,7 +6,7 @@ export const ExpenseTransactionSchema = z.object({
   amount: z.coerce.number().min(0.1, "Amount must be greater than 0"),
   description: z.string().max(5000).optional(),
   type: z.enum(["Expense", "Income"], { message: "Invalid Type" }),
-  tags: z.array(z.string()).nonempty(),
+  tags: z.array(z.string()).min(1, "At least one tag is required"),
 });
 
 const ExpenseAccountBaseSchema = z.object({

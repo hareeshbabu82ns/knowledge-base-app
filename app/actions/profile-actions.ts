@@ -75,7 +75,7 @@ export async function updateProfile(
     if (error instanceof z.ZodError) {
       return {
         status: "error",
-        error: `Validation error: ${error.errors.map((e) => e.message).join(", ")}`,
+        error: `Validation error: ${error.issues.map((e) => e.message).join(", ")}`,
       };
     }
 
@@ -281,7 +281,7 @@ export async function updatePassword(
     if (error instanceof z.ZodError) {
       return {
         status: "error",
-        error: `Validation error: ${error.errors.map((e) => e.message).join(", ")}`,
+        error: `Validation error: ${error.issues.map((e) => e.message).join(", ")}`,
       };
     }
 
@@ -343,7 +343,7 @@ export async function setUserPassword(
     if (error instanceof z.ZodError) {
       return {
         status: "error",
-        error: `Validation error: ${error.errors.map((e) => e.message).join(", ")}`,
+        error: `Validation error: ${error.issues.map((e) => e.message).join(", ")}`,
       };
     }
 

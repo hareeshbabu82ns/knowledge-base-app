@@ -27,23 +27,24 @@ import { Icons } from "@/components/shared/icons";
 import { DeleteConfirmButton } from "@/components/DeleteConfirmButton";
 
 interface AccountFormProps {
-  id: ExpenseAccount[ "id" ];
+  id: ExpenseAccount["id"];
   data: Partial<ExpenseAccount>;
   type: "create" | "update";
   // onSubmit: (data: Partial<ExpenseAccount>) => Promise<ExpenseAccount | null>;
 }
-export const AccountForm = ( { id, data, type }: AccountFormProps ) => {
+export const AccountForm = ({ id, data, type }: AccountFormProps) => {
   const router = useRouter();
   const session = useSession();
-  const [ isLoading, setIsLoading ] = useState( false );
+  const [isLoading, setIsLoading] = useState(false);
   const queryClient = useQueryClient();
 
-  const FormValidation = getExpenseAccountSchema( type );
+  const FormValidation = getExpenseAccountSchema(type);
+  type FormValues = z.infer<typeof FormValidation>;
 
   const accountConfig = data?.config as never as IConfig;
 
-  const form = useForm<z.infer<typeof FormValidation>>( {
-    resolver: zodResolver( FormValidation ),
+  const form = useForm<FormValues>({
+    resolver: zodResolver(FormValidation) as any,
     defaultValues: {
       id: id ? id : "",
       name: data.name ? data.name : "",
@@ -55,111 +56,111 @@ export const AccountForm = ( { id, data, type }: AccountFormProps ) => {
         trimQuotes: accountConfig?.trimQuotes || false,
       },
     },
-  } );
+  });
 
   const {
     formState: { errors },
   } = form;
 
-  const updateMutation = useMutation( {
-    mutationKey: [ "account", id ],
-    mutationFn: async ( {
+  const updateMutation = useMutation({
+    mutationKey: ["account", id],
+    mutationFn: async ({
       id,
       values,
     }: {
-      id: ExpenseAccount[ "id" ];
+      id: ExpenseAccount["id"];
       values: z.infer<typeof FormValidation>;
-    } ) => {
+    }) => {
       const updateData = {
         name: values.name,
         description: values.description,
         type: values.type,
-        config: { ...( data?.config as Object ), ...values.config },
+        config: { ...(data?.config as Object), ...values.config },
       } as Prisma.ExpenseAccountUpdateInput;
-      const updatedData = await updateAction( id, updateData );
+      const updatedData = await updateAction(id, updateData);
       return updatedData;
     },
     onMutate: async () => {
-      setIsLoading( true );
+      setIsLoading(true);
     },
-    onSuccess: ( updatedData ) => {
-      queryClient.invalidateQueries( { queryKey: [ "accounts", "account", id ] } );
-      form.reset( updatedData as any );
-      toast.success( "Account updated successfully" );
+    onSuccess: (updatedData) => {
+      queryClient.invalidateQueries({ queryKey: ["accounts", "account", id] });
+      form.reset(updatedData as any);
+      toast.success("Account updated successfully");
     },
-    onError: ( error ) => {
-      console.log( error );
-      toast.error( "An error occurred. Please try again." );
+    onError: (error) => {
+      console.log(error);
+      toast.error("An error occurred. Please try again.");
     },
     onSettled: () => {
-      setIsLoading( false );
+      setIsLoading(false);
     },
-  } );
-  const createMutation = useMutation( {
-    mutationFn: async ( values: z.infer<typeof FormValidation> ) => {
+  });
+  const createMutation = useMutation({
+    mutationFn: async (values: z.infer<typeof FormValidation>) => {
       const createData = {
-        id: Buffer.from( values.name ).toString( "base64" ),
+        id: Buffer.from(values.name).toString("base64"),
         name: values.name,
         description: values.description,
         type: "Saving Account",
         config: {},
         user: { connect: { id: session.data?.user.id } },
       } as Prisma.ExpenseAccountCreateInput;
-      const createdData = await createAction( createData );
+      const createdData = await createAction(createData);
       return createdData;
     },
     onMutate: async () => {
-      setIsLoading( true );
+      setIsLoading(true);
     },
-    onSuccess: ( createdData ) => {
-      queryClient.invalidateQueries( { queryKey: [ "accounts" ] } );
+    onSuccess: (createdData) => {
+      queryClient.invalidateQueries({ queryKey: ["accounts"] });
       form.reset();
-      router.push( `/expenses/accounts/${createdData.id}` );
+      router.push(`/expenses/accounts/${createdData.id}`);
       router.refresh();
-      toast.success( "Account created successfully" );
+      toast.success("Account created successfully");
     },
-    onError: ( error ) => {
-      console.log( error );
-      toast.error( "An error occurred. Please try again." );
+    onError: (error) => {
+      console.log(error);
+      toast.error("An error occurred. Please try again.");
     },
     onSettled: () => {
-      setIsLoading( false );
+      setIsLoading(false);
     },
-  } );
-  const deleteMutation = useMutation( {
-    mutationKey: [ "accounts" ],
-    mutationFn: async ( id: ExpenseAccount[ "id" ] ) => {
-      const deletedData = await deleteAction( id );
+  });
+  const deleteMutation = useMutation({
+    mutationKey: ["accounts"],
+    mutationFn: async (id: ExpenseAccount["id"]) => {
+      const deletedData = await deleteAction(id);
       return deletedData;
     },
     onMutate: async () => {
-      setIsLoading( true );
+      setIsLoading(true);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries( { queryKey: [ "accounts" ] } );
-      router.replace( "/expenses/accounts" );
+      queryClient.invalidateQueries({ queryKey: ["accounts"] });
+      router.replace("/expenses/accounts");
       router.refresh();
-      toast.success( "Account deleted successfully" );
+      toast.success("Account deleted successfully");
     },
-    onError: ( error ) => {
-      console.log( error );
-      toast.error( "An error occurred. Please try again." );
+    onError: (error) => {
+      console.log(error);
+      toast.error("An error occurred. Please try again.");
     },
     onSettled: () => {
-      setIsLoading( false );
+      setIsLoading(false);
     },
-  } );
+  });
 
-  const onSubmit = async ( values: z.infer<typeof FormValidation> ) => {
-    if ( type === "update" && id ) {
-      updateMutation.mutate( { id, values } );
+  const onSubmit = async (values: z.infer<typeof FormValidation>) => {
+    if (type === "update" && id) {
+      updateMutation.mutate({ id, values });
     } else {
-      createMutation.mutate( values );
+      createMutation.mutate(values);
     }
   };
 
   let buttonLabel;
-  switch ( type ) {
+  switch (type) {
     case "create":
       buttonLabel = "Create";
       break;
@@ -169,7 +170,7 @@ export const AccountForm = ( { id, data, type }: AccountFormProps ) => {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit( onSubmit )} className="flex-1 space-y-6">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="flex-1 space-y-6">
         <section className="mb-5 space-y-4">
           <h1 className="header">
             {type === "create" ? "New Account" : "Update Account"}
@@ -206,13 +207,13 @@ export const AccountForm = ( { id, data, type }: AccountFormProps ) => {
               placeholder="Select account type"
               className="@lg/details:max-w-[200px]"
             >
-              {accountTypes.map( ( account, i ) => (
+              {accountTypes.map((account, i) => (
                 <SelectItem key={account.name + i} value={account.name}>
                   <div className="flex cursor-pointer items-center gap-2">
                     <p>{account.name}</p>
                   </div>
                 </SelectItem>
-              ) )}
+              ))}
             </CustomFormField>
           </div>
 
@@ -269,7 +270,7 @@ export const AccountForm = ( { id, data, type }: AccountFormProps ) => {
             disabled={type === "create" || isLoading}
             toastId={`account-deletion-${id}`}
             toastLabel={`Delete Account? ${data.name}`}
-            onClick={() => deleteMutation.mutate( id )}
+            onClick={() => deleteMutation.mutate(id)}
           >
             Delete
           </DeleteConfirmButton>

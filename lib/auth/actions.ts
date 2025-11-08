@@ -1,7 +1,5 @@
 "use server";
 
-// import { revalidatePath } from "next/cache"
-// import { redirect } from "next/navigation"
 import { differenceInMinutes, format, subDays } from "date-fns";
 import { z } from "zod";
 import bcrypt from "bcryptjs";
@@ -106,7 +104,7 @@ export const signUp = async (
     const validatedFields = UserSignupSchema.safeParse(values);
 
     if (!validatedFields.success) {
-      const errors = validatedFields.error.errors
+      const errors = validatedFields.error.issues
         .map((err) => err.message)
         .join(", ");
       return { status: "error", error: errors };
