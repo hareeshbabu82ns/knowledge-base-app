@@ -36,29 +36,29 @@ const chartConfig = {
   },
   interestPaid: {
     label: "Interest",
-    color: "var(--chart-2)",
+    color: "var(--chart-5)",
   },
 } satisfies ChartConfig;
 
-function convertToChartData( data: PaymentScheduleYear[] ) {
-  return data.map( ( item ) => ( {
+function convertToChartData(data: PaymentScheduleYear[]) {
+  return data.map((item) => ({
     year: item.year,
     paymentAmount: item.paymentAmount,
     principalPaid: item.principalPaid,
     interestPaid: item.interestPaid,
     totalPaid: item.interestPaid + item.principalPaid,
     remainingBalance: item.remainingBalance,
-  } ) );
+  }));
 }
 
-export function ScheduleYearsBarChart( {
+export function ScheduleYearsBarChart({
   title,
   data,
 }: {
   title?: React.ReactNode;
   data: PaymentScheduleYear[];
-} ) {
-  const chartData = React.useMemo( () => convertToChartData( data ), [ data ] );
+}) {
+  const chartData = React.useMemo(() => convertToChartData(data), [data]);
 
   return (
     <Card className="w-full">
@@ -75,7 +75,7 @@ export function ScheduleYearsBarChart( {
               tickLine={false}
               tickMargin={10}
               axisLine={false}
-            // tickFormatter={(value) => value.slice(0, 3)}
+              // tickFormatter={(value) => value.slice(0, 3)}
             />
             <ChartTooltip
               cursor={false}
