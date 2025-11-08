@@ -10,15 +10,25 @@ const compat = new FlatCompat({
 });
 
 const eslintConfig = [
-  ...compat.config({
-    extends: [
-      "next/core-web-vitals",
-      "next/typescript",
+  {
+    ignores: [
+      "dist/*",
+      ".cache/*",
+      "public/*",
+      "node_modules/*",
+      "*.esm.js",
+      "data/*",
+      "legacy-code/*",
+      "components/ui/*",
+      "app/generated/*",
+      ".next/*",
     ],
+  },
+  ...compat.config({
+    extends: ["next/core-web-vitals", "next/typescript"],
     rules: {
       "tailwindcss/no-custom-classname": "off",
     },
-    ignorePatterns: ["app/generated/*"],
     settings: {
       tailwindcss: {
         callees: ["cn"],
@@ -37,7 +47,6 @@ const eslintConfig = [
   }),
   {
     files: ["**/*.ts", "**/*.tsx", "**/*.js", "**/*.jsx"],
-    parser: "@typescript-eslint/parser",
     rules: {
       "@typescript-eslint/no-explicit-any": "warn",
       "@typescript-eslint/no-unused-vars": [
