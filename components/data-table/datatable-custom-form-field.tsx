@@ -1,7 +1,85 @@
-// import { E164Number } from "libphonenumber-js/core";
-import { Control } from "react-hook-form";
-// import PhoneInput from "react-phone-number-input";
+/**
+ * @fileoverview Generic Custom Form Field component for DataTable row editing
+ *
+ * This component provides a type-safe, extensible form field that automatically
+ * renders the appropriate input based on column metadata. It supports multiple
+ * input variants including text, number, date, select, and more.
+ *
+ * @module DatatableCustomFormField
+ *
+ * Key Features:
+ * - Type-safe with TypeScript generics
+ * - Automatic option fetching for select-based inputs
+ * - Conditional query enabling to prevent unnecessary loading states
+ * - Error handling with user-friendly messages
+ * - Easy to extend with new input variants
+ *
+ * @example Basic Usage
+ * ```tsx
+ * // In your column definition
+ * const columns: ColumnDef<YourDataType>[] = [
+ *   {
+ *     accessorKey: "status",
+ *     header: "Status",
+ *     meta: {
+ *       cellInputVariant: "select",
+ *       fieldType: "string",
+ *       filterOptions: [
+ *         { value: "active", label: "Active" },
+ *         { value: "inactive", label: "Inactive" }
+ *       ]
+ *     }
+ *   }
+ * ];
+ *
+ * // In your row edit form
+ * <DatatableCustomFormField
+ *   column={column}
+ *   control={form.control}
+ *   name="status"
+ *   label="Status"
+ *   placeholder="Select status"
+ *   required
+ * />
+ * ```
+ *
+ * @example With Async Options
+ * ```tsx
+ * meta: {
+ *   cellInputVariant: "multiSelect",
+ *   fieldType: "array",
+ *   filterOptionsFn: async () => {
+ *     const response = await fetch('/api/categories');
+ *     return response.json();
+ *   }
+ * }
+ * ```
+ *
+ * @example Adding a New Variant
+ * 1. Add variant to InputVariant type: `| "yourVariant"`
+ * 2. If it needs options, add to needsOptionsVariants array
+ * 3. Add case in RenderInput switch statement
+ * 4. Define your custom rendering logic
+ *
+ * @see {@link InputVariant} for supported input types
+ * @see {@link CustomFormFieldProps} for component props
+ * @see {@link ColumnMeta} for column metadata structure
+ */
+"use client";
 
+import React, { useCallback } from "react";
+import {
+  Control,
+  ControllerRenderProps,
+  FieldValues,
+  Path,
+} from "react-hook-form";
+import { useQuery } from "@tanstack/react-query";
+import { Column } from "@tanstack/react-table";
+import { format } from "date-fns";
+import { DateRange } from "react-day-picker";
+
+// UI Components
 import { Checkbox } from "../ui/checkbox";
 import {
   FormControl,
@@ -19,55 +97,64 @@ import {
   SelectValue,
 } from "../ui/select";
 import { Textarea } from "../ui/textarea";
-import { cn } from "@/lib/utils";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { Button } from "../ui/button";
-import { Icons } from "../shared/icons";
-import { format } from "date-fns";
 import { Calendar } from "../ui/calendar";
-import { Column } from "@tanstack/react-table";
 import { Switch } from "../ui/switch";
-import { useQuery } from "@tanstack/react-query";
 import MultipleSelector, { Option } from "../ui/multi-select";
-import Loader from "../shared/loader";
+import { Alert, AlertDescription } from "../ui/alert";
 
-export enum FormFieldType {
-  INPUT = "input",
-  TEXTAREA = "textarea",
-  // PHONE_INPUT = "phoneInput",
-  CHECKBOX = "checkbox",
-  DATE_PICKER = "datePicker",
-  SELECT = "select",
-  SKELETON = "skeleton",
+// Utils
+import { cn } from "@/lib/utils";
+import { Icons } from "../shared/icons";
+
+/**
+ * Supported input variant types for the custom form field
+ */
+export type InputVariant =
+  | "text"
+  | "number"
+  | "textArea"
+  | "checkbox"
+  | "switch"
+  | "date"
+  | "dateRange"
+  | "select"
+  | "multiSelect"
+  | "range"
+  | "skeleton";
+
+/**
+ * Field type metadata for special handling
+ */
+export type FieldType =
+  | "string"
+  | "number"
+  | "boolean"
+  | "date"
+  | "array"
+  | "subObject";
+
+/**
+ * Configuration for variants that need to fetch options
+ */
+interface OptionConfig {
+  filterOptions?: Option[];
+  filterOptionsFn?: () => Promise<Option[] | undefined> | Option[] | undefined;
 }
 
-function generateFilterOptions(filterOptions?: Option[]) {
-  if (!filterOptions) return null;
-
-  return filterOptions.map(({ value, label }) => (
-    <SelectItem key={value} value={value}>
-      <div className="flex cursor-pointer items-center gap-2">
-        <p>{label}</p>
-      </div>
-    </SelectItem>
-  ));
-}
-
-interface CustomProps<TData> {
+/**
+ * Props for the custom form field component
+ */
+interface CustomFormFieldProps<TData, TFieldValues extends FieldValues = any> {
   column: Column<TData, unknown>;
-  control: Control<any>;
+  control: Control<TFieldValues>;
   name: string;
   label?: string;
   placeholder?: string;
   required?: boolean;
-  iconSrc?: React.ReactNode;
   disabled?: boolean;
-  dateFormat?: string;
-  fromMonth?: Date;
-  toMonth?: Date;
-  showTimeSelect?: boolean;
-  children?: React.ReactNode;
-  renderSkeleton?: (field: any) => React.ReactNode;
+  iconSrc?: React.ReactNode;
   className?: string;
   fieldClassName?: string;
   inputType?: React.HTMLInputTypeAttribute;
@@ -79,39 +166,140 @@ interface CustomProps<TData> {
     | "url"
     | "none"
     | "numeric"
-    | "decimal"
-    | undefined;
+    | "decimal";
+  dateFormat?: string;
+  fromMonth?: Date;
+  toMonth?: Date;
+  renderSkeleton?: (
+    field: ControllerRenderProps<TFieldValues, any>,
+  ) => React.ReactNode;
 }
 
-function RenderInput<TData>({
-  field,
-  props,
-}: {
-  field: any;
-  props: CustomProps<TData>;
-}) {
-  const { cellInputVariant, fieldType, filterOptions, filterOptionsFn } =
-    props.column.columnDef.meta ?? {};
+/**
+ * Column metadata structure
+ */
+interface ColumnMeta extends OptionConfig {
+  cellInputVariant?: InputVariant;
+  fieldType?: FieldType;
+  dbMapId?: string;
+  subObjectLabelField?: string;
+}
+
+/**
+ * Checks if an input variant requires fetching options
+ */
+const needsOptionsVariants: InputVariant[] = ["select", "multiSelect"];
+
+const isOptionsBasedVariant = (variant?: InputVariant): boolean => {
+  return !!variant && needsOptionsVariants.includes(variant);
+};
+
+/**
+ * Generates select items from filter options
+ */
+const generateFilterOptions = (
+  filterOptions?: Option[],
+): React.ReactElement[] | null => {
+  if (!filterOptions || filterOptions.length === 0) return null;
+
+  return filterOptions.map(({ value, label }) => (
+    <SelectItem key={value} value={value}>
+      <div className="flex cursor-pointer items-center gap-2">
+        <p>{label}</p>
+      </div>
+    </SelectItem>
+  ));
+};
+
+/**
+ * Hook to fetch options for select-based inputs
+ */
+const useFieldOptions = (
+  columnId: string,
+  meta?: ColumnMeta,
+): {
+  isLoading: boolean;
+  isError: boolean;
+  options: Option[];
+  error: Error | null;
+} => {
+  const variant = meta?.cellInputVariant;
+  const needsOptions = isOptionsBasedVariant(variant);
+
+  // Memoize query function
+  const queryFn = useCallback(async (): Promise<Option[]> => {
+    if (meta?.filterOptionsFn) {
+      const result = await meta.filterOptionsFn();
+      return result ?? [];
+    } else if (meta?.filterOptions) {
+      return meta.filterOptions;
+    }
+    return [];
+  }, [meta?.filterOptionsFn, meta?.filterOptions]);
 
   const {
     isLoading,
     isPending,
     isError,
-    data: options,
+    data: options = [],
     error,
-  } = useQuery({
-    queryKey: ["filters", props.column.id],
-    queryFn: async () => {
-      if (filterOptionsFn) {
-        return await filterOptionsFn();
-      } else if (filterOptions) {
-        return filterOptions;
-      } else {
-        return [];
-      }
-    },
+  } = useQuery<Option[], Error>({
+    queryKey: ["formFieldOptions", columnId],
+    queryFn,
+    enabled: needsOptions && !!(meta?.filterOptionsFn || meta?.filterOptions),
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    retry: 2,
   });
-  if (isLoading || isPending) return <Loader />;
+
+  return {
+    isLoading: needsOptions && (isLoading || isPending),
+    isError: needsOptions && isError,
+    options,
+    error: error || null,
+  };
+};
+
+/**
+ * Renders the appropriate input based on the variant type
+ */
+function RenderInput<TData, TFieldValues extends FieldValues = any>({
+  field,
+  props,
+  options,
+  isLoading,
+  isError,
+  error,
+}: {
+  field: ControllerRenderProps<TFieldValues, any>;
+  props: CustomFormFieldProps<TData, TFieldValues>;
+  options: Option[];
+  isLoading: boolean;
+  isError: boolean;
+  error: Error | null;
+}) {
+  const meta = props.column.columnDef.meta as ColumnMeta | undefined;
+  const cellInputVariant = meta?.cellInputVariant;
+  const fieldType = meta?.fieldType;
+
+  // Loading state for options-based inputs
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center p-2">
+        <Icons.spinner className="size-4 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
+
+  // Error state for options-based inputs
+  if (isError) {
+    return (
+      <Alert variant="destructive" className="p-2">
+        <AlertDescription className="text-xs">
+          {error?.message || "Failed to load options"}
+        </AlertDescription>
+      </Alert>
+    );
+  }
 
   switch (cellInputVariant) {
     case "number":
@@ -284,27 +472,63 @@ function RenderInput<TData>({
   }
 }
 
-function DatatableCustomFormField<TData>(props: CustomProps<TData>) {
-  const { control, name, label, className } = props;
+/**
+ * Generic form field component for data table row editing
+ *
+ * @example
+ * ```tsx
+ * <DatatableCustomFormField
+ *   column={column}
+ *   control={form.control}
+ *   name="fieldName"
+ *   label="Field Label"
+ *   placeholder="Enter value"
+ *   required
+ * />
+ * ```
+ *
+ * To add a new input variant:
+ * 1. Add the variant to the InputVariant type union
+ * 2. If it needs options, add to needsOptionsVariants array
+ * 3. Add a case to the switch statement in RenderInput
+ * 4. Define column meta with cellInputVariant and fieldType
+ */
+function DatatableCustomFormField<
+  TData,
+  TFieldValues extends FieldValues = any,
+>(props: CustomFormFieldProps<TData, TFieldValues>) {
+  const { control, name, label, className, column } = props;
+  const meta = column.columnDef.meta as ColumnMeta | undefined;
+
+  // Fetch options if needed for this variant
+  const { isLoading, isError, options, error } = useFieldOptions(
+    column.id,
+    meta,
+  );
 
   return (
     <FormField
       control={control}
-      name={name}
+      name={name as Path<TFieldValues>}
       render={({ field }) => (
         <FormItem className={cn("relative flex-1", className)}>
-          <RenderInput field={field} props={props} />
-          {props.column.columnDef.meta?.cellInputVariant !== "checkbox" &&
-            label && (
-              <FormLabel
-                className="bg-background absolute start-1 top-2 z-10 origin-left -translate-y-6 scale-90 px-1 duration-300"
-                htmlFor={name}
-              >
-                {/* {props.required ? `${label} *` : label} */}
-                {label}
-                {props.required && " *"}
-              </FormLabel>
-            )}
+          <RenderInput
+            field={field}
+            props={props}
+            options={options}
+            isLoading={isLoading}
+            isError={isError}
+            error={error}
+          />
+          {meta?.cellInputVariant !== "checkbox" && label && (
+            <FormLabel
+              className="bg-background absolute start-1 top-2 z-10 origin-left -translate-y-6 scale-90 px-1 duration-300"
+              htmlFor={name}
+            >
+              {label}
+              {props.required && " *"}
+            </FormLabel>
+          )}
           <FormMessage />
         </FormItem>
       )}
