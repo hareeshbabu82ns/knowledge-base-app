@@ -11,23 +11,28 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Icons } from "@/components/shared/icons";
-import { formatCurrency } from "@/lib/utils";
-import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
+import { cn, formatCurrency } from "@/lib/utils";
+import { Bar, BarChart, CartesianGrid, Legend, XAxis, YAxis } from "recharts";
 import {
   ChartConfig,
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
+  ChartLegend,
+  ChartLegendContent,
 } from "@/components/ui/chart";
 import { Label, Pie, PieChart } from "recharts";
 import { TrendingDown, TrendingUp } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
 
 const chartConfig = {
-  amount: {
-    label: "Amount",
-    color: "hsl(var(--chart-1))",
+  expenses: {
+    label: "Expenses",
+    color: "var(--chart-1)",
+  },
+  income: {
+    label: "Income",
+    color: "var(--chart-2)",
   },
 } satisfies ChartConfig;
 
@@ -87,7 +92,7 @@ const Page = () => {
   const expenseTypeChartData = stats.expensesByType.map((item, index) => ({
     type: item.type,
     amount: item.amount,
-    fill: `hsl(var(--chart-${(index % 5) + 1}))`,
+    fill: `var(--chart-${(index % 5) + 1})`,
   }));
 
   return (
@@ -135,15 +140,48 @@ const Page = () => {
           </CardContent>
         </Card>
 
-        {/* Transactions Card */}
+        {/* Monthly Income Card */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Transactions</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Monthly Income
+            </CardTitle>
             <Icons.transactions className="size-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {stats.expenses.transactionCount}
+              {formatCurrency(stats.income.totalAmount)}
+            </div>
+            <div className="flex items-center gap-2 text-xs">
+              {stats.income.monthlyChange > 0 ? (
+                <>
+                  <TrendingUp className="size-3 text-green-500" />
+                  <span className="text-green-500">
+                    +{stats.income.monthlyChange.toFixed(1)}%
+                  </span>
+                </>
+              ) : (
+                <>
+                  <TrendingDown className="size-3 text-red-500" />
+                  <span className="text-red-500">
+                    {stats.income.monthlyChange.toFixed(1)}%
+                  </span>
+                </>
+              )}
+              <span className="text-muted-foreground">from last month</span>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Transactions Card */}
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Transactions</CardTitle>
+            <Icons.page className="size-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              {stats.expenses.transactionCount + stats.income.transactionCount}
             </div>
             <p className="text-xs text-muted-foreground">
               {stats.expenses.accountCount} active accounts
@@ -189,8 +227,8 @@ const Page = () => {
         {/* Monthly Expenses Chart */}
         <Card>
           <CardHeader>
-            <CardTitle>Monthly Expenses Trend</CardTitle>
-            <CardDescription>Last 6 months expenses</CardDescription>
+            <CardTitle>Income vs Expenses Trend</CardTitle>
+            <CardDescription>Last 6 months comparison</CardDescription>
           </CardHeader>
           <CardContent>
             {stats.monthlyExpenses.length > 0 ? (
@@ -206,14 +244,24 @@ const Page = () => {
                   <YAxis tickLine={false} axisLine={false} />
                   <ChartTooltip
                     cursor={false}
-                    content={<ChartTooltipContent hideLabel />}
+                    content={<ChartTooltipContent />}
                   />
-                  <Bar dataKey="amount" fill="var(--color-amount)" radius={8} />
+                  <ChartLegend content={<ChartLegendContent />} />
+                  <Bar
+                    dataKey="expenses"
+                    fill="var(--color-expenses)"
+                    radius={[8, 8, 0, 0]}
+                  />
+                  <Bar
+                    dataKey="income"
+                    fill="var(--color-income)"
+                    radius={[8, 8, 0, 0]}
+                  />
                 </BarChart>
               </ChartContainer>
             ) : (
               <div className="flex h-[200px] items-center justify-center text-muted-foreground">
-                No expense data available
+                No transaction data available
               </div>
             )}
           </CardContent>
@@ -305,8 +353,12 @@ const Page = () => {
                     </p>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Badge variant="outline">{transaction.type}</Badge>
-                    <div className="text-right font-medium">
+                    <div
+                      className={cn("text-right font-medium", {
+                        "text-destructive": transaction.type === "Expense",
+                        "text-success": transaction.type === "Income",
+                      })}
+                    >
                       {formatCurrency(transaction.amount)}
                     </div>
                   </div>

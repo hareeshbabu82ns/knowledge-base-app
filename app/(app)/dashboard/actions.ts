@@ -11,6 +11,11 @@ export type DashboardStats = {
     accountCount: number;
     monthlyChange: number;
   };
+  income: {
+    totalAmount: number;
+    transactionCount: number;
+    monthlyChange: number;
+  };
   loans: {
     totalAmount: number;
     loanCount: number;
@@ -27,7 +32,8 @@ export type DashboardStats = {
   }[];
   monthlyExpenses: {
     month: string;
-    amount: number;
+    expenses: number;
+    income: number;
   }[];
   expensesByType: {
     type: string;
@@ -49,38 +55,97 @@ export async function fetchDashboardStats(): Promise<DashboardStats | null> {
 
   const userId = session.user.id;
   const now = new Date();
-  const currentMonthStart = startOfMonth(now);
-  const currentMonthEnd = endOfMonth(now);
-  const lastMonthStart = startOfMonth(subMonths(now, 1));
-  const lastMonthEnd = endOfMonth(subMonths(now, 1));
   const sixMonthsAgo = subMonths(now, 6);
+
+  // First, get all transactions grouped by month to find the last month with data
+  const monthlyTransactionsRaw = await db.expenseTransaction.groupBy({
+    by: ["date", "type"],
+    where: {
+      userId,
+      date: { gte: sixMonthsAgo },
+    },
+    _sum: { amount: true },
+    _count: true,
+    orderBy: {
+      date: "desc",
+    },
+  });
+
+  // Group by month to find which months have data
+  const monthsWithData = new Map<string, Date>();
+  monthlyTransactionsRaw.forEach((item) => {
+    const monthStart = startOfMonth(new Date(item.date));
+    const monthKey = monthStart.toISOString();
+    if (!monthsWithData.has(monthKey)) {
+      monthsWithData.set(monthKey, monthStart);
+    }
+  });
+
+  // Sort months and get the two most recent months with data
+  const sortedMonths = Array.from(monthsWithData.values()).sort(
+    (a, b) => b.getTime() - a.getTime(),
+  );
+
+  // Use the most recent month with data as "current" and the one before as "last"
+  const currentMonthStart =
+    sortedMonths.length > 0 ? sortedMonths[0] : startOfMonth(now);
+  const currentMonthEnd = endOfMonth(currentMonthStart);
+  const lastMonthStart =
+    sortedMonths.length > 1 ? sortedMonths[1] : startOfMonth(subMonths(now, 1));
+  const lastMonthEnd = endOfMonth(lastMonthStart);
 
   // Fetch expense stats
   const [
-    currentMonthTransactions,
-    lastMonthTransactions,
+    currentMonthExpenses,
+    currentMonthIncome,
+    lastMonthExpenses,
+    lastMonthIncome,
     expenseAccounts,
     recentTransactions,
-    monthlyExpenses,
+    monthlyTransactions,
     expensesByType,
     expensesByAccount,
+    expenseAccountsList,
   ] = await Promise.all([
-    // Current month transactions
+    // Current month expense transactions
     db.expenseTransaction.aggregate({
       where: {
         userId,
+        type: "Expense",
         date: { gte: currentMonthStart, lte: currentMonthEnd },
       },
       _sum: { amount: true },
       _count: true,
     }),
-    // Last month transactions
+    // Current month income transactions
     db.expenseTransaction.aggregate({
       where: {
         userId,
+        type: "Income",
+        date: { gte: currentMonthStart, lte: currentMonthEnd },
+      },
+      _sum: { amount: true },
+      _count: true,
+    }),
+    // Last month expense transactions
+    db.expenseTransaction.aggregate({
+      where: {
+        userId,
+        type: "Expense",
         date: { gte: lastMonthStart, lte: lastMonthEnd },
       },
       _sum: { amount: true },
+      _count: true,
+    }),
+    // Last month income transactions
+    db.expenseTransaction.aggregate({
+      where: {
+        userId,
+        type: "Income",
+        date: { gte: lastMonthStart, lte: lastMonthEnd },
+      },
+      _sum: { amount: true },
+      _count: true,
     }),
     // Expense accounts count
     db.expenseAccount.count({
@@ -103,34 +168,43 @@ export async function fetchDashboardStats(): Promise<DashboardStats | null> {
         },
       },
     }),
-    // Monthly expenses for last 6 months
+    // Monthly transactions for last 6 months (grouped by date and type)
     db.expenseTransaction.groupBy({
-      by: ["date"],
+      by: ["date", "type"],
       where: {
         userId,
         date: { gte: sixMonthsAgo },
       },
       _sum: { amount: true },
+      _count: true,
     }),
-    // Expenses by type
+    // Expenses by type (only expenses, not income)
     db.expenseTransaction.groupBy({
       by: ["type"],
       where: {
         userId,
+        type: "Expense",
         date: { gte: sixMonthsAgo },
       },
       _sum: { amount: true },
       _count: true,
     }),
-    // Expenses by account
+    // Expenses by account (only expenses, not income)
     db.expenseTransaction.groupBy({
       by: ["account"],
       where: {
         userId,
+        type: "Expense",
         date: { gte: sixMonthsAgo },
       },
       _sum: { amount: true },
       _count: true,
+    }),
+    // Expense accounts (for mapping)
+    db.expenseAccount.findMany({
+      where: {
+        userId,
+      },
     }),
   ]);
 
@@ -151,33 +225,65 @@ export async function fetchDashboardStats(): Promise<DashboardStats | null> {
     }),
   ]);
 
-  // Calculate monthly change percentage
-  const currentTotal = currentMonthTransactions._sum.amount || 0;
-  const lastTotal = lastMonthTransactions._sum.amount || 0;
-  const monthlyChange =
-    lastTotal > 0 ? ((currentTotal - lastTotal) / lastTotal) * 100 : 0;
+  // Calculate monthly change percentage for expenses
+  const currentExpenseTotal = currentMonthExpenses._sum.amount || 0;
+  const lastExpenseTotal = lastMonthExpenses._sum.amount || 0;
+  const expenseMonthlyChange =
+    lastExpenseTotal > 0
+      ? ((currentExpenseTotal - lastExpenseTotal) / lastExpenseTotal) * 100
+      : 0;
 
-  // Process monthly expenses data
-  const monthlyExpensesMap = new Map<string, number>();
-  monthlyExpenses.forEach((item) => {
+  // Calculate monthly change percentage for income
+  const currentIncomeTotal = currentMonthIncome._sum.amount || 0;
+  const lastIncomeTotal = lastMonthIncome._sum.amount || 0;
+  const incomeMonthlyChange =
+    lastIncomeTotal > 0
+      ? ((currentIncomeTotal - lastIncomeTotal) / lastIncomeTotal) * 100
+      : 0;
+
+  // Process monthly transactions data (separate income and expenses)
+  const monthlyDataMap = new Map<
+    string,
+    { expenses: number; income: number }
+  >();
+  monthlyTransactions.forEach((item) => {
     const monthKey = new Date(item.date).toLocaleDateString("en-US", {
       month: "short",
       year: "numeric",
     });
-    const currentAmount = monthlyExpensesMap.get(monthKey) || 0;
-    monthlyExpensesMap.set(monthKey, currentAmount + (item._sum.amount || 0));
+    const currentData = monthlyDataMap.get(monthKey) || {
+      expenses: 0,
+      income: 0,
+    };
+
+    if (item.type === "Expense") {
+      currentData.expenses += item._sum.amount || 0;
+    } else if (item.type === "Income") {
+      currentData.income += item._sum.amount || 0;
+    }
+
+    monthlyDataMap.set(monthKey, currentData);
   });
 
-  const monthlyExpensesArray = Array.from(monthlyExpensesMap.entries())
-    .map(([month, amount]) => ({ month, amount }))
+  const monthlyExpensesArray = Array.from(monthlyDataMap.entries())
+    .map(([month, data]) => ({
+      month,
+      expenses: data.expenses,
+      income: data.income,
+    }))
     .sort((a, b) => new Date(a.month).getTime() - new Date(b.month).getTime());
 
   return {
     expenses: {
-      totalAmount: currentTotal,
-      transactionCount: currentMonthTransactions._count || 0,
+      totalAmount: currentExpenseTotal,
+      transactionCount: currentMonthExpenses._count || 0,
       accountCount: expenseAccounts,
-      monthlyChange,
+      monthlyChange: expenseMonthlyChange,
+    },
+    income: {
+      totalAmount: currentIncomeTotal,
+      transactionCount: currentMonthIncome._count || 0,
+      monthlyChange: incomeMonthlyChange,
     },
     loans: {
       totalAmount: loans.reduce((sum, loan) => sum + loan.amount, 0),
@@ -196,7 +302,10 @@ export async function fetchDashboardStats(): Promise<DashboardStats | null> {
       count: item._count,
     })),
     expensesByAccount: expensesByAccount.map((item) => ({
-      account: item.account,
+      account:
+        expenseAccountsList.find((acc) => acc.id === item.account)?.name ||
+        item.account ||
+        "N/A",
       amount: item._sum.amount || 0,
       count: item._count,
     })),
