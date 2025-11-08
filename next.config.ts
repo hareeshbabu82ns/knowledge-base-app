@@ -1,12 +1,12 @@
-import type { NextConfig } from "next";
+const withBundleAnalyzer = require("@next/bundle-analyzer")({
+  enabled: process.env.ANALYZE === "true",
+});
 
-const nextConfig: NextConfig = {
+/** @type {import('next').NextConfig} */
+const nextConfig = {
   output: "standalone",
   reactStrictMode: true,
-  serverExternalPackages: ["tesseract.js", "pdf2pic"],
-  // Disable ESLint during build process
   eslint: {
-    // This setting will completely disable ESLint during builds
     ignoreDuringBuilds: true,
   },
   images: {
@@ -21,4 +21,4 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+module.exports = withBundleAnalyzer(nextConfig);
