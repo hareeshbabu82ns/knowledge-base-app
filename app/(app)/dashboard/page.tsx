@@ -26,11 +26,11 @@ import { TrendingDown, TrendingUp } from "lucide-react";
 const chartConfig = {
   expenses: {
     label: "Expenses",
-    color: "var(--chart-1)",
+    color: "var(--chart-5)",
   },
   income: {
     label: "Income",
-    color: "var(--chart-2)",
+    color: "var(--chart-1)",
   },
 } satisfies ChartConfig;
 
@@ -223,7 +223,7 @@ const Page = () => {
           <CardContent>
             {stats.monthlyExpenses.length > 0 ? (
               <ChartContainer config={chartConfig}>
-                <BarChart data={stats.monthlyExpenses}>
+                <BarChart accessibilityLayer data={stats.monthlyExpenses}>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} />
                   <XAxis
                     dataKey="month"
@@ -234,18 +234,23 @@ const Page = () => {
                   <YAxis tickLine={false} axisLine={false} />
                   <ChartTooltip
                     cursor={false}
-                    content={<ChartTooltipContent />}
+                    content={
+                      <ChartTooltipContent
+                        indicator="dashed"
+                        className="w-40"
+                      />
+                    }
                   />
-                  <ChartLegend content={<ChartLegendContent />} />
+                  <ChartLegend />
                   <Bar
                     dataKey="expenses"
                     fill="var(--color-expenses)"
-                    radius={[8, 8, 0, 0]}
+                    radius={[4, 4, 0, 0]}
                   />
                   <Bar
                     dataKey="income"
                     fill="var(--color-income)"
-                    radius={[8, 8, 0, 0]}
+                    radius={[4, 4, 0, 0]}
                   />
                 </BarChart>
               </ChartContainer>
@@ -308,7 +313,7 @@ const Page = () => {
                   <Bar
                     dataKey="averageAmount"
                     fill="var(--color-expenses)"
-                    radius={[0, 8, 8, 0]}
+                    radius={[0, 4, 4, 0]}
                   />
                 </BarChart>
               </ChartContainer>

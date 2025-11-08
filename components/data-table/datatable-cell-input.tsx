@@ -206,9 +206,9 @@ export default function DataTableCellInput<TData>({
             </PopoverTrigger>
             <PopoverContent className="w-full p-0">
               <Calendar
-                className=""
                 mode="single"
-                captionLayout="dropdown-buttons"
+                className="rounded-xs border shadow-sm w-56"
+                captionLayout="dropdown"
                 selected={dateValue}
                 onSelect={(date?: Date) => {
                   setCellValue(date);
@@ -255,6 +255,7 @@ export default function DataTableCellInput<TData>({
             <PopoverContent className="w-auto p-0" align="start">
               <Calendar
                 mode="range"
+                className="rounded-xs border shadow-sm w-96"
                 defaultMonth={dateRangeValue?.[0]}
                 selected={{
                   from: dateRangeValue?.[0],

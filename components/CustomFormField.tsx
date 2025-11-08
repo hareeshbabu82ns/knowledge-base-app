@@ -169,7 +169,8 @@ const RenderInput = ({ field, props }: { field: any; props: CustomProps }) => {
             <PopoverContent className="w-auto p-0">
               <Calendar
                 mode="single"
-                captionLayout="dropdown-buttons"
+                className="rounded-xs border shadow-sm w-56"
+                captionLayout="dropdown"
                 selected={field.value}
                 onSelect={(date?: Date) => field.onChange(date)}
               />

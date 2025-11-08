@@ -180,7 +180,8 @@ export default function DataTableColumnFilter({
             <PopoverContent className="w-auto p-0">
               <Calendar
                 mode="single"
-                captionLayout="dropdown-buttons"
+                className="rounded-xs border shadow-sm w-56"
+                captionLayout="dropdown"
                 selected={dateValue}
                 onSelect={(date?: Date) => {
                   column.setFilterValue(date);
@@ -221,6 +222,7 @@ export default function DataTableColumnFilter({
             <PopoverContent className="w-auto p-0" align="start">
               <Calendar
                 mode="range"
+                className="rounded-xs border shadow-sm w-96"
                 defaultMonth={dateRangeValue?.[0]}
                 selected={{
                   from: dateRangeValue?.[0],
